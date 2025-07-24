@@ -1,6 +1,6 @@
 # WahlrechnerZero
 
-**Original by [Linus Köster](https://github.com/wahlrechner/wahlrechner)**
+**Ursprungsversion von [Linus Köster](https://github.com/wahlrechner/wahlrechner)**
 
 # Aufsetzen eines Wahlrechner-Servers
 
