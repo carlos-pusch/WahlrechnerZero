@@ -2,7 +2,7 @@
 
 Im Terminal
 
-```
+```python
 dir_name="Wahlrechner"
 sudo mkdir $dir_name
 
