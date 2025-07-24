@@ -4,13 +4,9 @@ from import_export.admin import ImportExportModelAdmin
 
 from .models import Antwort, Partei, These
 
-# Register your models here.
-
-
 class AntwortResource(resources.ModelResource):
     class Meta:
         model = Antwort
-
 
 class AntwortAdmin(ImportExportModelAdmin):
     list_display = ["antwort_partei", "antwort_these", "antwort_position"]
@@ -18,28 +14,27 @@ class AntwortAdmin(ImportExportModelAdmin):
     search_fields = [
         "antwort_these__these_text",
         "antwort_these__these_keyword",
+        "antwort_these__these_explainer",  # lz_a_1: Suche erweitert
         "antwort_partei__partei_name",
     ]
     list_filter = ["antwort_partei"]
     autocomplete_fields = ["antwort_these", "antwort_partei"]
     resource_class = AntwortResource
 
-
 class AntwortInLine(admin.TabularInline):
     model = Antwort
     extra = 1
-
 
 class TheseResource(resources.ModelResource):
     class Meta:
         model = These
 
-
 class TheseAdmin(ImportExportModelAdmin):
-    list_display = ["these_nr", "these_keyword", "these_text"]
+    # lz_a_1: Neues Feld in Admin-Ansicht hinzugefügt
+    list_display = ["these_nr", "these_keyword", "these_text", "these_explainer"]
     list_display_links = ["these_keyword"]
     ordering = ["these_nr"]
-    search_fields = ["these_keyword", "these_text"]
+    search_fields = ["these_keyword", "these_text", "these_explainer"]  # lz_a_1: Suche erweitert
     inlines = [AntwortInLine]
     resource_class = TheseResource
 
