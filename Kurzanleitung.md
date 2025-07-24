@@ -1,6 +1,6 @@
-### Kurzanleitung
+### Kurzanleitung mit fertigen Code zum Erstart
 
-Im Terminal
+Im Terminal und kann dann in einem Rutsch ausgeführt werden.
 
 ```python
 dir_name="Wahlrechner"
