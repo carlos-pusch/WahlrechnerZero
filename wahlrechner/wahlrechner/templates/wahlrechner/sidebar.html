@@ -1,60 +1,89 @@
 {% comment %}
 Template für die Seitenleiste mit der Übersicht aller Thesen.
-
-Parameter:
-1. "icon_default": Gibt an, welches Icon angezeigt werden soll, wenn eine These noch nicht
-   beantwortet wurde ("empty" oder "skip").
-2. "url_template": Gibt den Namen des Templates an, auf das der Hyperlink der einzelnen Thesen verweisen soll
-   ("reason", "these" oder leer für kein Hyperlink)
 {% endcomment %}
 
 {% load wahlrechner_extras %}
 
-<p class="mb-2 text-lg font-semibold dark:text-gray-200">Alle Thesen</p>
+<div class="mobile-menu-container md:hidden">
+    {# Burger-Icon für mobile Ansicht #}
+    <div id="burgerButton" class="burger-button">
+        <!-- <span class="burger-icon"></span>
+        <span class="burger-icon"></span>
+        <span class="burger-icon"></span> -->
+        <!-- lz_a_1: Kreis-Button ohne Text -->
+        <button class="btn btn-burger" id="burger-button">
+            {% include "snippets/icon.html" with icon="burger" color="black" %} 
+        </button>
+    </div>
+</div>
 
-<ul class="space-y-1 sidebar">
+<div id="thesenMenu" class="thesen-container">
+    <p class="mb-2 text-lg font-semibold dark:text-gray-200">Alle Thesen</p>
 
-    {# Zeige Meldung, falls noch keine Thesen hinzugefügt#}
-    {% if not thesen.first %}
+    <ul class="space-y-1 sidebar">
 
-        <p class="mt-4 italic text-gray-700 dark:text-gray-300">
-            Es wurden noch keine Thesen hinzugefügt. Bitte melde dich in der
-            <a class="underline" href="{% url 'admin:index' %}">Admin-Oberfläche</a> an, um neue Thesen
-            hinzuzufügen.</p>
+        {# Zeige Meldung, falls noch keine Thesen hinzugefügt#}
+        {% if not thesen.first %}
 
-    {% else %}
+            <p class="mt-4 italic text-gray-700 dark:text-gray-300">
+                Es wurden noch keine Thesen hinzugefügt. Bitte melde dich in der
+                <a class="underline" href="{% url 'admin:index' %}">Admin-Oberfläche</a> an, um neue Thesen
+                hinzuzufügen.</p>
 
-        {% for these in thesen %}
+        {% else %}
 
-            {# Erhalte Position des Nutzers zu der These #}
-            {% alias opinions|get_opinion:these as opinion %}
+            {% for these in thesen %}
 
-            <li>
+                {# Erhalte Position des Nutzers zu der These #}
+                {% alias opinions|get_opinion:these as opinion %}
 
-                {# Füge Icon passend zur Position des Nutzers hinzu #}
-                {% include "snippets/icon.html" with icon=opinion|default:icon_default %}
+                <li>
 
-                {# Titel der These ggf. mit Hyperlink #}
-                {% if these == these_current %}
-                    <a class="active">{{ these.these_keyword }}</a>
-                {% else %}
-                    <a {% if url_template != "" %}
-                        onClick="location.href='{% url url_template these.pk zustand_current %}'"
-                        class="clickable"
-                    {% endif %} >
-                        {{ these.these_keyword }}
-                    </a>
-                {% endif %}
+                    {% include "snippets/icon.html" with icon=opinion|default:icon_default %}
 
-                {# Falls These priorisiert, füge Icon hinzu #}
-                {% if opinions|is_prio:these %}
-                    {% include "snippets/icon.html" with icon="fav" %}
-                {% endif %}
+                    {% if these == these_current %}
+                        <a class="active">{{ these.these_keyword }}</a>
+                    {% else %}
+                        <a {% if url_template != "" %}
+                            onClick="location.href='{% url url_template these.pk zustand_current %}'"
+                            class="clickable"
+                        {% endif %} >
+                            {{ these.these_keyword }}
+                        </a>
+                    {% endif %}
 
-            </li>
+                    {# Falls These priorisiert, füge Icon hinzu #}
+                    {% if opinions|is_prio:these %}
+                        {% include "snippets/icon.html" with icon="fav" %}
+                    {% endif %}
 
-        {% endfor %}
+                </li>
 
-    {% endif %}
+            {% endfor %}
 
-</ul>
+        {% endif %}
+
+    </ul>
+</div>
+
+<script>
+    // Burger-Menü Interaktion
+    document.addEventListener('DOMContentLoaded', function() {
+        const burgerButton = document.getElementById('burgerButton');
+        const thesenMenu = document.getElementById('thesenMenu');
+        
+        if (burgerButton && thesenMenu) {
+            burgerButton.addEventListener('click', function() {
+                thesenMenu.classList.toggle('active');
+            });
+            
+            // Schließe Menü bei Klick auf einen Link
+            const links = thesenMenu.querySelectorAll('a.clickable');
+            links.forEach(link => {
+                link.addEventListener('click', function() {
+                    thesenMenu.classList.remove('active');
+                });
+            });
+        }
+    });
+</script>

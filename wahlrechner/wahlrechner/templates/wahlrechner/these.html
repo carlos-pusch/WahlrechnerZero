@@ -10,7 +10,10 @@
 {% block content %}
     <div class="content lg:p-10">
 
-        <div class="these counter">These {{ index.0 }} von {{ index.1 }}</div>
+        <div class="thesen-counter-container">
+            <div class="these counter">These {{ index.0 }} von {{ index.1 }}</div>
+        </div>        
+
         <div class="these title">{{ these_current.these_text }}</div>
 
         {# Erhalte Position des Nutzers zu der These #}
@@ -60,24 +63,103 @@
                 {% include "snippets/icon.html" with icon="disagree" color="white" %} stimme nicht zu
             </button>
 
-            <script>
-                {# Keyboard Shortcuts für Agree/Neutral/Disagree #}
-                $(document).keydown(function (event) {
-                    if (event.which === 65) {
-                        $('#agree').trigger('click');
-                        event.preventDefault();
-                    } else if (event.which === 78) {
-                        $('#neutral').trigger('click');
-                        event.preventDefault();
-                    } else if (event.which === 68) {
-                        $('#disagree').trigger('click');
-                        event.preventDefault();
-                    }
-                });
-            </script>
-
+            <!-- lz_a_1: Info-Button-->
+            <button onClick="" class="btn btn-background" id="background-button">
+                {% include "snippets/icon.html" with icon="background" color="black" %} Info
+            </button>
         </div>
 
+        <!-- lz_a_1: Sichtbarer Info-Bereich mit Erklärungstext-->
+        <div id="background-info-section" class="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200 hidden">
+            <div class="font-semibold text-blue-800 mb-2">Hintergrundinformation:</div>
+            <div class="text-gray-700" id="background-info">
+                {% if these_current.these_explainer %}
+                    {{ these_current.these_explainer|linebreaks }}
+                {% else %}
+                    Es liegen leider keine extra Hintergrundinformation vor.
+                {% endif %}
+            </div>
+        </div>
+        
+        <!--        lz_a_1: Pop-up Modal statt inline-Sektion 
+        <div id="background-modal" class="modal">
+            <div class="modal-content">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-lg">Hintergrundinformation</h3>
+                    <button class="modal-close">&times;</button>
+                </div>
+                <div class="text-gray-700">
+                    {% if these_current.these_explainer %}
+                        {{ these_current.these_explainer|linebreaks }}
+                    {% else %}
+                        Es liegen leider keine extra Hintergrundinformation vor.
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        -->
+        <script>
+            // lz_a_1: Neue Modal-Funktionalität
+            const bgBtn = document.getElementById('background-button');
+            /* const modal = document.getElementById('background-modal');
+            const closeBtn = document.querySelector('.modal-close'); */
+
+            bgBtn.addEventListener('click', () => {
+                modal.style.display = 'flex';
+                bgBtn.classList.add('active');
+                
+                setTimeout(() => {
+                    bgBtn.classList.remove('active');
+                }, 3000);
+            });
+
+            /* closeBtn.addEventListener('click', () => {
+                modal.style.display = 'none';
+            }); */
+
+            window.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+            
+            // lz_a_1: Toggle-Funktion mit Timeout für Farbänderung
+            $('#background-button').click(function() {
+                const infoSection = $('#background-info-section');
+                const isVisible = !infoSection.hasClass('hidden');
+                
+                if (isVisible) {
+                    infoSection.addClass('hidden');
+                } else {
+                    infoSection.removeClass('hidden');
+                }
+                
+                // Füge 'active'-Klasse für visuelles Feedback hinzu
+                $(this).addClass('active');
+                
+                // Entferne 'active'-Klasse nach 0,5 Sekunden
+                setTimeout(() => {
+                    $(this).removeClass('active');
+                }, 500);
+            });
+
+            {# Keyboard Shortcuts #}
+            $(document).keydown(function (event) {
+                if (event.which === 65) {  // A
+                    $('#agree').trigger('click');
+                    event.preventDefault();
+                } else if (event.which === 78) {  // N
+                    $('#neutral').trigger('click');
+                    event.preventDefault();
+                } else if (event.which === 68) {  // D
+                    $('#disagree').trigger('click');
+                    event.preventDefault();
+                } else if (event.which === 72) {  // H
+                    $('#background-button').trigger('click');
+                    event.preventDefault();
+                }
+            });
+        </script>
 
     </div>
 
@@ -110,7 +192,6 @@
 
     </div>
 
-
 {% endblock %}
 
 {% block shortcuts %}
@@ -128,6 +209,11 @@
 
     <li>
         <span class="icon">D</span> stimme nicht zu
+    </li>
+
+    <!-- lz_a_1: Statischer Shortcut-Text -->
+    <li>
+        <span class="icon">H</span> Hintergrundinfo
     </li>
 
     {% if these_prev %}

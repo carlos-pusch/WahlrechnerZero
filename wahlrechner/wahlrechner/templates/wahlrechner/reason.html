@@ -58,7 +58,7 @@
 
             {# Farbiger Akzentstreifen, falls bei Partei vorhanden #}
             {% alias antwort.antwort_partei.partei_farbe as farbe %}
-            <div class="w-full h-full p-4 {% if farbe %}border-l-8{% endif %}"
+            <div class="w-full h-full p-4 border-empty {% if farbe %}border-l-8{% endif %}"
                  {% if farbe %}style="border-color: {{ farbe }}"{% endif %}>
 
                 {# Parteititel mit passendem Badge #}
