@@ -4,7 +4,7 @@
 
 # Aufsetzen eines Wahlrechner-Servers
 
-Dieses Repository dient als Hifestellung, um eine [Wahlrechner](https://github.com/wahlrechner/wahlrechner)-Instanz auf einem Server aufzusetzen.
+Dieses Repository dient als Hifestellung, um eine [Wahlrechner](https://github.com/wahlrechner/wahlrechner)-Instanz auf einem Server inkl. Host aufzusetzen.
 Die folgende Anleitung funktioniert nur auf Debian-basierten Systemen, und wurde ausschließlich mit `Ubuntu 24.04 LTS`
 getestet.
 
@@ -19,14 +19,14 @@ sudo apt update && sudo apt install git -y
 ### Repository klonen
 
 ```
-sudo mkdir /opt/wahlrechner-server/
-sudo git clone --recurse-submodules https://github.com/carlos-pusch/Wahlrechner-server /opt/wahlrechner-server/
-cd /opt/wahlrechner-server
+sudo mkdir /Wahlrechner
+sudo git clone --recurse-submodules https://github.com/carlos-pusch/WahlrechnerZero /Wahlrechner
+cd /Wahlrechner
 ```
 
 ### Installation von Docker
 
-Einschub: Falls mal Probleme mit Schreibrechten durch `docker compose up -d`oder `bash ServerUpdate.sh` entstehen, dann liegt es vermutlich an docker-snap.
+Einschub: Falls mal Probleme mit Schreibrechten durch `docker compose up -d` entstehen, dann liegt es vermutlich an docker-snap.
 Stattdessen muss docker-ce verwendet werden. Ggf. folgenden Code zum Entfernen verwenden:
 
 ```
@@ -63,7 +63,7 @@ sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin dock
 erstellen. Eine Vorlage ist unter `config/global.env.example` zu finden.
 
 ```
-cd /opt/wahlrechner
+cd /Wahlrechner/wahlrechner_host
 cp config/config.env.example config/config.env
 ```
 
@@ -74,11 +74,11 @@ cp config/config.env.example config/config.env
 **MYSQL_PASSWORD:** Ersetze `SetDatabaseUserPassword` durch ein zufällig generiertes Passwort. Du wirst es niemals von Hand eingeben müssen - also lass dir bitte ein sicheres Passwort mit einem [Passwortgenerator](https://1password.com/de/password-generator/) generieren.
 
 Zusätzlich musst du für deine Wahlrechner-Instanzen ebenfalls eine eigene Konfigurationsdatei erstellen. Eine Vorlage
-ist unter `config/wahlrechner-eins.env.example` zu finden.
+ist unter `/wahlrechner_host/config/` zu finden.
 
 ```
-cd /opt/wahlrechner
-cp config/wahlrechner-eins.env.example config/wahlrechner-eins.env
+cd /Wahlrechner/wahlrechner_host
+cp config/config_dev.env config/wahlrechner-eins.env
 ```
 
 Falls du mehr als eine Wahlrechner-Instanz aufsetzen möchtest, erstelle eine Konfigurationsdatei für jede Instanz.
@@ -91,7 +91,7 @@ Für die Konfiguration des Webservers erstelle eine Datei `web/nginx.conf`. Du f
 Bitte setze den `server_name` auf deine Domain, damit das Routing richtig funktioniert. Bei einer Verwendung von
 mehreren Instanzen sind weitere Änderungen notwendig.
 
-## Anpassung der Konfiguration für mehrere Instanzen
+## ALT: Anpassung der Konfiguration für mehrere Instanzen
 
 Wenn du mehrere Wahlrechner-Instanzen aufsetzen möchtest, musst du einiges anpassen. Die wichtigsten Stellen in den
 Konfigurationsdateien sind mit einem `TODO` markiert.
