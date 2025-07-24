@@ -1,0 +1,33 @@
+{% extends 'wahlrechner/base.html' %}
+
+{% block title %}Fehler 500{% endblock %}
+
+{% block sidebar %}
+    {% include "error/sidebar.html" %}
+{% endblock %}
+
+{% block content %}
+    <div class="content text-center">
+        <h1>Fehler 500</h1>
+        Es ist ein unerwarteter Fehler aufgetreten. Bitte versuche es erneut!
+    </div>
+
+    <div class="btn-row">
+        {% alias "window.history.back();" as onclick %}
+        {% include "snippets/btn.html" with text="Zurück" onclick=onclick icon="left" pos="l" sc="37" %}
+        {% url "start" as url %}
+        {% include "snippets/btn.html" with text="Zur Startseite" url=url icon="cright" pos="r" sc="39" %}
+    </div>
+{% endblock %}
+
+{% block shortcuts %}
+
+    <li>
+        <span class="icon">&larr;</span> Zurück
+    </li>
+
+    <li>
+        <span class="icon">&rarr;</span> Zur Startseite
+    </li>
+
+{% endblock %}

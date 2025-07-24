@@ -1,0 +1,122 @@
+{% extends 'wahlrechner/base.html' %}
+{% load wahlrechner_extras %}
+
+{% block title %}Begründungen der Kandidierenden zu These {{ index.0 }} von {{ index.1 }}{% endblock %}
+
+{% block sidebar %}
+    {% include "wahlrechner/sidebar.html" with icon_default="skip" url_template="reason" %}
+{% endblock %}
+
+{% block content %}
+
+    <div class="content lg:p-10 space-x-0">
+
+        <div class="these counter">These {{ index.0 }} von {{ index.1 }}</div>
+        <div class="these title">{{ these_current.these_text }}</div>
+
+        {# Erhalte Position des Nutzers zu der These #}
+        {% alias opinions|get_opinion:these_current as opinion %}
+
+        {% if opinion != "s" and opinion != None %}
+            {# Falls These nicht übersprungen... #}
+
+            {# Füge ein passendes Badge für die Position des Nutzers ein #}
+            <p class="these clue">Deine Position:</p>
+            {% include "snippets/badge.html" with type=opinion pers="1" %}
+
+            {# Falls These priorisiert, füge ein passendes Badge ein #}
+            {% if opinions|is_prio:these_current %}
+                {% include "snippets/badge.html" with type="fav" pers="1" %}
+            {% endif %}
+
+        {% else %}
+            {# Falls These übersprungen... #}
+            <p class="these clue">Du hast diese These übersprungen.</p>
+
+        {% endif %}
+
+    </div>
+
+    <div class="btn-row">
+        {% if these_prev %}
+            {% url "reason" these_prev.pk zustand_current as url %}
+            {% include "snippets/btn.html" with text="vorherige These" url=url icon="left" pos="l" %}
+        {% endif %}
+
+        {% url "result" zustand_current as url %}
+        {% include "snippets/btn.html" with text="zurück zu meinem Ergebnis" url=url icon="cleft" pos="l" %}
+
+        {% if these_next %}
+            {% url "reason" these_next.pk zustand_current as url %}
+            {% include "snippets/btn.html" with text="nächste These" url=url icon="right" pos="r" %}
+        {% endif %}
+    </div>
+
+    {% for antwort in antworten %}
+
+        <div class="card">
+
+            {# Farbiger Akzentstreifen, falls bei Partei vorhanden #}
+            {% alias antwort.antwort_partei.partei_farbe as farbe %}
+            <div class="w-full h-full p-4 {% if farbe %}border-l-8{% endif %}"
+                 {% if farbe %}style="border-color: {{ farbe }}"{% endif %}>
+
+                {# Parteititel mit passendem Badge #}
+                <h2 class="mb-3">
+                    <div class="text-lg font-semibold text-gray-700 dark:text-gray-100 sm:inline-flex">
+                        {{ antwort.antwort_partei.partei_name }}
+                    </div>
+                    {% include "snippets/badge.html" with type=antwort.antwort_position pers="3" %}
+                </h2>
+
+                {# Begründung der kandidierenden Person #}
+                <p class="text-sm text-left text-gray-600 dark:text-gray-300">
+                    {% if antwort.antwort_text %}
+                        "{{ antwort.antwort_text.strip }}"
+                    {% else %}
+                        <i>Von der kandidierenden Person liegt zu dieser These keine Begründung vor.</i>
+                    {% endif %}
+                </p>
+
+            </div>
+
+        </div>
+
+    {% endfor %}
+
+    <div class="btn-row move-arrows">
+        {% if these_prev %}
+            {% url "reason" these_prev.pk zustand_current as url %}
+            {% include "snippets/btn.html" with text="vorherige These" url=url icon="left" pos="l" sc="37" %}
+        {% endif %}
+
+        {% url "result" zustand_current as url %}
+        {% include "snippets/btn.html" with text="zurück zu meinem Ergebnis" url=url icon="cleft" pos="l" sc="70" %}
+
+        {% if these_next %}
+            {% url "reason" these_next.pk zustand_current as url %}
+            {% include "snippets/btn.html" with text="nächste These" url=url icon="right" pos="r" sc="39" %}
+        {% endif %}
+    </div>
+
+{% endblock %}
+
+{% block shortcuts %}
+
+    {% if these_prev %}
+        <li>
+            <span class="icon">&larr;</span> vorherige These
+        </li>
+    {% endif %}
+
+    {% if these_next %}
+        <li>
+            <span class="icon">&rarr;</span> nächste These
+        </li>
+    {% endif %}
+
+    <li>
+        <span class="icon">F</span> zurück zu meinem Ergebnis
+    </li>
+
+{% endblock %}

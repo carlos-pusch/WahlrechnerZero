@@ -1,0 +1,36 @@
+{% extends 'wahlrechner/base.html' %}
+{% load wahlrechner_extras %}
+{% load wahlrechner_name %}
+
+{% block title %}{% wahlrechner_title %}{% endblock %}
+2
+{% block sidebar %}
+    {% include "wahlrechner/sidebar.html" with icon_default="" url_template="" %}
+{% endblock %}
+
+{% block content %}
+
+    <div class="content">
+        {% include 'intro_page.html' %}
+    </div>
+
+    <div class="btn-row">
+        {# Leeres Div, um die restlichen Buttons korrekt anzuordnen #}
+        <div class="-mb-2"></div>
+
+        {% if thesen.first %}
+            {% url "these" thesen.first.pk 0 as url %}
+            {% include "snippets/btn.html" with text="Start" url=url icon="cright" pos="r" sc="39" %}
+        {% endif %}
+    </div>
+
+{% endblock %}
+
+
+{% block shortcuts %}
+
+    <li>
+        <span class="icon">&rarr;</span> Start
+    </li>
+
+{% endblock %}
