@@ -1374,6 +1374,16 @@ input:checked+svg {
  }
 }
 
+.reason-scroll-container {
+  display:flex !important;
+  flex-direction: column !important;
+  height: 1000px !important;
+}
+.reason-scroll-main {
+  flex: 1 !important;
+  overflow-y: scroll !important;
+}
+
 .footer_padding {
     padding-left: 5.5rem;
     /*margin-top: 0rem;*/
