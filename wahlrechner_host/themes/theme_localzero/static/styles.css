@@ -1,10 +1,7 @@
 /* path/to/css */
 
 /*! tailwindcss v3.0.24 | MIT License | https://tailwindcss.com*/*,
-/*! Carlos 2024-07-23 10:15:00 */
-/*! Carlos 2025-01-23 00:30:00 */
-/*! Test */
-/*! Adapted for LocalZero Theme by Carlos, Valentin, Leon. */
+/*! Carlos 2024-07-24 20:15:00 */
 :after,
 :before {
  box-sizing:border-box;
@@ -1385,7 +1382,6 @@ input:checked+svg {
 footer {
   width: 100%;
   padding: 20px 0;
-  border-top: 1px solid #eee;
   margin-top: 30px;
 }
 
