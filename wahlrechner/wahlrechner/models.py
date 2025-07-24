@@ -1,21 +1,32 @@
 from colorfield.fields import ColorField
 from django.db import models
 
-
 class These(models.Model):
     these_keyword_help = """<i>Maximal 40 Zeichen</i><br>
     Ein kurzes Schlagwort, um die These zu beschreiben. Wird in der
     Seitenleiste des Wahlrechners angezeigt.<br>
     <b>Beispiel:</b> Klimanotstand"""
     these_keyword = models.CharField(
-        "Schlagwort", help_text=these_keyword_help, max_length=40
+        "Schlagwort", help_text=these_keyword_help, max_length=40, blank=True
     )
 
     these_text_help = """<i>Maximal 400 Zeichen</i><br>
     Der vollständige Text der These.<br>
     <b>Beispiel:</b> Die Stadt XYZ sollte den Klimanotstand ausrufen."""
     these_text = models.TextField(
-        "Vollständige These", help_text=these_text_help, max_length=400
+        "Vollständige These", help_text=these_text_help, max_length=400, blank=True
+    )
+
+    # lz_a_1: Neues Feld für Erklärungssätze hinzugefügt
+    these_explainer_help = """<i>Optionale Hintergrundinformation</i><br>
+    Erklärungssätze zur These, die als zusätzliche Information angezeigt werden."""
+    these_explainer = models.TextField(
+        "Hintergrundinformation", 
+        help_text=these_explainer_help, 
+        max_length=1500, 
+        blank=True,
+        null=True,
+        default=None
     )
 
     these_nr_help = """Die Thesen-Nummer gibt Auskunft über die Reihenfolge, in der alle Thesen
@@ -34,16 +45,15 @@ class These(models.Model):
         verbose_name = "These"
         verbose_name_plural = "Thesen"
 
-
 class Partei(models.Model):
     partei_name_help = """<i>Maximal 50 Zeichen</i><br>
     Gib den Namen der Partei an, der für den Benutzer angezeigt werden soll."""
     partei_name = models.CharField("Name", help_text=partei_name_help, max_length=50)
 
-    partei_beschreibung_help = """<i>Maximal 1000 Zeichen</i><br>
+    partei_beschreibung_help = """<i>Maximal 1500 Zeichen</i><br>
     Beschreibung für die Partei, wird auf der Ergebnis-Seite angezeigt."""
     partei_beschreibung = models.TextField(
-        "Beschreibung", help_text=partei_beschreibung_help, max_length=1000, blank=True
+        "Beschreibung", help_text=partei_beschreibung_help, max_length=1500, blank=True
     )
 
     partei_bild_beschreibung = (
@@ -98,10 +108,10 @@ class Antwort(models.Model):
         max_length=1,
     )
 
-    antwort_text_help = """<i>Maximal 1000 Zeichen</i><br>
+    antwort_text_help = """<i>Maximal 1500 Zeichen</i><br>
     Vollständige Antwort/Begründung der Partei zu ihrer Position."""
     antwort_text = models.TextField(
-        "Antwort", help_text=antwort_text_help, max_length=1000, blank=True
+        "Antwort", help_text=antwort_text_help, max_length=1500, blank=True
     )
 
     def __str__(self):
