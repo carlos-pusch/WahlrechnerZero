@@ -2,3 +2,4 @@ data/*
 /web/cert/
 LICENSE
 .gitmodules
+wahlrechner_host/data

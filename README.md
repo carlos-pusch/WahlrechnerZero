@@ -18,6 +18,8 @@ sudo apt update && sudo apt install git -y
 
 ### Repository klonen
 
+Achtung der hier verwendete Code ist hier zwar richtig, aber besser in dder *Kurzanleitung.md* dokumentiert.
+
 ```
 sudo mkdir /Wahlrechner
 sudo git clone --recurse-submodules https://github.com/carlos-pusch/WahlrechnerZero /Wahlrechner
