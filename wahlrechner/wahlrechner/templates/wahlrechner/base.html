@@ -42,17 +42,34 @@
     </div>
     <footer class="w-full bg-gray-100 mt-auto footer_padding">
     <!--<div class="container mx-auto p-4 xl:max-w-7xl sm:p-8 sm:px-16 md:p-8 lg:p-12 xl:p-16 2xl:p-28">-->
+        <div class="footer-content" id="footer-content">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div class="footer-left">
                 <p>&nbsp;Ein Angebot von GermanZero<br>und LocalZero</p>
             </div>
             <div class="footer-middle">
-                <p>Kontakt:<br>wahlcheck[at]germanzero.de</p>
+                <p>Kontakt unter<br>wahlcheck[at]germanzero.de</p>
             </div>
             <div class="footer-right">
-                <p>Thesen wurden durch<br>durch das lokale Team erarbeitet&nbsp;</p>
+                <p>Die Thesen wurden durch<br>das lokale Team erarbeitet&nbsp;</p>
             </div>
         </div>
+        </div>
+        <script>
+        //Erkennenn, ob URL LocalZero.net enthält, kann nur beim einmal ausgeführt werden
+        // Hole die aktuelle URL
+        const currentUrl = window.location.href;    
+        const search_word_1 = "localzero.net"
+        const search_word_2 = "wahlcheck.carlos-pusch.de/"
+
+        // Überprüfe, ob "hallo" im URL-String enthalten ist
+        if (currentUrl.includes(search_word_1) || currentUrl.includes(search_word_2)) {
+            //console.log("wir sind da");
+            document.getElementById('footer-content').style.display = "none";
+        } else {
+            //console.log("nicht richtig");
+        }
+    </script>
     <!--</div>-->
 </footer>
 </div>
