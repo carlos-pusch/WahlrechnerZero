@@ -19,9 +19,9 @@ services:
             # instance dev
             - ./data/dev/static:/www/dev/static
             - ./data/dev/media:/www/dev/media
-            # instance btw25_91_euskirchen
-            - ./data/btw25_91_euskirchen/static:/www/btw25_91_euskirchen/static
-            - ./data/btw25_91_euskirchen/media:/www/btw25_91_euskirchen/media
+            # instance kommunalwahl_nw_2025_bad_muenstereifel_bmw
+            - ./data/kommunalwahl_nw_2025_bad_muenstereifel_bmw/static:/www/kommunalwahl_nw_2025_bad_muenstereifel_bmw/static
+            - ./data/kommunalwahl_nw_2025_bad_muenstereifel_bmw/media:/www/kommunalwahl_nw_2025_bad_muenstereifel_bmw/media
 
         env_file:
             - ./caddy/caddy.env
@@ -62,31 +62,31 @@ services:
         volumes:
             - ./data/dev/mysql:/var/lib/mysql
 
-    # instance btw25_91_euskirchen
-    btw25_91_euskirchen:
-        container_name: btw25_91_euskirchen
+    # instance kommunalwahl_nw_2025_bad_muenstereifel_bmw
+    kommunalwahl_nw_2025_bad_muenstereifel_bmw:
+        container_name: kommunalwahl_nw_2025_bad_muenstereifel_bmw
         build:
             context: ../wahlrechner
-        command: bash -c 'docker/wait-for-it/wait-for-it.sh db_btw25_91_euskirchen:3306 -t 120 -- docker/startup-production.sh'
+        command: bash -c 'docker/wait-for-it/wait-for-it.sh db_kommunalwahl_nw_2025_bad_muenstereifel_bmw:3306 -t 120 -- docker/startup-production.sh'
         restart: always
         networks:
             main_app_network:
                ipv4_address: 192.168.108.5
         volumes:
-            - ./data/btw25_91_euskirchen/static:/code/assets/
-            - ./data/btw25_91_euskirchen/media:/code/media/
-            - ./data/btw25_91_euskirchen/logs/wahlrechner:/code/logs/
-            - ./data/btw25_91_euskirchen/migrations/wahlrechner:/code/wahlrechner/migrations
-            - ./data/btw25_91_euskirchen/stats:/code/wahlrechner/stats
+            - ./data/kommunalwahl_nw_2025_bad_muenstereifel_bmw/static:/code/assets/
+            - ./data/kommunalwahl_nw_2025_bad_muenstereifel_bmw/media:/code/media/
+            - ./data/kommunalwahl_nw_2025_bad_muenstereifel_bmw/logs/wahlrechner:/code/logs/
+            - ./data/kommunalwahl_nw_2025_bad_muenstereifel_bmw/migrations/wahlrechner:/code/wahlrechner/migrations
+            - ./data/kommunalwahl_nw_2025_bad_muenstereifel_bmw/stats:/code/wahlrechner/stats
             - ./themes:/code/themes
         env_file:
             - ./config/config.env
-            - ./config/config_btw25_91_euskirchen.env
+            - ./config/config_kommunalwahl_nw_2025_bad_muenstereifel_bmw.env
         depends_on:
-            - db_btw25_91_euskirchen
+            - db_kommunalwahl_nw_2025_bad_muenstereifel_bmw
 
-    db_btw25_91_euskirchen:
-        container_name: db_btw25_91_euskirchen
+    db_kommunalwahl_nw_2025_bad_muenstereifel_bmw:
+        container_name: db_kommunalwahl_nw_2025_bad_muenstereifel_bmw
         image: mariadb
         restart: always
         networks:
@@ -94,9 +94,9 @@ services:
                ipv4_address: 192.168.108.6
         env_file:
             - ./config/config.env
-            - ./config/config_btw25_91_euskirchen.env
+            - ./config/config_kommunalwahl_nw_2025_bad_muenstereifel_bmw.env
         volumes:
-            - ./data/btw25_91_euskirchen/mysql:/var/lib/mysql
+            - ./data/kommunalwahl_nw_2025_bad_muenstereifel_bmw/mysql:/var/lib/mysql
 
 volumes:
     caddy_data:
