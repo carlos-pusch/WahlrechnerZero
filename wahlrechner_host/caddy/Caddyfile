@@ -17,19 +17,19 @@
         root * /www/dev
         reverse_proxy dev:8000
     }
-    # instance btw25_91_euskirchen
-    route /btw25_91_euskirchen* {
-        handle_path /btw25_91_euskirchen/static/* {
-            root * /www/btw25_91_euskirchen/static
+    # instance kommunalwahl_nw_2025_bad_muenstereifel_bmw
+    route /kommunalwahl_nw_2025_bad_muenstereifel_bmw* {
+        handle_path /kommunalwahl_nw_2025_bad_muenstereifel_bmw/static/* {
+            root * /www/kommunalwahl_nw_2025_bad_muenstereifel_bmw/static
             file_server
         }
         
-        handle_path /btw25_91_euskirchen/media/* {
-            root * /www/btw25_91_euskirchen/media
+        handle_path /kommunalwahl_nw_2025_bad_muenstereifel_bmw/media/* {
+            root * /www/kommunalwahl_nw_2025_bad_muenstereifel_bmw/media
             file_server
         }
 
-        root * /www/btw25_91_euskirchen
-        reverse_proxy btw25_91_euskirchen:8000
+        root * /www/kommunalwahl_nw_2025_bad_muenstereifel_bmw
+        reverse_proxy kommunalwahl_nw_2025_bad_muenstereifel_bmw:8000
     }
 }
