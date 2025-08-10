@@ -1,7 +1,7 @@
 /* path/to/css */
 
 /*! tailwindcss v3.0.24 | MIT License | https://tailwindcss.com*/*,
-/*! Carlos 2024-08-10 12:40:00 */
+/*! Carlos 2024-08-10 13:40:00 */
 /*! Carlos 2024-07-24 20:15:00 */
 :after,
 :before {
@@ -478,8 +478,9 @@ video {
  border-radius:9999px;
 }
 .border-l-8 {
- /*! border-left-width:12px; */
- border-left-width:7px;
+ /*! border-left-width:12px; 
+ border-left-width:7px;*/
+ border-left-width: 0.5rem;
 }
 .border-empty {
  /*! border-left-width:2px;*/
