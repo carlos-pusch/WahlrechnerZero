@@ -60,23 +60,26 @@
             {% alias antwort.antwort_partei.partei_farbe as farbe %}
             <div class="w-full h-full p-4 border-empty {% if farbe %}border-l-8{% endif %}"
                  {% if farbe %}style="border-color: {{ farbe }}"{% endif %}>
+				 
+				<div class="border_gap">
 
-                {# Parteititel mit passendem Badge #}
-                <h2 class="mb-3">
-                    <div class="text-lg font-semibold text-gray-700 dark:text-gray-100 sm:inline-flex">
-                        {{ antwort.antwort_partei.partei_name }}
-                    </div>
-                    {% include "snippets/badge.html" with type=antwort.antwort_position pers="3" %}
-                </h2>
-
-                {# Begründung der kandidierenden Person #}
-                <p class="text-sm text-left text-gray-600 dark:text-gray-300">
-                    {% if antwort.antwort_text %}
-                        "{{ antwort.antwort_text.strip }}"
-                    {% else %}
-                        <i>Von der kandidierenden Person liegt zu dieser These keine Begründung vor.</i>
-                    {% endif %}
-                </p>
+					{# Parteititel mit passendem Badge #}
+					<h2 class="mb-3">
+						<div class="text-lg font-semibold text-gray-700 dark:text-gray-100 sm:inline-flex">
+							{{ antwort.antwort_partei.partei_name }}
+						</div>
+						{% include "snippets/badge.html" with type=antwort.antwort_position pers="3" %}
+					</h2>
+					
+					{# Begründung der kandidierenden Person #}
+					<p class="text-sm text-left text-gray-600 dark:text-gray-300">
+						{% if antwort.antwort_text %}
+							"{{ antwort.antwort_text.strip }}"
+						{% else %}
+							<i>Von der kandidierenden Person liegt zu dieser These keine Begründung vor.</i>
+						{% endif %}
+					</p>
+				</div>
 
             </div>
 
