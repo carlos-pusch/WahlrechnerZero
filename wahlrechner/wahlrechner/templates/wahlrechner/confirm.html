@@ -10,9 +10,11 @@
 {% block content %}
 
     <div class="content">
-        <h1>Gewichtung der Thesen</h1>
-        <p>Wähle die Thesen aus, die dir wichtig sind. Diese Thesen werden in der Berechnung doppelt gewichtet.</p>
-    </div>
+		<div class="shift_for_icon">
+			<h1>Gewichtung der Thesen</h1>			
+		</div>
+		<p>Wähle die Thesen aus, die dir wichtig sind. Diese Thesen werden in der Berechnung doppelt gewichtet.</p>
+	</div>
 
     <form method="get" action="{% url "confirm_submit" zustand_current %}">
 
