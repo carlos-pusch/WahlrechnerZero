@@ -10,10 +10,12 @@
 {% block content %}
 
     <div class="content">
-        <h1>Dein Ergebnis</h1>
-        <p>Auf Grundlage deiner Positionen zu jeder These haben wir deine Übereinstimmung mit
-            den einzelnen Kandidierenden berechnet. Bitte beachte, dass Kandidierende mit einer ähnlichen
-            Übereinstimmung nicht auch automatisch eine inhaltliche Nähe zueinander haben.</p>
+	
+        <div class="shift_for_icon">
+			<h1>Dein Ergebnis</h1>
+		</div>
+		<p>Auf Grundlage deiner Positionen zu jeder These haben wir deine Übereinstimmung mit den einzelnen Kandidierenden berechnet. Bitte beachte, dass Kandidierende mit einer ähnlichen Übereinstimmung nicht auch automatisch eine inhaltliche Nähe zueinander haben.</p>
+
 
         {% if not aussagekraeftig %}
             <p class="mt-3 font-semibold text-red-700 dark:text-red-500">
