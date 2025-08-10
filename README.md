@@ -1,6 +1,6 @@
 # WahlrechnerZero
 
-**Ursprungsversion von [Linus Köster](https://github.com/wahlrechner/wahlrechner)**
+**Die Ursprungsversion stammte von [Linus Köster](https://github.com/wahlrechner/wahlrechner) ist nun aber weiterentwickelt worden**
 
 # Aufsetzen eines Wahlrechner-Servers
 
@@ -18,7 +18,7 @@ sudo apt update && sudo apt install git -y
 
 ### Repository klonen
 
-Achtung der hier verwendete Code ist hier zwar richtig, aber besser in dder *Kurzanleitung.md* dokumentiert.
+Achtung der hier verwendete Code ist hier zwar richtig, aber für den produktiven Einsatz (mit Annahme von installierten Docker und Caddy) besser in der *Kurzanleitung.md* dokumentiert.
 
 ```
 sudo mkdir /Wahlrechner
