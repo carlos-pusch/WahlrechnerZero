@@ -1,5 +1,5 @@
+
 services:
-    # Reverse proxy.
     caddy:
         container_name: caddy
         image: caddy:2.8
@@ -9,84 +9,22 @@ services:
             - "443:443"
             - "443:443/udp"
         networks:
-            - caddy
-            # instance markdorf
-            - markdorf
-            # instance dev
-            - dev
-            # instance btw25_91_euskirchen
-            - btw25_91_euskirchen
-            # instance btw25_293_bodensee
-            - btw25_293_bodensee
-            - btw25_260_boeblingen
-            - btw25_261_esslingen
-            - btw25_265_ludwigsburg
-
+            main_app_network:
+               # Statische IP fuer Caddy im Hauptnetzwerk
+               ipv4_address: 192.168.108.2
         volumes:
             - ./caddy/Caddyfile:/etc/caddy/Caddyfile
             - caddy_data:/data
             - caddy_config:/config
-            # instance markdorf
-            - ./data/markdorf/static:/www/markdorf/static
-            - ./data/markdorf/media:/www/markdorf/media
             # instance dev
             - ./data/dev/static:/www/dev/static
             - ./data/dev/media:/www/dev/media
-            # instance btw25_91_euskirchen
-            - ./data/btw25_91_euskirchen/static:/www/btw25_91_euskirchen/static
-            - ./data/btw25_91_euskirchen/media:/www/btw25_91_euskirchen/media
-            # instance btw25_293_bodensee
-            - ./data/btw25_293_bodensee/static:/www/btw25_293_bodensee/static
-            - ./data/btw25_293_bodensee/media:/www/btw25_293_bodensee/media
-            # instance btw25_260_boeblingen
-            - ./data/btw25_260_boeblingen/static:/www/btw25_260_boeblingen/static
-            - ./data/btw25_260_boeblingen/media:/www/btw25_260_boeblingen/media
-            # instance btw25_261_esslingen
-            - ./data/btw25_261_esslingen/static:/www/btw25_261_esslingen/static
-            - ./data/btw25_261_esslingen/media:/www/btw25_261_esslingen/media
-            # instance btw25_265_ludwigsburg
-            - ./data/btw25_265_ludwigsburg/static:/www/btw25_265_ludwigsburg/static
-            - ./data/btw25_265_ludwigsburg/media:/www/btw25_265_ludwigsburg/media
+            # instance kommunalwahl_nw_2025_bad_muenstereifel_bmw
+            - ./data/kommunalwahl_nw_2025_bad_muenstereifel_bmw/static:/www/kommunalwahl_nw_2025_bad_muenstereifel_bmw/static
+            - ./data/kommunalwahl_nw_2025_bad_muenstereifel_bmw/media:/www/kommunalwahl_nw_2025_bad_muenstereifel_bmw/media
 
         env_file:
             - ./caddy/caddy.env
-
-
-    # instance markdorf
-    markdorf:
-        container_name: markdorf
-        build:
-            context: ../wahlrechner
-        command: bash -c 'docker/wait-for-it/wait-for-it.sh db_markdorf:3306 -t 120 -- docker/startup-production.sh'
-        restart: always
-        networks:
-            - markdorf
-            - db_markdorf
-        volumes:
-            - ./data/markdorf/static:/code/assets/
-            - ./data/markdorf/media:/code/media/
-            - ./data/markdorf/logs/wahlrechner:/code/logs/
-            - ./data/markdorf/migrations/wahlrechner:/code/wahlrechner/migrations
-            - ./data/markdorf/stats:/code/wahlrechner/stats
-            - ./themes:/code/themes
-        env_file:
-            - ./config/config.env
-            - ./config/config_markdorf.env
-        depends_on:
-            - db_markdorf
-
-    db_markdorf:
-        container_name: db_markdorf
-        image: mariadb
-        restart: always
-        networks:
-            - db_markdorf
-        env_file:
-            - ./config/config.env
-            - ./config/config_markdorf.env
-        volumes:
-            - ./data/markdorf/mysql:/var/lib/mysql
-
 
     # instance dev
     dev:
@@ -96,8 +34,8 @@ services:
         command: bash -c 'docker/wait-for-it/wait-for-it.sh db_dev:3306 -t 120 -- docker/startup-production.sh'
         restart: always
         networks:
-            - dev
-            - db_dev
+            main_app_network:
+               ipv4_address: 192.168.108.3
         volumes:
             - ./data/dev/static:/code/assets/
             - ./data/dev/media:/code/media/
@@ -116,213 +54,58 @@ services:
         image: mariadb
         restart: always
         networks:
-            - db_dev
+            main_app_network:
+               ipv4_address: 192.168.108.4
         env_file:
             - ./config/config.env
             - ./config/config_dev.env
         volumes:
             - ./data/dev/mysql:/var/lib/mysql
 
-
-    # instance btw25_91_euskirchen
-    btw25_91_euskirchen:
-        container_name: btw25_91_euskirchen
+    # instance kommunalwahl_nw_2025_bad_muenstereifel_bmw
+    kommunalwahl_nw_2025_bad_muenstereifel_bmw:
+        container_name: kommunalwahl_nw_2025_bad_muenstereifel_bmw
         build:
             context: ../wahlrechner
-        command: bash -c 'docker/wait-for-it/wait-for-it.sh db_btw25_91_euskirchen:3306 -t 120 -- docker/startup-production.sh'
+        command: bash -c 'docker/wait-for-it/wait-for-it.sh db_kommunalwahl_nw_2025_bad_muenstereifel_bmw:3306 -t 120 -- docker/startup-production.sh'
         restart: always
         networks:
-            - btw25_91_euskirchen
-            - db_btw25_91_euskirchen
+            main_app_network:
+               ipv4_address: 192.168.108.5
         volumes:
-            - ./data/btw25_91_euskirchen/static:/code/assets/
-            - ./data/btw25_91_euskirchen/media:/code/media/
-            - ./data/btw25_91_euskirchen/logs/wahlrechner:/code/logs/
-            - ./data/btw25_91_euskirchen/migrations/wahlrechner:/code/wahlrechner/migrations
-            - ./data/btw25_91_euskirchen/stats:/code/wahlrechner/stats
+            - ./data/kommunalwahl_nw_2025_bad_muenstereifel_bmw/static:/code/assets/
+            - ./data/kommunalwahl_nw_2025_bad_muenstereifel_bmw/media:/code/media/
+            - ./data/kommunalwahl_nw_2025_bad_muenstereifel_bmw/logs/wahlrechner:/code/logs/
+            - ./data/kommunalwahl_nw_2025_bad_muenstereifel_bmw/migrations/wahlrechner:/code/wahlrechner/migrations
+            - ./data/kommunalwahl_nw_2025_bad_muenstereifel_bmw/stats:/code/wahlrechner/stats
             - ./themes:/code/themes
         env_file:
             - ./config/config.env
-            - ./config/config_btw25_91_euskirchen.env
+            - ./config/config_kommunalwahl_nw_2025_bad_muenstereifel_bmw.env
         depends_on:
-            - db_btw25_91_euskirchen
+            - db_kommunalwahl_nw_2025_bad_muenstereifel_bmw
 
-    db_btw25_91_euskirchen:
-        container_name: db_btw25_91_euskirchen
+    db_kommunalwahl_nw_2025_bad_muenstereifel_bmw:
+        container_name: db_kommunalwahl_nw_2025_bad_muenstereifel_bmw
         image: mariadb
         restart: always
         networks:
-            - db_btw25_91_euskirchen
+            main_app_network:
+               ipv4_address: 192.168.108.6
         env_file:
             - ./config/config.env
-            - ./config/config_btw25_91_euskirchen.env
+            - ./config/config_kommunalwahl_nw_2025_bad_muenstereifel_bmw.env
         volumes:
-            - ./data/btw25_91_euskirchen/mysql:/var/lib/mysql
-
-
-    # instance btw25_293_bodensee
-    btw25_293_bodensee:
-        container_name: btw25_293_bodensee
-        build:
-            context: ../wahlrechner
-        command: bash -c 'docker/wait-for-it/wait-for-it.sh db_btw25_293_bodensee:3306 -t 120 -- docker/startup-production.sh'
-        restart: always
-        networks:
-            - btw25_293_bodensee
-            - db_btw25_293_bodensee
-        volumes:
-            - ./data/btw25_293_bodensee/static:/code/assets/
-            - ./data/btw25_293_bodensee/media:/code/media/
-            - ./data/btw25_293_bodensee/logs/wahlrechner:/code/logs/
-            - ./data/btw25_293_bodensee/migrations/wahlrechner:/code/wahlrechner/migrations
-            - ./data/btw25_293_bodensee/stats:/code/wahlrechner/stats
-            - ./themes:/code/themes
-        env_file:
-            - ./config/config.env
-            - ./config/config_btw25_293_bodensee.env
-        depends_on:
-            - db_btw25_293_bodensee
-
-    db_btw25_293_bodensee:
-        container_name: db_btw25_293_bodensee
-        image: mariadb
-        restart: always
-        networks:
-            - db_btw25_293_bodensee
-        env_file:
-            - ./config/config.env
-            - ./config/config_btw25_293_bodensee.env
-        volumes:
-            - ./data/btw25_293_bodensee/mysql:/var/lib/mysql
-
-    # instance btw25_260_boeblingen
-    btw25_260_boeblingen:
-        container_name: btw25_260_boeblingen
-        build:
-            context: ../wahlrechner
-        command: bash -c 'docker/wait-for-it/wait-for-it.sh db_btw25_260_boeblingen:3306 -t 120 -- docker/startup-production.sh'
-        restart: always
-        networks:
-            - btw25_260_boeblingen
-            - db_btw25_260_boeblingen
-        volumes:
-            - ./data/btw25_260_boeblingen/static:/code/assets/
-            - ./data/btw25_260_boeblingen/media:/code/media/
-            - ./data/btw25_260_boeblingen/logs/wahlrechner:/code/logs/
-            - ./data/btw25_260_boeblingen/migrations/wahlrechner:/code/wahlrechner/migrations
-            - ./data/btw25_260_boeblingen/stats:/code/wahlrechner/stats
-            - ./themes:/code/themes
-        env_file:
-            - ./config/config.env
-            - ./config/config_btw25_260_boeblingen.env
-        depends_on:
-            - db_btw25_260_boeblingen
-
-    db_btw25_260_boeblingen:
-        container_name: db_btw25_260_boeblingen
-        image: mariadb
-        restart: always
-        networks:
-            - db_btw25_260_boeblingen
-        env_file:
-            - ./config/config.env
-            - ./config/config_btw25_260_boeblingen.env
-        volumes:
-            - ./data/btw25_260_boeblingen/mysql:/var/lib/mysql
-
-    # instance btw25_261_esslingen
-    btw25_261_esslingen:
-        container_name: btw25_261_esslingen
-        build:
-            context: ../wahlrechner
-        command: bash -c 'docker/wait-for-it/wait-for-it.sh db_btw25_261_esslingen:3306 -t 120 -- docker/startup-production.sh'
-        restart: always
-        networks:
-            - btw25_261_esslingen
-            - db_btw25_261_esslingen
-        volumes:
-            - ./data/btw25_261_esslingen/static:/code/assets/
-            - ./data/btw25_261_esslingen/media:/code/media/
-            - ./data/btw25_261_esslingen/logs/wahlrechner:/code/logs/
-            - ./data/btw25_261_esslingen/migrations/wahlrechner:/code/wahlrechner/migrations
-            - ./data/btw25_261_esslingen/stats:/code/wahlrechner/stats
-            - ./themes:/code/themes
-        env_file:
-            - ./config/config.env
-            - ./config/config_btw25_261_esslingen.env
-        depends_on:
-            - db_btw25_261_esslingen
-
-    db_btw25_261_esslingen:
-        container_name: db_btw25_261_esslingen
-        image: mariadb
-        restart: always
-        networks:
-            - db_btw25_261_esslingen
-        env_file:
-            - ./config/config.env
-            - ./config/config_btw25_261_esslingen.env
-        volumes:
-            - ./data/btw25_261_esslingen/mysql:/var/lib/mysql
-
-    # instance btw25_265_ludwigsburg
-    btw25_265_ludwigsburg:
-        container_name: btw25_265_ludwigsburg
-        build:
-            context: ../wahlrechner
-        command: bash -c 'docker/wait-for-it/wait-for-it.sh db_btw25_265_ludwigsburg:3306 -t 120 -- docker/startup-production.sh'
-        restart: always
-        networks:
-            - btw25_265_ludwigsburg
-            - db_btw25_265_ludwigsburg
-        volumes:
-            - ./data/btw25_265_ludwigsburg/static:/code/assets/
-            - ./data/btw25_265_ludwigsburg/media:/code/media/
-            - ./data/btw25_265_ludwigsburg/logs/wahlrechner:/code/logs/
-            - ./data/btw25_265_ludwigsburg/migrations/wahlrechner:/code/wahlrechner/migrations
-            - ./data/btw25_265_ludwigsburg/stats:/code/wahlrechner/stats
-            - ./themes:/code/themes
-        env_file:
-            - ./config/config.env
-            - ./config/config_btw25_265_ludwigsburg.env
-        depends_on:
-            - db_btw25_265_ludwigsburg
-
-    db_btw25_265_ludwigsburg:
-        container_name: db_btw25_265_ludwigsburg
-        image: mariadb
-        restart: always
-        networks:
-            - db_btw25_265_ludwigsburg
-        env_file:
-            - ./config/config.env
-            - ./config/config_btw25_265_ludwigsburg.env
-        volumes:
-            - ./data/btw25_265_ludwigsburg/mysql:/var/lib/mysql
+            - ./data/kommunalwahl_nw_2025_bad_muenstereifel_bmw/mysql:/var/lib/mysql
 
 volumes:
     caddy_data:
     caddy_config:
 
 networks:
-    caddy:
-      name: caddy
-    # instance dev
-    db_dev:
-    dev:
-    # instance markdorf
-    db_markdorf:
-    markdorf:
-    # instance btw25_91_euskirchen
-    db_btw25_91_euskirchen:
-    btw25_91_euskirchen:
-    # instance btw25_293_bodensee
-    db_btw25_293_bodensee:
-    btw25_293_bodensee:
-    # instance btw25_260_boeblingen
-    db_btw25_260_boeblingen:
-    btw25_260_boeblingen:
-    db_btw25_261_esslingen:
-    btw25_261_esslingen:
-    db_btw25_265_ludwigsburg:
-    btw25_265_ludwigsburg:
+  main_app_network:
+    name: wahlcheck_app_cp # Der Name des Netzwerks, wie es in Docker erscheinen wird
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.108.0/24
