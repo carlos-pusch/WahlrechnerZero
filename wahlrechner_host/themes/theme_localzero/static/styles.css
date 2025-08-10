@@ -1,6 +1,7 @@
 /* path/to/css */
 
 /*! tailwindcss v3.0.24 | MIT License | https://tailwindcss.com*/*,
+/*! Carlos 2024-08-10 12:40:00 */
 /*! Carlos 2024-07-24 20:15:00 */
 :after,
 :before {
@@ -1552,5 +1553,10 @@ footer img {
   .footer_padding {
     margin-top: -3rem;
     padding-left: 0rem;
+}
+}
+@media (max-width:640px) {
+ .shift_for_icon {
+  padding-left: 2.5rem;
 }
 }
