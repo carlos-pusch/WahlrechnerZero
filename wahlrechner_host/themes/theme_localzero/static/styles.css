@@ -1502,7 +1502,7 @@ footer img {
 
 /* Mobile Menu Container */
 .thesen-container {
-    transition: transform 0.3s ease;
+    transition: transform 0.4s ease;
 }
 
 #footer-content {
@@ -1522,12 +1522,12 @@ footer img {
         z-index: 999;
         padding: 20px;
         transform: translateX(-100%);
-        overflow-y: auto;
-        box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        overflow-y: auto;        
     }
     
     .thesen-container.active {
         transform: translateX(0);
+		box-shadow: 2px 0 10px rgba(0,0,0,0.1);
     }
     
     .dark .thesen-container {
