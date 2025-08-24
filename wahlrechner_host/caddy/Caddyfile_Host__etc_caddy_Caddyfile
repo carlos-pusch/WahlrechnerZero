@@ -1,0 +1,21 @@
+wahlcheck.localhost {
+	# needs ssl
+	# Übersichtsseite für Root-URL
+	@root path /
+	handle @root {
+		root * /var/www/wahlcheck
+		file_server
+	}
+
+	# header Content-Security-Policy: frame-ancestors *
+
+	# Alle anderen Anfragen an Docker weiterleiten    
+
+	reverse_proxy http://localhost:8080 {
+		header_up Host {host} # Original-Host-Header weiterleiten
+		header_up X-Real-IP {remote} # Client-IP übermitteln
+		header_up X-Forwarded-Proto https # Protokoll setzen
+		# header_up X-Forwarded-Host {host}
+		# header_up X-Forwarded-For {remote}
+	}
+}
