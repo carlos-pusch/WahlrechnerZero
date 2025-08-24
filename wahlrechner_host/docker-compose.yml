@@ -1,7 +1,7 @@
 
 services:
     caddy:
-        container_name: caddy
+        container_name: caddy_wahlcheck
         image: caddy:2.8
         restart: unless-stopped
         ports:
