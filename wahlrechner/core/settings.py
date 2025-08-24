@@ -136,4 +136,12 @@ STATICFILES_DIRS = [
 # SSL-Encryption
 
 SECURE_HSTS_SECONDS = int(os.getenv("DJANGO_SECURE_HSTS_SECONDS", 0))
-SESSION_COOKIE_SECURE = bool(int(os.getenv("DJANGO_SESSION_COOKIE_SECURE", 1)))
+#SESSION_COOKIE_SECURE = bool(int(os.getenv("DJANGO_SESSION_COOKIE_SECURE", 1))) # geändert
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https') # neu
+USE_X_FORWARDED_HOST = True # neu
+SESSION_COOKIE_SECURE = True # neu
+CSRF_COOKIE_SECURE = True # neu
+SECURE_SSL_REDIRECT = False  # false bzw. Deaktivieren, da Proxy SSL handhabt
+
+X_FRAME_OPTIONS = 'ALLOW-FROM *'  # Oder spezifische Domains
