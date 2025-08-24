@@ -1,9 +1,12 @@
 ### Kurzanleitung mit fertigen Code zum Erstart
 
 Im Terminal und kann dann in einem Rutsch ausgeführt werden.
+Dazu muss nur der notwendige Parent-Ordner ausgewählt werden und ggf. der "dir_name" noch angepast werden.
+
+ACHTUNG: Es werden auch potentiell laufende Docker Container gestoppt und beendet!
 
 ```python
-dir_name="Wahlrechner"
+dir_name="WahlrechnerZero"
 sudo mkdir $dir_name
 
 sudo git clone https://github.com/carlos-pusch/WahlrechnerZero "$dir_name"
