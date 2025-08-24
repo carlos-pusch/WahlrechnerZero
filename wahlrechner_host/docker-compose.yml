@@ -5,9 +5,13 @@ services:
         image: caddy:2.8
         restart: unless-stopped
         ports:
-            - "80:80"
-            - "443:443"
-            - "443:443/udp"
+            - "0.0.0.0:8080:80"
+            - "0.0.0.0:8443:443"
+            - "0.0.0.0:8443:443/udp"            
+            ## - "80:80"
+            # - "8080:80"
+            # - "8443:443"
+            # - "8443:443/udp"
         networks:
             main_app_network:
                # Statische IP fuer Caddy im Hauptnetzwerk
