@@ -1,7 +1,26 @@
-<h1 class="mb-3 text-xl font-semibold text-gray-700 dark:text-gray-100 shift_for_icon">Starte deinen Wahlcheck</h1>
+<!-- lz_a_1:
+<h1 class="mb-3 text-xl font-semibold text-gray-700 dark:text-gray-100 shift_for_icon">Starte deinen Klima-Wahlcheck</h1>
 <div class="text-left text-gray-600 dark:text-gray-300">
-    Dieser Wahlcheck basiert auf Thesen, die durch das Projektteam formuliert und mit Kandidierenden bzw. Parteien geteilt werden sollen. Die eingegangenen Rückmeldungen werden unbearbeitet übernommen. Kandidierende, die ihre Positionen zu den Thesen nicht dargelegt haben sind nicht Teil dieses Wahlchecks und werden aus Transparenzgründen gesondert aufgelistet.
+    Dieser Klima-Wahlcheck basiert auf Thesen, die durch das lokale Projektteam formuliert und mit Kandidierenden bzw. Parteien geteilt wurden. Die eingegangenen Rückmeldungen werden unbearbeitet übernommen. Kandidierende, die ihre Positionen zu den Thesen nicht dargelegt haben sind nicht Teil dieses Wahlchecks und werden aus Transparenzgründen gesondert aufgelistet.
 </div>
 <div class="p-3 mt-5 italic text-gray-400 border border-gray-400 rounded dark:text-gray-200 dark:bg-gray-700 dark:border-none">
     Der Wahlcheck sammelt keinerlei personenbezogene Daten und verwendet keine Cookies.
 </div>
+-->
+{% if not thesen.first %}
+    <h1 class="mb-3 text-xl font-semibold text-gray-700 dark:text-gray-100 shift_for_icon">Wahlcheck bald verfügbar</h1>
+    <div class="text-left text-gray-600 dark:text-gray-300">
+        Der Wahlcheck wird in Kürze mit Thesen und Positionen der Kandidierenden verfügbar sein. Bitte schau später noch einmal vorbei.
+    </div>
+    <div class="p-3 mt-5 italic text-gray-400 border border-gray-400 rounded dark:text-gray-200 dark:bg-gray-700 dark:border-none">
+        Der Wahlcheck sammelt keinerlei personenbezogene Daten und verwendet keine Cookies.
+    </div>
+{% else %}
+    <h1 class="mb-3 text-xl font-semibold text-gray-700 dark:text-gray-100 shift_for_icon">Starte deinen Wahlcheck</h1>
+    <div class="text-left text-gray-600 dark:text-gray-300">
+        Dieser Wahlcheck basiert auf Thesen, die durch das Projektteam formuliert und mit Kandidierenden bzw. Parteien geteilt werden sollen. Die eingegangenen Rückmeldungen werden unbearbeitet übernommen. Kandidierende, die ihre Positionen zu den Thesen nicht dargelegt haben sind nicht Teil dieses Wahlchecks und werden aus Transparenzgründen gesondert aufgelistet.
+    </div>
+    <div class="p-3 mt-5 italic text-gray-400 border border-gray-400 rounded dark:text-gray-200 dark:bg-gray-700 dark:border-none">
+        Der Wahlcheck sammelt keinerlei personenbezogene Daten und verwendet keine Cookies.
+    </div>
+{% endif %}
