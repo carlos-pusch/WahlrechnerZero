@@ -1,8 +1,7 @@
 {% extends 'wahlrechner/base.html' %}
 {% load wahlrechner_extras %}
-{% load wahlrechner_name %}
 
-{% block title %}{% wahlrechner_title %}{% endblock %}
+{% block title %}{% wahl.titel %}{% endblock %}
 2
 {% block sidebar %}
     {% include "wahlrechner/sidebar.html" with icon_default="" url_template="" %}
@@ -20,9 +19,11 @@
         <div class="-mb-2"></div>
 
         {% if thesen.first %}
-            {% url "these" thesen.first.pk 0 as url %}
+            {% if thesen.first %}
+            {% url "these" wahl.slug thesen.first.pk 0 as url %}
             {% include "snippets/btn.html" with text="Start" url=url icon="cright" pos="r" sc="39" %}
         {% endif %}
+        
     </div>
 
 {% endblock %}
