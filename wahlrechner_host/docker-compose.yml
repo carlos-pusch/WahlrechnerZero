@@ -1,110 +1,63 @@
 
 services:
-    caddy:
-        container_name: caddy
-        image: caddy:2.8
-        restart: unless-stopped
-        ports:
-            - "80:80"
-            - "443:443"
-            - "443:443/udp"
-        networks:
-            main_app_network:
-               # Statische IP fuer Caddy im Hauptnetzwerk
-               ipv4_address: 192.168.108.2
-        volumes:
-            - ./caddy/Caddyfile:/etc/caddy/Caddyfile
-            - caddy_data:/data
-            - caddy_config:/config
-            # instance dev
-            - ./data/dev/static:/www/dev/static
-            - ./data/dev/media:/www/dev/media
-            # instance kommunalwahl_nw_2025_bad_muenstereifel_bmw
-            - ./data/kommunalwahl_nw_2025_bad_muenstereifel_bmw/static:/www/kommunalwahl_nw_2025_bad_muenstereifel_bmw/static
-            - ./data/kommunalwahl_nw_2025_bad_muenstereifel_bmw/media:/www/kommunalwahl_nw_2025_bad_muenstereifel_bmw/media
+  caddy:
+    container_name: caddy
+    image: caddy:2.8
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    networks:
+      - main_app_network
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+      # Statische und Mediendateien für alle Wahlen (werden von Django gesammelt)
+      - ./data/static:/www/static
+      - ./data/media:/www/media
+    env_file:
+      - ./caddy/caddy.env
 
-        env_file:
-            - ./caddy/caddy.env
+  app:
+    container_name: wahlrechner_app
+    build:
+      context: ../wahlrechner
+    command: bash -c 'docker/wait-for-it/wait-for-it.sh db:3306 -t 120 -- docker/startup-production.sh'
+    restart: always
+    networks:
+      - main_app_network
+    volumes:
+      # Statische und Mediendateien (Django sammelt nach /code/assets/ und /code/media/)
+      - ./data/static:/code/assets/
+      - ./data/media:/code/media/
+      - ./data/logs:/code/logs/
+      - ./data/stats:/code/wahlrechner/stats
+      - ./themes:/code/themes
+    env_file:
+      - ./config/config.env
+    depends_on:
+      - db
 
-    # instance dev
-    dev:
-        container_name: dev
-        build:
-            context: ../wahlrechner
-        command: bash -c 'docker/wait-for-it/wait-for-it.sh db_dev:3306 -t 120 -- docker/startup-production.sh'
-        restart: always
-        networks:
-            main_app_network:
-               ipv4_address: 192.168.108.3
-        volumes:
-            - ./data/dev/static:/code/assets/
-            - ./data/dev/media:/code/media/
-            - ./data/dev/logs/wahlrechner:/code/logs/
-            - ./data/dev/migrations/wahlrechner:/code/wahlrechner/migrations
-            - ./data/dev/stats:/code/wahlrechner/stats
-            - ./themes:/code/themes
-        env_file:
-            - ./config/config.env
-            - ./config/config_dev.env
-        depends_on:
-            - db_dev
-
-    db_dev:
-        container_name: db_dev
-        image: mariadb
-        restart: always
-        networks:
-            main_app_network:
-               ipv4_address: 192.168.108.4
-        env_file:
-            - ./config/config.env
-            - ./config/config_dev.env
-        volumes:
-            - ./data/dev/mysql:/var/lib/mysql
-
-    # instance kommunalwahl_nw_2025_bad_muenstereifel_bmw
-    kommunalwahl_nw_2025_bad_muenstereifel_bmw:
-        container_name: kommunalwahl_nw_2025_bad_muenstereifel_bmw
-        build:
-            context: ../wahlrechner
-        command: bash -c 'docker/wait-for-it/wait-for-it.sh db_kommunalwahl_nw_2025_bad_muenstereifel_bmw:3306 -t 120 -- docker/startup-production.sh'
-        restart: always
-        networks:
-            main_app_network:
-               ipv4_address: 192.168.108.5
-        volumes:
-            - ./data/kommunalwahl_nw_2025_bad_muenstereifel_bmw/static:/code/assets/
-            - ./data/kommunalwahl_nw_2025_bad_muenstereifel_bmw/media:/code/media/
-            - ./data/kommunalwahl_nw_2025_bad_muenstereifel_bmw/logs/wahlrechner:/code/logs/
-            - ./data/kommunalwahl_nw_2025_bad_muenstereifel_bmw/migrations/wahlrechner:/code/wahlrechner/migrations
-            - ./data/kommunalwahl_nw_2025_bad_muenstereifel_bmw/stats:/code/wahlrechner/stats
-            - ./themes:/code/themes
-        env_file:
-            - ./config/config.env
-            - ./config/config_kommunalwahl_nw_2025_bad_muenstereifel_bmw.env
-        depends_on:
-            - db_kommunalwahl_nw_2025_bad_muenstereifel_bmw
-
-    db_kommunalwahl_nw_2025_bad_muenstereifel_bmw:
-        container_name: db_kommunalwahl_nw_2025_bad_muenstereifel_bmw
-        image: mariadb
-        restart: always
-        networks:
-            main_app_network:
-               ipv4_address: 192.168.108.6
-        env_file:
-            - ./config/config.env
-            - ./config/config_kommunalwahl_nw_2025_bad_muenstereifel_bmw.env
-        volumes:
-            - ./data/kommunalwahl_nw_2025_bad_muenstereifel_bmw/mysql:/var/lib/mysql
+  db:
+    container_name: wahlrechner_db
+    image: mariadb
+    restart: always
+    networks:
+      - main_app_network
+    env_file:
+      - ./config/config.env
+    volumes:
+      - ./data/mysql:/var/lib/mysql
 
 volumes:
-    caddy_data:
-    caddy_config:
+  caddy_data:
+  caddy_config:
 
 networks:
   main_app_network:
-    name: wahlcheck_app_cp # Der Name des Netzwerks, wie es in Docker erscheinen wird
+    name: wahlcheck_app
     driver: bridge
     ipam:
       config:
