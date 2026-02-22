@@ -2,34 +2,21 @@
     header Content-Security-Policy: frame-ancestors *
     header -X-Frame-Options
     header Strict-Transport-Security max-age=31536000;
-    # instance dev
-    route /dev* {
-        handle_path /dev/static/* {
-            root * /www/dev/static
-            file_server
-        }
-        
-        handle_path /dev/media/* {
-            root * /www/dev/media
-            file_server
-        }
 
-        root * /www/dev
-        reverse_proxy dev:8000
+    # Statische Dateien (gesammelt von Django)
+    handle_path /static/* {
+        root * /www/static
+        file_server
     }
-    # instance kommunalwahl_nw_2025_bad_muenstereifel_bmw
-    route /kommunalwahl_nw_2025_bad_muenstereifel_bmw* {
-        handle_path /kommunalwahl_nw_2025_bad_muenstereifel_bmw/static/* {
-            root * /www/kommunalwahl_nw_2025_bad_muenstereifel_bmw/static
-            file_server
-        }
-        
-        handle_path /kommunalwahl_nw_2025_bad_muenstereifel_bmw/media/* {
-            root * /www/kommunalwahl_nw_2025_bad_muenstereifel_bmw/media
-            file_server
-        }
 
-        root * /www/kommunalwahl_nw_2025_bad_muenstereifel_bmw
-        reverse_proxy kommunalwahl_nw_2025_bad_muenstereifel_bmw:8000
+    # Medien-Dateien (Uploads pro Mandant)
+    handle_path /media/* {
+        root * /www/media
+        file_server
+    }
+
+    # Alle anderen Pfade an Django weiterleiten
+    handle {
+        reverse_proxy app:8000
     }
 }
