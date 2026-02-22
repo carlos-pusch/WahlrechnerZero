@@ -9,7 +9,6 @@
 
 {% block content %}
     <div class="content lg:p-10">
-
         <div class="thesen-counter-container">
             <div class="these counter shift_for_icon">These {{ index.0 }} von {{ index.1 }}</div>
         </div>        
@@ -30,40 +29,37 @@
         </p>
 
         <div class="these btn-container">
-
             {% if opinion %}
                 {# Wenn These bereits beantwortet, bleibe nach Auswahl auf der gleichen Seite #}
-                {% url "these" these_current.pk zustand_agree as url_agree %}
-                {% url "these" these_current.pk zustand_neutral as url_neutral %}
-                {% url "these" these_current.pk zustand_disagree as url_disagree %}
+                {% url 'these' wahl.slug these_current.pk zustand_agree as url_agree %}
+                {% url 'these' wahl.slug these_current.pk zustand_neutral as url_neutral %}
+                {% url 'these' wahl.slug these_current.pk zustand_disagree as url_disagree %}
             {% elif these_next %}
                 {# Wenn These noch nicht beantwortet, gehe nach Auswahl zur nächsten These #}
-                {% url "these" these_next.pk zustand_agree as url_agree %}
-                {% url "these" these_next.pk zustand_neutral as url_neutral %}
-                {% url "these" these_next.pk zustand_disagree as url_disagree %}
+                {% url 'these' wahl.slug these_next.pk zustand_agree as url_agree %}
+                {% url 'these' wahl.slug these_next.pk zustand_neutral as url_neutral %}
+                {% url 'these' wahl.slug these_next.pk zustand_disagree as url_disagree %}
             {% else %}
                 {# Wenn die letzte These beantwortet wird, und zuvor noch nicht beantwortet wurde #}
-                {% url "confirm" zustand_agree as url_agree %}
-                {% url "confirm" zustand_neutral as url_neutral %}
-                {% url "confirm" zustand_disagree as url_disagree %}
+                {% url 'confirm' wahl.slug zustand_agree as url_agree %}
+                {% url 'confirm' wahl.slug zustand_neutral as url_neutral %}
+                {% url 'confirm' wahl.slug zustand_disagree as url_disagree %}
             {% endif %}
 
             <button onClick="location.href='{{ url_agree }}'"
                     class="btn btn-agree {% if opinion == "a" %}active{% endif %}" id="agree">
                 {% include "snippets/icon.html" with icon="agree" color="white" %} stimme zu
             </button>
-
             <button onClick="location.href='{{ url_neutral }}'"
                     class="btn btn-neutral {% if opinion == "n" %}active{% endif %}" id="neutral">
                 {% include "snippets/icon.html" with icon="neutral" color="white" %} neutral
             </button>
-
             <button onClick="location.href='{{ url_disagree }}'"
                     class="btn btn-disagree {% if opinion == "d" %}active{% endif %}" id="disagree">
                 {% include "snippets/icon.html" with icon="disagree" color="white" %} stimme nicht zu
             </button>
 
-            <!-- lz_a_1: Info-Button ; würde gehen, aber für NW_KOM_25 wieder deaktiviert -->
+            <!-- lz_a_1: Info-Button ; würde gehen, aber für NW_KOM_25 wieder deaktiviert-->
             <button onClick="" class="btn btn-background" id="background-button">
                 Info
             </button>
@@ -81,23 +77,6 @@
             </div>
         </div>
         
-        <!--        lz_a_1: Pop-up Modal statt inline-Sektion 
-        <div id="background-modal" class="modal">
-            <div class="modal-content">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="font-bold text-lg">Hintergrundinformation</h3>
-                    <button class="modal-close">&times;</button>
-                </div>
-                <div class="text-gray-700">
-                    {% if these_current.these_explainer %}
-                        {{ these_current.these_explainer|linebreaks }}
-                    {% else %}
-                        Es liegen leider keine extra Hintergrundinformation vor.
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-        -->
         <script>
             // lz_a_1: Neue Modal-Funktionalität
             const bgBtn = document.getElementById('background-button');
@@ -107,7 +86,7 @@
             bgBtn.addEventListener('click', () => {
                 modal.style.display = 'flex';
                 bgBtn.classList.add('active');
-                
+
                 setTimeout(() => {
                     bgBtn.classList.remove('active');
                 }, 3000);
@@ -122,21 +101,21 @@
                     modal.style.display = 'none';
                 }
             });
-            
+
             // lz_a_1: Toggle-Funktion mit Timeout für Farbänderung
             $('#background-button').click(function() {
                 const infoSection = $('#background-info-section');
                 const isVisible = !infoSection.hasClass('hidden');
-                
+
                 if (isVisible) {
                     infoSection.addClass('hidden');
                 } else {
                     infoSection.removeClass('hidden');
                 }
-                
+
                 // Füge 'active'-Klasse für visuelles Feedback hinzu
                 $(this).addClass('active');
-                
+
                 // Entferne 'active'-Klasse nach 0,5 Sekunden
                 setTimeout(() => {
                     $(this).removeClass('active');
@@ -164,9 +143,8 @@
     </div>
 
     <div class="btn-row">
-
         {% if these_prev %}
-            {% url "these" these_prev.pk zustand_current as url %}
+            {% url 'these' wahl.slug these_prev.pk zustand_current as url %}
             {% include "snippets/btn.html" with text="vorherige These" url=url icon="left" pos="l" sc="37" %}
         {% elif not opinions|get_opinion:thesen.last %}
             {# Leeres Div, um die restlichen Buttons korrekt anzuordnen #}
@@ -174,68 +152,41 @@
         {% endif %}
 
         {% if opinions|get_opinion:thesen.last %}
-            {% url "confirm" zustand_current as url %}
+            {% url 'confirm' wahl.slug zustand_current as url %}
             {% include "snippets/btn.html" with text="Abschließen" url=url icon="cright" pos="r" sc="70" %}
         {% endif %}
 
         {% if opinion and these_next %}
-            {% url "these" these_next.pk zustand_current as url %}
+            {% url 'these' wahl.slug these_next.pk zustand_current as url %}
             {% include "snippets/btn.html" with text="nächste These" url=url icon="right" pos="r" sc="39" %}
         {% elif not opinion %}
             {% if these_next %}
-                {% url "these" these_next.pk zustand_skip as url %}
+                {% url 'these' wahl.slug these_next.pk zustand_skip as url %}
             {% else %}
-                {% url "confirm" zustand_skip as url %}
+                {% url 'confirm' wahl.slug zustand_skip as url %}
             {% endif %}
             {% include "snippets/btn.html" with text="These überspringen" url=url icon="skip" pos="r" sc="39" %}
         {% endif %}
-
     </div>
 
 {% endblock %}
 
 {% block shortcuts %}
-
     {# Erhalte Position des Nutzers zu der These #}
     {% alias opinions|get_opinion:these_current as opinion %}
-
-    <li>
-        <span class="icon">A</span> stimme zu
-    </li>
-
-    <li>
-        <span class="icon">N</span> neutral
-    </li>
-
-    <li>
-        <span class="icon">D</span> stimme nicht zu
-    </li>
-
-    <!-- lz_a_1: Statischer Shortcut-Text -->
-    <li>
-        <span class="icon">H</span> Hintergrundinfo
-    </li>
-
+    <li><span class="icon">A</span> stimme zu</li>
+    <li><span class="icon">N</span> neutral</li>
+    <li><span class="icon">D</span> stimme nicht zu</li>
+    <li><span class="icon">H</span> Hintergrundinfo</li>
     {% if these_prev %}
-        <li>
-            <span class="icon">&larr;</span> vorherige These
-        </li>
+        <li><span class="icon">&larr;</span> vorherige These</li>
     {% endif %}
-
     {% if opinion and these_next %}
-        <li>
-            <span class="icon">&rarr;</span> nächste These
-        </li>
+        <li><span class="icon">&rarr;</span> nächste These</li>
     {% elif not opinion %}
-        <li>
-            <span class="icon">&rarr;</span> These überspringen
-        </li>
+        <li><span class="icon">&rarr;</span> These überspringen</li>
     {% endif %}
-
     {% if opinions|get_opinion:thesen.last %}
-        <li>
-            <span class="icon">F</span> Abschließen
-        </li>
+        <li><span class="icon">F</span> Abschließen</li>
     {% endif %}
-
 {% endblock %}
