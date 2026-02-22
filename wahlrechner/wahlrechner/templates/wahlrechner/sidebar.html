@@ -45,7 +45,7 @@ Template für die Seitenleiste mit der Übersicht aller Thesen.
                         <a class="active">{{ these.these_keyword }}</a>
                     {% else %}
                         <a {% if url_template != "" %}
-                            onClick="location.href='{% url url_template these.pk zustand_current %}'"
+                            onClick="location.href='{% url url_template wahl.slug these.pk zustand_current %}'"
                             class="clickable"
                         {% endif %} >
                             {{ these.these_keyword }}
