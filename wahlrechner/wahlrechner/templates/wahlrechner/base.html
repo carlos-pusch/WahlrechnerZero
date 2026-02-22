@@ -1,7 +1,4 @@
 {% load static %}
-{% load wahlrechner_name %}
-{% load wahlrechner_version %}
-
 
 <!DOCTYPE html>
 
@@ -12,7 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{% static "tailwind/styles.css" %}">
     <script src="{% static "jquery-3.6.0.min.js" %}"></script>
-    <title>{% block title %}{% endblock %} | {% wahlrechner_name %}</title>
+    <title>{% block title %}{% endblock %} | {{ wahl.titel }}</title>
     {% include 'head.html' %}
 </head>
 
