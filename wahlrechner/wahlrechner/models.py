@@ -1,7 +1,55 @@
 from colorfield.fields import ColorField
 from django.db import models
 
+# lz_b_1: Neues Modell für Mandanten (Wahlen)
+class Wahl(models.Model):
+    """
+    Repräsentiert eine einzelne Wahl / einen Mandanten.
+    Jede Wahl hat einen eigenen Slug für die URL, einen Titel,
+    ein Theme und einen Aktiv-Status.
+    """
+    slug = models.SlugField(
+        "URL-Kennung",
+        max_length=50,
+        unique=True,
+        help_text="Eindeutige Kurzbezeichnung für die URL (z.B. 'bundestagswahl-2025')"
+    )
+    titel = models.CharField(
+        "Titel der Wahl",
+        max_length=200,
+        help_text="Angezeigter Name im Wahlrechner"
+    )
+    theme = models.CharField(
+        "Theme",
+        max_length=50,
+        default="theme_localzero",
+        help_text="Name des zu verwendenden Themes (Ordner im themes-Verzeichnis)"
+    )
+    ist_aktiv = models.BooleanField(
+        "Aktiv",
+        default=True,
+        help_text="Nur aktive Wahlen sind über die URL erreichbar"
+    )
+    erstellt_am = models.DateTimeField(auto_now_add=True)
+    geaendert_am = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Wahl"
+        verbose_name_plural = "Wahlen"
+
+    def __str__(self):
+        return self.titel
+
+
 class These(models.Model):
+    # lz_b_1: Fremdschlüssel zur Wahl hinzugefügt
+    wahl = models.ForeignKey(
+        Wahl,
+        on_delete=models.CASCADE,
+        verbose_name="Wahl",
+        related_name="thesen"
+    )
+
     these_keyword_help = """<i>Maximal 40 Zeichen</i><br>
     Ein kurzes Schlagwort, um die These zu beschreiben. Wird in der
     Seitenleiste des Wahlrechners angezeigt.<br>
@@ -17,13 +65,13 @@ class These(models.Model):
         "Vollständige These", help_text=these_text_help, max_length=400, blank=True
     )
 
-    # lz_a_1: Neues Feld für Erklärungssätze hinzugefügt
+    # lz_a_1: Neues Feld für Erklärungssätze
     these_explainer_help = """<i>Optionale Hintergrundinformation</i><br>
     Erklärungssätze zur These, die als zusätzliche Information angezeigt werden."""
     these_explainer = models.TextField(
-        "Hintergrundinformation", 
-        help_text=these_explainer_help, 
-        max_length=1500, 
+        "Hintergrundinformation",
+        help_text=these_explainer_help,
+        max_length=1500,
         blank=True,
         null=True,
         default=None
@@ -36,16 +84,27 @@ class These(models.Model):
     Zahl sein.<br>
     <b>Beispiel:</b> Die These, die zuerst angezeigt werden soll, hat die Nummer 1. Die zweite These
     die Nummer 2, usw."""
-    these_nr = models.FloatField("Thesen-Nummer", help_text=these_nr_help, unique=True)
-
-    def __str__(self):
-        return self.these_keyword
+    these_nr = models.FloatField("Thesen-Nummer", help_text=these_nr_help)
 
     class Meta:
         verbose_name = "These"
         verbose_name_plural = "Thesen"
+        # lz_b_1: Eindeutigkeit pro Wahl erzwingen
+        unique_together = [['wahl', 'these_nr']]
+
+    def __str__(self):
+        return f"{self.wahl.slug} - {self.these_keyword}"
+
 
 class Partei(models.Model):
+    # lz_b_1: Fremdschlüssel zur Wahl hinzugefügt
+    wahl = models.ForeignKey(
+        Wahl,
+        on_delete=models.CASCADE,
+        verbose_name="Wahl",
+        related_name="parteien"
+    )
+
     partei_name_help = """<i>Maximal 50 Zeichen</i><br>
     Gib den Namen der Partei an, der für den Benutzer angezeigt werden soll."""
     partei_name = models.CharField("Name", help_text=partei_name_help, max_length=50)
@@ -77,15 +136,26 @@ class Partei(models.Model):
         default=None,
     )
 
-    def __str__(self):
-        return self.partei_name
-
     class Meta:
         verbose_name = "Partei"
         verbose_name_plural = "Parteien"
+        # lz_b_1: Name pro Wahl eindeutig (optional)
+        unique_together = [['wahl', 'partei_name']]
+
+    def __str__(self):
+        return f"{self.wahl.slug} - {self.partei_name}"
 
 
 class Antwort(models.Model):
+    # lz_b_1: Fremdschlüssel zur Wahl hinzugefügt (kann über These oder Partei abgeleitet werden, aber für einfachere Abfragen direkt)
+    wahl = models.ForeignKey(
+        Wahl,
+        on_delete=models.CASCADE,
+        verbose_name="Wahl",
+        editable=False,  # wird automatisch gesetzt
+        null=True        # für bestehende Daten, wird aber durch Signal gesetzt
+    )
+
     antwort_these = models.ForeignKey(
         These, on_delete=models.CASCADE, verbose_name="These"
     )
@@ -114,9 +184,16 @@ class Antwort(models.Model):
         "Antwort", help_text=antwort_text_help, max_length=1500, blank=True
     )
 
-    def __str__(self):
-        return f"{self.antwort_these.these_keyword} - {self.antwort_partei.partei_name}"
-
     class Meta:
         verbose_name = "Antwort"
         verbose_name_plural = "Antworten"
+        unique_together = [['antwort_these', 'antwort_partei']]
+
+    def __str__(self):
+        return f"{self.antwort_these.these_keyword} - {self.antwort_partei.partei_name}"
+
+    # lz_b_1: Automatisches Setzen der wahl beim Speichern
+    def save(self, *args, **kwargs):
+        if not self.wahl_id:
+            self.wahl = self.antwort_these.wahl
+        super().save(*args, **kwargs)
