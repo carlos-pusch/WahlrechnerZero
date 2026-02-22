@@ -7,6 +7,8 @@ dir_name="Wahlrechner"
 sudo mkdir $dir_name
 
 sudo git clone https://github.com/carlos-pusch/WahlrechnerZero "$dir_name"
+# falls spezifischer Branch; stattdessen
+# sudo git clone -b NAME https://github.com/carlos-pusch/WahlrechnerZero.git "$dir_name"
 
 cd "$dir_name"
 cd wahlrechner_host
