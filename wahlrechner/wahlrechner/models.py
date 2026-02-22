@@ -12,7 +12,7 @@ class Wahl(models.Model):
         "URL-Kennung",
         max_length=50,
         unique=True,
-        help_text="Eindeutige Kurzbezeichnung für die URL (z.B. 'bundestagswahl-2025')"
+        help_text="Eindeutige Kurzbezeichnung für die URL (z. B. 'wahlart_ort_kuerzel')"
     )
     titel = models.CharField(
         "Titel der Wahl",
