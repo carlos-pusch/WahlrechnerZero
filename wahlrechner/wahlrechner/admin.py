@@ -4,14 +4,17 @@ from import_export.admin import ImportExportModelAdmin
 
 from .models import Antwort, Partei, These, Wahl   # lz_b_1: Wahl importiert
 
+class WahlResource(resources.ModelResource):
+    class Meta:
+        model = Wahl
+
 # lz_b_1: Admin für Wahl
 @admin.register(Wahl)
-class WahlAdmin(admin.ModelAdmin):
-    list_display = ['slug', 'titel', 'theme', 'ist_aktiv', 'erstellt_am']
+class WahlAdmin(ImportExportModelAdmin):
+    list_display = ['slug', 'titel', 'theme', 'ist_aktiv', 'erstellt_am', 'geaendert_am']
     list_filter = ['ist_aktiv', 'theme']
     search_fields = ['slug', 'titel']
     prepopulated_fields = {'slug': ('titel',)}
-
 
 class AntwortResource(resources.ModelResource):
     class Meta:
@@ -35,7 +38,6 @@ class AntwortAdmin(ImportExportModelAdmin):
 class AntwortInLine(admin.TabularInline):
     model = Antwort
     extra = 1
-
 
 class TheseResource(resources.ModelResource):
     class Meta:
