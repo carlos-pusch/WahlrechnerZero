@@ -7,10 +7,11 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{% static "tailwind/styles.css" %}">
+    <!-- lz_b_1: Theme-CSS dynamisch über /themes/ laden -->
+    <link rel="stylesheet" href="/themes/{{ wahl.theme }}/static/styles.css">
     <script src="{% static "jquery-3.6.0.min.js" %}"></script>
     <title>{% block title %}{% endblock %} | {{ wahl.titel }}</title>
-   {% include 'wahlrechner/head.html' %}
+    {% include 'wahlrechner/head.html' %}
 </head>
 
 <body class="theme-{{ wahl.theme }} flex flex-col min-h-screen">
