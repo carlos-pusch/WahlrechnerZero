@@ -14,6 +14,7 @@ services:
       - ./caddy/Caddyfile:/etc/caddy/Caddyfile
       - caddy_data:/data
       - caddy_config:/config
+      - ./caddy-logs:/var/log/caddy
       # Statische und Mediendateien für alle Wahlen (werden von Django gesammelt)
       - ./data/static:/www/static
       - ./data/media:/www/media
