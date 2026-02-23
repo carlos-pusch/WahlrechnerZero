@@ -1,6 +1,7 @@
 from django.contrib import admin
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
+from .models import GlobalSettings   # Import nicht vergessen
 
 from .models import Antwort, Partei, These, Wahl   # lz_b_1: Wahl importiert
 
@@ -66,3 +67,19 @@ class ParteiAdmin(ImportExportModelAdmin):
     search_fields = ["partei_name"]
     list_filter = ["wahl"]   # lz_b_1: Filter nach Wahl
     resource_class = ParteiResource
+
+# lz_b_2: Admin für globale Einstellungen
+@admin.register(GlobalSettings)
+class GlobalSettingsAdmin(admin.ModelAdmin):
+    list_display = ['wartungsmodus']
+    
+    # Verhindere das Anlegen weiterer Datensätze
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    class Media:
+        # Bestätigungsdialog beim Ändern der Checkbox
+        js = ('js/admin_maintenance_confirm.js',)
