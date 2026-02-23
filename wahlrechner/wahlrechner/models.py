@@ -10,7 +10,7 @@ class Wahl(models.Model):
     """
     slug = models.SlugField(
         "URL-Kennung",
-        max_length=50,
+        max_length=200,
         unique=True,
         help_text="Eindeutige Kurzbezeichnung für die URL (z. B. 'wahlart_ort_kuerzel')"
     )
@@ -26,7 +26,7 @@ class Wahl(models.Model):
         help_text="Name des zu verwendenden Themes (Ordner im themes-Verzeichnis)"
     )
     ist_aktiv = models.BooleanField(
-        "Aktiv",
+        "Aktiv?",
         default=True,
         help_text="Nur aktive Wahlen sind über die URL erreichbar"
     )
