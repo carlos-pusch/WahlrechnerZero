@@ -77,6 +77,7 @@ css bearbeitet und sidebar.html überarbeitet
 System auf Multi-Tenant umgestellt (branch multi_tenant)
 Ist-Aktiv Funktion eingebaut und inactive Seite eingebaut
 Dockerfile angepasst damit nicht jedes Mal die Packages installiert werden bei build
+404 custom Seite erzeugt, wenn nicht bekannter Slug
 
 noch zu tun:
 
@@ -84,6 +85,8 @@ noch zu tun:
 - [X] Wahlchecks sind unabhängig von einander
 - [] Bilder von Kandidierenden hinzufügen und prüfen
 - [] Caddy Aufrufe tracken bzw. Logs prüfen
+- [] "Bauarbeiten" Seite
+- [] "These 16" aka Freitext zum Wahlcheck; außerhalb der Berechnung!
 - [] SPÄTER API Einbindung
 
 
