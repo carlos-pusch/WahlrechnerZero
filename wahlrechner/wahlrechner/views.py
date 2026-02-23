@@ -1,22 +1,41 @@
 from django.http.response import HttpResponseNotFound, HttpResponseServerError
 from django.shortcuts import get_object_or_404, render, redirect
 from django.template.loader import render_to_string
-from .models import Wahl   # lz_b_1: Wahl importieren
+from .models import Wahl # lz_b_1
 from .parse import *
 
-# lz_b_1: Alle Views bekommen einen wahl_slug Parameter und laden die Wahl
+# lz_b_1: Hilfsfunktion für Dummy-Wahl bei 404
+def _get_dummy_wahl():
+    """Erzeugt ein temporäres Wahl-Objekt für die 404-Seite."""
+    return Wahl(slug='', titel='Seite nicht gefunden', theme='theme_localzero')
+
+# lz_b_1: Startseite einer Wahl
 def start(request, wahl_slug):
-    wahl = get_object_or_404(Wahl, slug=wahl_slug)          # 1. Existenz prüfen
-    if not wahl.ist_aktiv:                                  # 2. Aktiv?
+    try:
+        wahl = Wahl.objects.get(slug=wahl_slug)
+    except Wahl.DoesNotExist:
+        dummy = _get_dummy_wahl()
+        return render(request, "wahlrechner/error_404.html", {"wahl": dummy}, status=404)
+
+    if not wahl.ist_aktiv:
         return render(request, "wahlrechner/inactive.html", {"wahl": wahl})
-    # 3. Normale Logik
+
     thesen = alle_thesen(wahl)
     opinions = decode_zustand(0, wahl)
     context = {"thesen": thesen, "opinions": opinions, "wahl": wahl}
     return render(request, "wahlrechner/start.html", context)
 
+# lz_b_1: Detailseite einer These
 def these(request, wahl_slug, these_pk, zustand):
-    wahl = get_object_or_404(Wahl, slug=wahl_slug, ist_aktiv=True)
+    try:
+        wahl = Wahl.objects.get(slug=wahl_slug)
+    except Wahl.DoesNotExist:
+        dummy = _get_dummy_wahl()
+        return render(request, "wahlrechner/error_404.html", {"wahl": dummy}, status=404)
+
+    if not wahl.ist_aktiv:
+        return render(request, "wahlrechner/inactive.html", {"wahl": wahl})
+
     these_current = get_object_or_404(These, pk=these_pk, wahl=wahl)
     opinions = decode_zustand(zustand, wahl)
     thesen = alle_thesen(wahl)
@@ -38,8 +57,17 @@ def these(request, wahl_slug, these_pk, zustand):
     }
     return render(request, "wahlrechner/these.html", context)
 
+# lz_b_1: Bestätigungsseite (Gewichtung)
 def confirm(request, wahl_slug, zustand):
-    wahl = get_object_or_404(Wahl, slug=wahl_slug, ist_aktiv=True)
+    try:
+        wahl = Wahl.objects.get(slug=wahl_slug)
+    except Wahl.DoesNotExist:
+        dummy = _get_dummy_wahl()
+        return render(request, "wahlrechner/error_404.html", {"wahl": dummy}, status=404)
+
+    if not wahl.ist_aktiv:
+        return render(request, "wahlrechner/inactive.html", {"wahl": wahl})
+
     opinions = decode_zustand(zustand, wahl)
     thesen = alle_thesen(wahl)
     context = {
@@ -50,14 +78,32 @@ def confirm(request, wahl_slug, zustand):
     }
     return render(request, "wahlrechner/confirm.html", context)
 
+# lz_b_1: Bestätigung absenden (Prioritäten setzen)
 def confirm_submit(request, wahl_slug, zustand):
-    wahl = get_object_or_404(Wahl, slug=wahl_slug, ist_aktiv=True)
+    try:
+        wahl = Wahl.objects.get(slug=wahl_slug)
+    except Wahl.DoesNotExist:
+        dummy = _get_dummy_wahl()
+        return render(request, "wahlrechner/error_404.html", {"wahl": dummy}, status=404)
+
+    if not wahl.ist_aktiv:
+        return render(request, "wahlrechner/inactive.html", {"wahl": wahl})
+
     opinions = decode_zustand(zustand, wahl)
     zustand = update_opinions(opinions, request.GET, wahl)
     return redirect("result", wahl_slug=wahl_slug, zustand=zustand)
 
+# lz_b_1: Ergebnis-Seite
 def result(request, wahl_slug, zustand):
-    wahl = get_object_or_404(Wahl, slug=wahl_slug, ist_aktiv=True)
+    try:
+        wahl = Wahl.objects.get(slug=wahl_slug)
+    except Wahl.DoesNotExist:
+        dummy = _get_dummy_wahl()
+        return render(request, "wahlrechner/error_404.html", {"wahl": dummy}, status=404)
+
+    if not wahl.ist_aktiv:
+        return render(request, "wahlrechner/inactive.html", {"wahl": wahl})
+
     opinions = decode_zustand(zustand, wahl)
     thesen = alle_thesen(wahl)
     context = {
@@ -71,8 +117,17 @@ def result(request, wahl_slug, zustand):
     increase_result_count()
     return render(request, "wahlrechner/result.html", context)
 
+# lz_b_1: Begründungs-Seite
 def reason(request, wahl_slug, these_pk, zustand):
-    wahl = get_object_or_404(Wahl, slug=wahl_slug, ist_aktiv=True)
+    try:
+        wahl = Wahl.objects.get(slug=wahl_slug)
+    except Wahl.DoesNotExist:
+        dummy = _get_dummy_wahl()
+        return render(request, "wahlrechner/error_404.html", {"wahl": dummy}, status=404)
+
+    if not wahl.ist_aktiv:
+        return render(request, "wahlrechner/inactive.html", {"wahl": wahl})
+
     these_current = get_object_or_404(These, pk=these_pk, wahl=wahl)
     opinions = decode_zustand(zustand, wahl)
     thesen = alle_thesen(wahl)
@@ -90,7 +145,7 @@ def reason(request, wahl_slug, these_pk, zustand):
     }
     return render(request, "wahlrechner/reason.html", context)
 
-# lz_b_1: Handler bleiben unverändert (keine wahl_slug nötig)
+# lz_b_1: Globale 404-Fehler (für andere Pfade, z.B. nicht existierende These)
 def handler404(request, exception=""):
     return HttpResponseNotFound(render_to_string("error/404.html"))
 
