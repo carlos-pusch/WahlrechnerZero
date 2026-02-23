@@ -6,14 +6,13 @@ from .parse import *
 
 # lz_b_1: Alle Views bekommen einen wahl_slug Parameter und laden die Wahl
 def start(request, wahl_slug):
-    wahl = get_object_or_404(Wahl, slug=wahl_slug, ist_aktiv=True)
+    wahl = get_object_or_404(Wahl, slug=wahl_slug)          # 1. Existenz prüfen
+    if not wahl.ist_aktiv:                                  # 2. Aktiv?
+        return render(request, "wahlrechner/inactive.html", {"wahl": wahl})
+    # 3. Normale Logik
     thesen = alle_thesen(wahl)
-    opinions = decode_zustand(0, wahl)  # Startzustand (alles 0)
-    context = {
-        "thesen": thesen,
-        "opinions": opinions,
-        "wahl": wahl,          # optional im Template
-    }
+    opinions = decode_zustand(0, wahl)
+    context = {"thesen": thesen, "opinions": opinions, "wahl": wahl}
     return render(request, "wahlrechner/start.html", context)
 
 def these(request, wahl_slug, these_pk, zustand):
