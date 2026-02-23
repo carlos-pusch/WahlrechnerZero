@@ -15,6 +15,12 @@
         file_server
     }
 
+    # Theme-Dateien (pro Wahl)
+    handle_path /themes/* {
+        root * /www/themes
+        file_server
+    }
+
     # Alle anderen Pfade an Django weiterleiten
     handle {
         reverse_proxy app:8000
