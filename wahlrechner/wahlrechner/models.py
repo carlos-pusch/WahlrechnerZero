@@ -197,3 +197,34 @@ class Antwort(models.Model):
         if not self.wahl_id:
             self.wahl = self.antwort_these.wahl
         super().save(*args, **kwargs)
+
+# lz_b_2: Globale Einstellungen für Wartungsmodus (Singleton)
+class GlobalSettings(models.Model):
+    """
+    Singleton-Modell für globale Einstellungen.
+    Es kann nur einen Datensatz geben (Primary Key = 1).
+    """
+    wartungsmodus = models.BooleanField(
+        default=False,
+        help_text="Wenn aktiviert, sehen alle Besucher eine Wartungsseite (außer Admin-Bereich)."
+    )
+
+    class Meta:
+        verbose_name = "Globale Einstellung"
+        verbose_name_plural = "Globale Einstellungen"
+
+    def save(self, *args, **kwargs):
+        # Erzwinge Singleton: Es darf nur den PK 1 geben
+        self.pk = 1
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def get_settings(cls):
+        """
+        Gibt die globalen Einstellungen zurück (erzeugt sie, falls nicht vorhanden).
+        """
+        obj, created = cls.objects.get_or_create(pk=1)
+        return obj
+
+    def __str__(self):
+        return f"Globale Einstellungen (Wartungsmodus: {'AN' if self.wartungsmodus else 'AUS'})"
