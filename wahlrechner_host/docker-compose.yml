@@ -17,6 +17,7 @@ services:
       # Statische und Mediendateien für alle Wahlen (werden von Django gesammelt)
       - ./data/static:/www/static
       - ./data/media:/www/media
+      - ./themes:/www/themes
     env_file:
       - ./caddy/caddy.env
 
