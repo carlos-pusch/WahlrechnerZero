@@ -84,6 +84,7 @@ noch zu tun:
 - [X] Wahlchecks sind unabhängig von einander
 - [] Bilder von Kandidierenden hinzufügen und prüfen
 - [] Caddy Aufrufe tracken bzw. Logs prüfen
+- [] SPÄTER API Einbindung
 
 
 
