@@ -12,6 +12,8 @@ class WahlResource(resources.ModelResource):
 @admin.register(Wahl)
 class WahlAdmin(ImportExportModelAdmin):
     list_display = ['slug', 'titel', 'theme', 'ist_aktiv', 'erstellt_am', 'geaendert_am']
+    list_editable = ['ist_aktiv', 'theme']
+    list_display_links = ['slug'] # explizit, damit der Link erhalten bleibt
     list_filter = ['ist_aktiv', 'theme']
     search_fields = ['slug', 'titel']
     prepopulated_fields = {'slug': ('titel',)}
