@@ -72,17 +72,27 @@ background.html erstellt
 Mobiles Seitenmenu versucht einzufügen
 css bearbeitet und sidebar.html überarbeitet
 
+Änderung 7
+
+System auf Multi-Tenant umgestellt (branch multi_tenant)
+Ist-Aktiv Funktion eingebaut und inactive Seite eingebaut
+Dockerfile angepasst damit nicht jedes Mal die Packages installiert werden bei build
+
+noch zu tun:
+
+- [X] eigene URLs (wie bisher)
+- [X] Wahlchecks sind unabhängig von einander
+- [] Bilder von Kandidierenden hinzufügen und prüfen
+- [] Caddy Aufrufe tracken bzw. Logs prüfen
 
 
 
-
-
-Noch zu tun:
+Noch zu tun - alt:
 
 - X Info Button soll rund werden und Hintergrundinfo anzeigen sofern eine da ist. Sonst nicht anzeigen.
-- x Farben in Abhängigkeit des Abstimmens der Thesen bei der linken Seite anpassen (wurde bereits von DeepSeek gefixt)
+- x Farben in Abhängigkeit des Abstimmens der Thesen bei der linken Seite anpassen
 - x Burger Button etwas verschieben, sodass die Thesen nicht verdeckt sind
 - Burger Button verschieben wegen "Thesen x von y"
 - nicht umsetzeen:Pop-up eingerichtet
-- Hintergrundinfo nur anbieten, wenn these.explainer etwas enthält
+- X Hintergrundinfo nur anbieten, wenn these.explainer etwas enthält
 - Footer bei Base.html in der If Schleife einbauen (und auf zwei Funktionen künstlich strecken)
