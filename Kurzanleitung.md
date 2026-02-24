@@ -41,12 +41,19 @@ echo "";echo "";echo ""
 
 echo "Bist du da?"
 read -p "Weiter mit Enter..."
+echo ""
 echo "Wurde die Datei 'wahlrechner_host/caddy/caddy.env' angepasst (ROOT_DOMAIN)?"
 read -p "Weiter mit Enter..."
+echo ""
 echo "Wurde die Datei 'wahlrechner_host/config/config.env' angepasst (DJANGO_DEFAULT_ADMIN_USERNAME)?"
 read -p "Weiter mit Enter..."
+echo ""
 echo "Wurde die Datei 'wahlrechner_host/config/config.env' angepasst (DJANGO_DEFAULT_ADMIN_PASSWORD)?"
 read -p "Weiter mit Enter..."
+echo ""
+echo "Wurde die Datei 'wahlrechner_host/config/config.env' angepasst (DJANGO_CSRF_TRUSTED_ORIGINS)?"
+read -p "Weiter mit Enter..."
+echo ""
 
 docker compose down; docker compose build; docker compose up -d
 
