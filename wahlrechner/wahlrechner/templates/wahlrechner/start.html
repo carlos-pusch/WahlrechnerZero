@@ -4,7 +4,9 @@
 {% block title %}{{ wahl.titel }}{% endblock %}
 
 {% block sidebar %}
-    {% include "wahlrechner/sidebar.html" with icon_default="" url_template="" %}
+    {% if thesen.first %}
+        {% include "wahlrechner/sidebar.html" with icon_default="" url_template="" %}
+    {% endif %}
 {% endblock %}
 
 {% block content %}
