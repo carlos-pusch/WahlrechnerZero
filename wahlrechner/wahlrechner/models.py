@@ -155,7 +155,6 @@ class Antwort(models.Model):
         editable=False,  # wird automatisch gesetzt
         null=True        # für bestehende Daten, wird aber durch Signal gesetzt
     )
-
     antwort_these = models.ForeignKey(
         These, on_delete=models.CASCADE, verbose_name="These"
     )
@@ -187,11 +186,11 @@ class Antwort(models.Model):
     class Meta:
         verbose_name = "Antwort"
         verbose_name_plural = "Antworten"
-        unique_together = [['antwort_these', 'antwort_partei']]
+        unique_together = [['wahl', 'antwort_these', 'antwort_partei']]
 
     def __str__(self):
         return f"{self.antwort_these.these_keyword} - {self.antwort_partei.partei_name}"
-
+    
     # lz_b_1: Automatisches Setzen der wahl beim Speichern
     def save(self, *args, **kwargs):
         if not self.wahl_id:
