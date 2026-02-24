@@ -37,6 +37,17 @@ docker compose down; docker compose build; docker compose up -d
 
 cd ..; cd wahlrechner_host
 
+echo "";echo "";echo ""
+
+echo "Bist du da?"
+read -p "Weiter mit Enter..."
+echo "Wurde die Datei 'wahlrechner_host/caddy/caddy.env' angepasst (ROOT_DOMAIN)?"
+read -p "Weiter mit Enter..."
+echo "Wurde die Datei 'wahlrechner_host/config/config.env' angepasst (DJANGO_DEFAULT_ADMIN_USERNAME)?"
+read -p "Weiter mit Enter..."
+echo "Wurde die Datei 'wahlrechner_host/config/config.env' angepasst (DJANGO_DEFAULT_ADMIN_PASSWORD)?"
+read -p "Weiter mit Enter..."
+
 docker compose down; docker compose build; docker compose up -d
 
 [//]: # Ggf. einen anderen Dienst wegen gleichen Port schließen
