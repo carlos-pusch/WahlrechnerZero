@@ -1,6 +1,6 @@
 {$ROOT_DOMAIN} {
     header Content-Security-Policy: frame-ancestors *
-    # header -X-Frame-Options
+    header -X-Frame-Options
     # header Strict-Transport-Security max-age=31536000;
 
     log {
