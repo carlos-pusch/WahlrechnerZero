@@ -148,6 +148,14 @@ def calc_result(zustand, opinions, wahl):
             total_p = 0
             max_p = 0
             for antwort in Antwort.objects.filter(antwort_partei=partei):
+                # lz_b_1: Prüfe, ob die These zur aktuellen Wahl gehört
+                if antwort.antwort_these.wahl != wahl:
+                    # logger.warning(
+                    #    f"Inkonsistente Antwort ignoriert: Partei {partei.pk} (Wahl {wahl.pk}) "
+                    #    f"verweist auf These {antwort.antwort_these.pk} (Wahl {antwort.antwort_these.wahl.pk})"
+                    # )
+                    continue  # Diese Antwort überspringen
+                
                 # Position des Nutzers
                 opinion = opinions[antwort.antwort_these][0]
                 prio = opinions[antwort.antwort_these][1]
