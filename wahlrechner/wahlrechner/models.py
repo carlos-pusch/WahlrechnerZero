@@ -1,5 +1,6 @@
 from colorfield.fields import ColorField
 from django.db import models
+from django.core.exceptions import ValidationError
 
 # lz_b_1: Neues Modell für Mandanten (Wahlen)
 class Wahl(models.Model):
@@ -195,4 +196,11 @@ class Antwort(models.Model):
     def save(self, *args, **kwargs):
         if not self.wahl_id:
             self.wahl = self.antwort_these.wahl
+        # lz_b_1: Validierung: These und Partei müssen zur gleichen Wahl gehören
+        if self.antwort_these.wahl != self.antwort_partei.wahl:
+            raise ValidationError(
+                "These und Partei gehören zu unterschiedlichen Wahlen. "
+                "Bitte wähle eine These und eine Partei aus derselben Wahl."
+            )
+
         super().save(*args, **kwargs)
