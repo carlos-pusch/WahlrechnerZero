@@ -204,3 +204,31 @@ class Antwort(models.Model):
             )
 
         super().save(*args, **kwargs)
+
+# lz_b_1: Globales Einstellungsmodell für Wartungsmodus
+class GlobalSettings(models.Model):
+    """
+    Globale Einstellungen für die gesamte Applikation.
+    """
+    titel = models.CharField(
+        "Dummy Spalte",
+        max_length=200,
+        help_text="Ignorieren, da nur Code intern relevant (admin editable list)"
+    )
+    wartungsmodus = models.BooleanField(
+        "Wartungsmodus aktiv",
+        default=False,
+        help_text="Wenn aktiv, wird für alle Wahlen die Wartungsseite angezeigt."
+    )
+    wartungsmeldung = models.TextField(
+        "Zusätzliche Wartungsmeldung",
+        blank=True,
+        help_text="Optionale individuelle Nachricht, die auf der Wartungsseite erscheint."
+    )
+
+    class Meta:
+        verbose_name = "Globale Einstellung"
+        verbose_name_plural = "Globale Einstellungen"
+
+    def __str__(self):
+        return f"Wartungsmodus: {'aktiv' if self.wartungsmodus else 'inaktiv'}"
