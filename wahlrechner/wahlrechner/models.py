@@ -36,11 +36,10 @@ class Wahl(models.Model):
 
     class Meta:
         verbose_name = "Wahl"
-        verbose_name_plural = "Wahlen"
+        verbose_name_plural = "01. Wahlen" # Sortierung
 
     def __str__(self):
         return self.titel
-
 
 class These(models.Model):
     # lz_b_1: Fremdschlüssel zur Wahl hinzugefügt
@@ -89,13 +88,12 @@ class These(models.Model):
 
     class Meta:
         verbose_name = "These"
-        verbose_name_plural = "Thesen"
+        verbose_name_plural = "02. Thesen" # Sortierung
         # lz_b_1: Eindeutigkeit pro Wahl erzwingen
         unique_together = [['wahl', 'these_nr']]
 
     def __str__(self):
         return f"{self.wahl.slug} - {self.these_keyword}"
-
 
 class Partei(models.Model):
     # lz_b_1: Fremdschlüssel zur Wahl hinzugefügt
@@ -139,13 +137,12 @@ class Partei(models.Model):
 
     class Meta:
         verbose_name = "Partei"
-        verbose_name_plural = "Parteien"
+        verbose_name_plural = "03. Parteien" # Sortieren
         # lz_b_1: Name pro Wahl eindeutig (optional)
         unique_together = [['wahl', 'partei_name']]
 
     def __str__(self):
         return f"{self.wahl.slug} - {self.partei_name}"
-
 
 class Antwort(models.Model):
     # lz_b_1: Fremdschlüssel zur Wahl hinzugefügt (kann über These oder Partei abgeleitet werden, aber für einfachere Abfragen direkt)
@@ -186,7 +183,7 @@ class Antwort(models.Model):
 
     class Meta:
         verbose_name = "Antwort"
-        verbose_name_plural = "Antworten"
+        verbose_name_plural = "04. Antworten" # Sortierung
         unique_together = [['wahl', 'antwort_these', 'antwort_partei']]
 
     def __str__(self):
@@ -204,3 +201,27 @@ class Antwort(models.Model):
             )
 
         super().save(*args, **kwargs)
+
+# lz_b_1: Globales Einstellungsmodell für Wartungsmodus
+class Wartungszustand(models.Model):
+    """
+    Möglichkeit zum Schalten von Wartungsarbeiten für die gesamte Applikation.
+    """
+    wartungsmodus = models.BooleanField(
+        "Wartungsmodus aktiv",
+        default=False,
+        help_text="Wenn aktiv, wird für alle Wahlen die Wartungsseite angezeigt."
+    )
+    wartungsmeldung = models.TextField(
+        "Zusätzliche Wartungsmeldung",
+        blank=False,
+        default="Der Wahlcheck wird in Kürze wieder mit Thesen und Positionen verfügbar sein.\nWir aktualisieren gerade die Daten. Bitte schau später noch einmal vorbei.",
+        help_text="Zentrale Nachricht, die auf der Wartungsseite erscheint."
+    )
+
+    class Meta:
+        verbose_name = "Wartungszustand"
+        verbose_name_plural = "05. Wartungszustände" # Sortieren
+
+    def __str__(self):
+        return f"Wartungsmodus gerade: {'aktiv' if self.wartungsmodus else 'inaktiv'}"
