@@ -1,4 +1,4 @@
-### Kurzanleitung mit fertigen Code zum Erstart
+### Kurzanleitung mit fertigen Code zum Start
 
 Im Terminal und kann dann in einem Rutsch ausgeführt werden.
 
