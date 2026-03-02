@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.urls import resolve
-from .models import Wahl, GlobalSettings
+from .models import Wahl, Wartungszustand
 
 # lz_b_1: Middleware für globalen Wartungsmodus
 class MaintenanceModeMiddleware:
@@ -26,9 +26,9 @@ class MaintenanceModeMiddleware:
                 request.wahl = wahl  # für spätere Views verfügbar machen
 
                 # Wartungsmodus prüfen
-                settings = GlobalSettings.objects.first()
+                settings = Wartungszustand.objects.first()
                 if settings and settings.wartungsmodus:
-                    # Wartungsseite rendern – Kontext mit Wahl für Theme und Titel
+                    # Wartungsseite rendern – Kontext mit Wahl für Theme
                     return render(request, 'wahlrechner/maintenance.html', {
                         'wahl': wahl,
                         'wartungsmeldung': settings.wartungsmeldung
