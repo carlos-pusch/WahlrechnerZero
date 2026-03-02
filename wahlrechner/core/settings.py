@@ -54,7 +54,7 @@ TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [
-            BASE_DIR / f"themes/{THEME}/templates",
+            # BASE_DIR / f"themes/{THEME}/templates",
         ],
         "OPTIONS": {
             "context_processors": [

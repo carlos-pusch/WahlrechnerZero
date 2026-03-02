@@ -16,11 +16,11 @@
 		<p>Wähle die Thesen aus, die dir wichtig sind. Diese Thesen werden in der Berechnung doppelt gewichtet.</p>
 	</div>
 
-    <form method="get" action="{% url "confirm_submit" zustand_current %}">
+    <form method="get" action="{% url "confirm_submit" wahl.slug zustand_current %}">
 
         <div class="btn-row">
 
-            {% url "these" thesen.last.pk zustand_current as url %}
+            {% url "these" wahl.slug thesen.last.pk zustand_current as url %}
             {% include "snippets/btn.html" with text="Antworten bearbeiten" url=url icon="edit" pos="l" %}
 
             {% include "snippets/btn.html" with text="Ergebnisse anzeigen" type="submit" icon="cright" pos="r" %}
@@ -80,7 +80,7 @@
 
         <div class="btn-row">
 
-            {% url "these" thesen.last.pk zustand_current as url %}
+            {% url "these" wahl.slug thesen.last.pk zustand_current as url %}
             {% include "snippets/btn.html" with text="Antworten bearbeiten" url=url icon="edit" pos="l" sc="37" %}
 
             {% alias "Ergebnisse anzeigen" as text %}

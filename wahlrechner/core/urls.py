@@ -3,12 +3,21 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
-from core.settings import URL_PREFIX
+
+# lz_b_1: Die feste URL_PREFIX wird entfernt, stattdessen dynamischer Slug
 
 urlpatterns = [
-    path(f"{URL_PREFIX}", include("wahlrechner.urls")),
-    path(f"{URL_PREFIX}admin/", admin.site.urls),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    # Admin bleibt global erreichbar (z.B. unter /admin)
+    path('admin/', admin.site.urls),
+
+    # lz_b_1: Alle wahlrechner-Pfade beginnen mit dem Slug der Wahl
+    path('<slug:wahl_slug>/', include('wahlrechner.tenant_urls')),
+]
+
+# Statische und Medien-Dateien im Development
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 admin.site.site_header = "Wahlrechner Admin"
 admin.site.site_title = "Wahlrechner Admin"

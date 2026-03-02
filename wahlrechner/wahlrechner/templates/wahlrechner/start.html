@@ -1,18 +1,18 @@
 {% extends 'wahlrechner/base.html' %}
 {% load wahlrechner_extras %}
-{% load wahlrechner_name %}
 
-{% block title %}{% wahlrechner_title %}{% endblock %}
-2
+{% block title %}{{ wahl.titel }}{% endblock %}
+
 {% block sidebar %}
-    {% include "wahlrechner/sidebar.html" with icon_default="" url_template="" %}
+    {% if thesen.first %}
+        {% include "wahlrechner/sidebar.html" with icon_default="" url_template="" %}
+    {% endif %}
 {% endblock %}
 
 {% block content %}
 
     <div class="content">
-        <!-- lz_a_1: {% include 'intro_page.html' %} -->
-		{% include 'intro_page.html' with thesen=thesen %}
+		{% include 'wahlrechner/intro_page.html' with thesen=thesen %}
     </div>
 
     <div class="btn-row">
@@ -20,9 +20,10 @@
         <div class="-mb-2"></div>
 
         {% if thesen.first %}
-            {% url "these" thesen.first.pk 0 as url %}
+            {% url "these" wahl.slug thesen.first.pk 0 as url %}
             {% include "snippets/btn.html" with text="Start" url=url icon="cright" pos="r" sc="39" %}
         {% endif %}
+        
     </div>
 
 {% endblock %}

@@ -39,15 +39,15 @@
 
     <div class="btn-row">
         {% if these_prev %}
-            {% url "reason" these_prev.pk zustand_current as url %}
+            {% url "reason" wahl.slug these_prev.pk zustand_current as url %}
             {% include "snippets/btn.html" with text="vorherige These" url=url icon="left" pos="l" %}
         {% endif %}
 
-        {% url "result" zustand_current as url %}
+        {% url "result" wahl.slug zustand_current as url %}
         {% include "snippets/btn.html" with text="zurück zu meinem Ergebnis" url=url icon="cleft" pos="l" %}
 
         {% if these_next %}
-            {% url "reason" these_next.pk zustand_current as url %}
+            {% url "reason" wahl.slug these_next.pk zustand_current as url %}
             {% include "snippets/btn.html" with text="nächste These" url=url icon="right" pos="r" %}
         {% endif %}
     </div>
@@ -89,15 +89,15 @@
 
     <div class="btn-row move-arrows">
         {% if these_prev %}
-            {% url "reason" these_prev.pk zustand_current as url %}
+            {% url "reason" wahl.slug these_prev.pk zustand_current as url %}
             {% include "snippets/btn.html" with text="vorherige These" url=url icon="left" pos="l" sc="37" %}
         {% endif %}
 
-        {% url "result" zustand_current as url %}
+        {% url "result" wahl.slug zustand_current as url %}
         {% include "snippets/btn.html" with text="zurück zu meinem Ergebnis" url=url icon="cleft" pos="l" sc="70" %}
 
         {% if these_next %}
-            {% url "reason" these_next.pk zustand_current as url %}
+            {% url "reason" wahl.slug these_next.pk zustand_current as url %}
             {% include "snippets/btn.html" with text="nächste These" url=url icon="right" pos="r" sc="39" %}
         {% endif %}
     </div>

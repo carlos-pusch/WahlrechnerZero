@@ -5,3 +5,4 @@ gunicorn==22.0.0
 pillow==10.3.0
 django-colorfield==0.10.1
 numpy==1.26.1
+whitenoise==6.7.0

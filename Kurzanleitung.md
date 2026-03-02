@@ -7,6 +7,8 @@ dir_name="Wahlrechner"
 sudo mkdir $dir_name
 
 sudo git clone https://github.com/carlos-pusch/WahlrechnerZero "$dir_name"
+# falls spezifischer Branch; stattdessen
+# sudo git clone -b NAME https://github.com/carlos-pusch/WahlrechnerZero.git "$dir_name"
 
 cd "$dir_name"
 cd wahlrechner_host
@@ -34,6 +36,24 @@ cd $dir_name ; cd wahlrechner
 docker compose down; docker compose build; docker compose up -d
 
 cd ..; cd wahlrechner_host
+
+echo "";echo "";echo ""
+
+echo "Bist du da?"
+read -p "Weiter mit Enter..."
+echo ""
+echo "Wurde die Datei 'wahlrechner_host/caddy/caddy.env' angepasst (ROOT_DOMAIN)?"
+read -p "Weiter mit Enter..."
+echo ""
+echo "Wurde die Datei 'wahlrechner_host/config/config.env' angepasst (DJANGO_DEFAULT_ADMIN_USERNAME)?"
+read -p "Weiter mit Enter..."
+echo ""
+echo "Wurde die Datei 'wahlrechner_host/config/config.env' angepasst (DJANGO_DEFAULT_ADMIN_PASSWORD)?"
+read -p "Weiter mit Enter..."
+echo ""
+echo "Wurde die Datei 'wahlrechner_host/config/config.env' angepasst (DJANGO_CSRF_TRUSTED_ORIGINS)?"
+read -p "Weiter mit Enter..."
+echo ""
 
 docker compose down; docker compose build; docker compose up -d
 
