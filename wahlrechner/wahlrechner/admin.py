@@ -2,7 +2,7 @@ from django.contrib import admin
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 
-from .models import Antwort, Partei, These, Wahl, GlobalSettings   # lz_b_1
+from .models import Antwort, Partei, These, Wahl, Wartungszustand   # lz_b_1
 
 class WahlResource(resources.ModelResource):
     class Meta:
@@ -68,7 +68,7 @@ class ParteiAdmin(ImportExportModelAdmin):
     resource_class = ParteiResource
 
 # lz_b_1: Admin für globale Einstellungen
-@admin.register(GlobalSettings)
-class GlobalSettingsAdmin(admin.ModelAdmin):
-    list_display = ["titel",'wartungsmodus', 'wartungsmeldung']
+@admin.register(Wartungszustand)
+class WartungszustandAdmin(admin.ModelAdmin):
+    list_display = ["__str__",'wartungsmodus', 'wartungsmeldung']
     list_editable = ['wartungsmodus', 'wartungsmeldung']
