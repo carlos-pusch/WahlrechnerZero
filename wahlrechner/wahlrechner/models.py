@@ -41,7 +41,6 @@ class Wahl(models.Model):
     def __str__(self):
         return self.titel
 
-
 class These(models.Model):
     # lz_b_1: Fremdschlüssel zur Wahl hinzugefügt
     wahl = models.ForeignKey(
@@ -96,7 +95,6 @@ class These(models.Model):
     def __str__(self):
         return f"{self.wahl.slug} - {self.these_keyword}"
 
-
 class Partei(models.Model):
     # lz_b_1: Fremdschlüssel zur Wahl hinzugefügt
     wahl = models.ForeignKey(
@@ -145,7 +143,6 @@ class Partei(models.Model):
 
     def __str__(self):
         return f"{self.wahl.slug} - {self.partei_name}"
-
 
 class Antwort(models.Model):
     # lz_b_1: Fremdschlüssel zur Wahl hinzugefügt (kann über These oder Partei abgeleitet werden, aber für einfachere Abfragen direkt)
@@ -217,9 +214,9 @@ class Wartungszustand(models.Model):
     )
     wartungsmeldung = models.TextField(
         "Zusätzliche Wartungsmeldung",
-        blank=True,
+        blank=False,
         default="Der Wahlcheck wird in Kürze wieder mit Thesen und Positionen verfügbar sein.\nWir aktualisieren gerade die Daten. Bitte schau später noch einmal vorbei.",
-        help_text="Optionale individuelle Nachricht, die auf der Wartungsseite erscheint."
+        help_text="Zentrale Nachricht, die auf der Wartungsseite erscheint."
     )
 
     class Meta:
