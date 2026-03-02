@@ -36,7 +36,7 @@ class Wahl(models.Model):
 
     class Meta:
         verbose_name = "Wahl"
-        verbose_name_plural = "Wahlen"
+        verbose_name_plural = "01. Wahlen" # Sortierung
 
     def __str__(self):
         return self.titel
@@ -88,7 +88,7 @@ class These(models.Model):
 
     class Meta:
         verbose_name = "These"
-        verbose_name_plural = "Thesen"
+        verbose_name_plural = "02. Thesen" # Sortierung
         # lz_b_1: Eindeutigkeit pro Wahl erzwingen
         unique_together = [['wahl', 'these_nr']]
 
@@ -137,7 +137,7 @@ class Partei(models.Model):
 
     class Meta:
         verbose_name = "Partei"
-        verbose_name_plural = "Parteien"
+        verbose_name_plural = "03. Parteien" # Sortieren
         # lz_b_1: Name pro Wahl eindeutig (optional)
         unique_together = [['wahl', 'partei_name']]
 
@@ -183,7 +183,7 @@ class Antwort(models.Model):
 
     class Meta:
         verbose_name = "Antwort"
-        verbose_name_plural = "Antworten"
+        verbose_name_plural = "04. Antworten" # Sortierung
         unique_together = [['wahl', 'antwort_these', 'antwort_partei']]
 
     def __str__(self):
@@ -221,7 +221,7 @@ class Wartungszustand(models.Model):
 
     class Meta:
         verbose_name = "Wartungszustand"
-        verbose_name_plural = "Wartungszustände"
+        verbose_name_plural = "05. Wartungszustände" # Sortieren
 
     def __str__(self):
-        return f"Wartungsmodus: {'aktiv' if self.wartungsmodus else 'inaktiv'}"
+        return f"Wartungsmodus gerade: {'aktiv' if self.wartungsmodus else 'inaktiv'}"
