@@ -218,6 +218,7 @@ class Wartungszustand(models.Model):
     wartungsmeldung = models.TextField(
         "Zusätzliche Wartungsmeldung",
         blank=True,
+        default="Der Wahlcheck wird in Kürze wieder mit Thesen und Positionen verfügbar sein.\nWir aktualisieren gerade die Daten. Bitte schau später noch einmal vorbei.",
         help_text="Optionale individuelle Nachricht, die auf der Wartungsseite erscheint."
     )
 
