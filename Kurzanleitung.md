@@ -2,7 +2,7 @@
 
 Im Terminal und kann dann in einem Rutsch ausgeführt werden.
 
-```python
+```bash
 dir_name="Wahlrechner"
 sudo mkdir $dir_name
 
@@ -45,13 +45,22 @@ echo ""
 echo "Wurde die Datei 'wahlrechner_host/caddy/caddy.env' angepasst (ROOT_DOMAIN)?"
 read -p "Weiter mit Enter..."
 echo ""
-echo "Wurde die Datei 'wahlrechner_host/config/config.env' angepasst (DJANGO_DEFAULT_ADMIN_USERNAME)?"
+echo "Wurde die Datei 'wahlrechner_host/docker-compose.yml' angepasst (DJANGO_DEFAULT_ADMIN_USERNAME)?"
 read -p "Weiter mit Enter..."
 echo ""
-echo "Wurde die Datei 'wahlrechner_host/config/config.env' angepasst (DJANGO_DEFAULT_ADMIN_PASSWORD)?"
+echo "Wurde die Datei 'wahlrechner_host/docker-compose.yml' angepasst (DJANGO_DEFAULT_ADMIN_PASSWORD)?"
 read -p "Weiter mit Enter..."
 echo ""
-echo "Wurde die Datei 'wahlrechner_host/config/config.env' angepasst (DJANGO_CSRF_TRUSTED_ORIGINS)?"
+echo "Wurde die Datei 'wahlrechner_host/docker-compose.yml' angepasst (DJANGO_CSRF_TRUSTED_ORIGINS)?"
+read -p "Weiter mit Enter..."
+echo ""
+echo "Wurde die Datei '/etc/caddy/Caddyfile' angepasst (s. domain-name: 'wahlrechner_host/config/config.env')?"
+read -p "Weiter mit Enter..."
+echo ""
+echo "Wurde die Datei '/etc/caddy/Caddyfile' angepasst (s. Caddy-Port: 'wahlrechner_host/docker-compose.yml')?"
+read -p "Weiter mit Enter..."
+echo ""
+echo "Abgeschlossen?"
 read -p "Weiter mit Enter..."
 echo ""
 
