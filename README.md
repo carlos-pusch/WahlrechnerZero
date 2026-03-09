@@ -1,16 +1,39 @@
 # WahlrechnerZero
 
-**Die Ursprungsversion stammte von [Linus Köster](https://github.com/wahlrechner/wahlrechner) mit Stand von August 2024, aber wurde unabhängig weiterentwickelt**
-<li>Multi-Tenant Unterstützung</li>
-<li>Hintergrundinfobutton eingebaut</li>
-<li>eigenes Thesenseitenmenu bei mobiler Ansicht eingefügt</li>
-<li>Möglichkeit zur De-/ Aktivierung von einzelnen Wahlen eingebaut</li>
-<li>"Bald verfügbar" Meldung eingebaut (für bereits hinterlegte, aber inaktive Wahlen)</li>
-<li>"Unbekannt" Meldung eingebaut (für noch nicht hinterlegte Wahlen)</li>
-<li>Editierbare ausgewählte Einträge im Admin-Interface</li>
-<li>Dockerfile bzgl. Package Installationen effizienter eingerichtet</li>
-<li>CSS für eigene Bedürfnisse angepasst</li>
-<li>docker/wait-for-it lokal ergänzt</li>
+**Die Ursprungsversion stammte von [Linus Köster](https://github.com/wahlrechner/wahlrechner) mit seinem Stand von August 2024, aber wurde unabhängig weiterentwickelt**
+<ul>
+  <li>Umgesetzte Änderungen
+    <ul>
+      <li>Multi-Tenant Unterstützung</li>
+      <li>Hintergrundinfobutton eingebaut</li>
+      <li>eigenes Thesenseitenmenu bei mobiler Ansicht eingefügt</li>
+      <li>Möglichkeit zur De-/ Aktivierung von einzelnen Wahlen eingebaut</li>
+      <li>"Bald verfügbar" Meldung eingebaut (für bereits hinterlegte, aber inaktive Wahlen)</li>
+      <li>"Unbekannt" Meldung eingebaut (für noch nicht hinterlegte Wahlen)</li>
+      <li>Editierbare ausgewählte Einträge im Admin-Interface</li>
+      <li>Dockerfile bzgl. Package Installationen effizienter eingerichtet</li>
+      <li>CSS für eigene Bedürfnisse angepasst</li>
+      <li>docker/wait-for-it lokal ergänzt</li>
+      <li>Zentraler Wartungszustand per Admin Interface aktivierbar</li>
+    </ul>
+  </li>
+  <li>Mögliche Änderungen
+    <ul>
+      <li>in Einarbeitung: Freitext Antworten nach dem / außerhalb des quantifizierbaren Wahlchecks darstellen</li>
+      <li>in Einarbeitung: Einbindung von Grafiken zur Bewertung der Kandidierenden durch die Positionierung bei den klimapositiven Thesen</li>
+      <li>in Umsetzung: vor dem eigentlichen Start Kurzvorstellung des lokalen Teams und die Darstellung der Übersicht der nicht geantworteten Kandidierenden</li>
+      <li>in Umsetzung: Einbindung von Grafiken zur Bewertung der Kandidierenden durch die Positionierung bei den klimapositiven Thesen</li>
+      <li>to-do: Direkter Vergleich von 3 Kandidierenden / Parteien mit detaillierte Auswertung, wo Unterschiede sind</li>
+      <li>to-do: Link teilen Funktion (nach dem Motto "ich habe den Wahlcheck gemacht, du auch?)</li>
+      <li>in Planung: Einbau von Klimadatenanalysen runtergeschnitten auf geografische Bereiche der Wahlkreise oder Landkreise</li>
+      <li>in Planung: Möglichkeit des Exports der eigenen Abstimmungen als PDF oder SharePics</li>
+      <li>zu prüfen: Feedback-Mechanismus - Nutzer:innen können melden, wenn eine These oder Antwort unklar oder irreführend ist</li>
+      <li>zu prüfen: aktuelle Antworten im Vergleich mit den Wahlkreisabstimmungen / Statistik darstellen</li>
+      <li>zu prüfen: Vorlesefunktion per Browser-API, https://developer.mozilla.org/de/docs/Web/API/Web_Speech_API/Using_the_Web_Speech_API</li>
+      <li>zu prüfen: Kommentar-/ Diskussionsfunktion pro These durch die Besucher:innen</li>
+    </ul>
+  </li>
+</ul>
 
 # Aufsetzen eines Wahlrechner-Servers
 
