@@ -60,8 +60,8 @@ cd /Wahlrechner
 
 ### Installation von Docker
 
-Einschub: Falls mal Probleme mit Schreibrechten durch `docker compose up -d` entstehen, dann liegt es vermutlich an docker-snap.
-Stattdessen muss docker-ce verwendet werden. Ggf. folgenden Code zum Entfernen verwenden:
+Einschub: Es sollte kein docker-snap verwendet werden.
+Stattdessen sollte docker-ce verwendet werden. Ggf. folgenden Code zum Entfernen verwenden:
 
 ```
 sudo snap remove docker --purge
