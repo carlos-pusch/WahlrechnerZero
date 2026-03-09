@@ -1,0 +1,18 @@
+wahlcheck.localhost {
+    # # Übersichtsseite für Root-URL
+    # @root path /
+    #     handle @root {
+    #         root * /var/www/path/to/dir
+    #         file_server
+    #    }
+    
+    # Alle anderen Anfragen an Docker weiterleiten    
+    
+    reverse_proxy localhost:8095 {
+        header_up Host {host} # Original-Host-Header weiterleiten
+        header_up X-Real-IP {remote} # Client-IP übermitteln
+        header_up X-Forwarded-Proto https # Protokoll setzen
+        header_up X-Forwarded-Host {host}
+        header_up X-Forwarded-For {remote}
+    }
+}
