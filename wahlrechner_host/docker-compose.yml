@@ -5,9 +5,7 @@ services:
     image: caddy:2.8
     restart: unless-stopped
     ports:
-      - "80:80"
-      - "443:443"
-      - "443:443/udp"
+      - "127.0.0.1:8095:80" # Port: 8095 # HOST: /etc/caddy/Caddyfile so einrichten entsprechend caddy.env
     networks:
       - main_app_network
     volumes:
