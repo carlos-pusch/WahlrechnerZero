@@ -821,7 +821,8 @@ p.text-gray-600 > span.text-gray-400 {
  margin-right:.25rem;
  border-radius:1.5rem;
  padding:.25rem .375rem;
- font-weight:700
+ font-weight:700;
+ margin-left: 0.5rem;
 }
 .content .these.btn-container {
  margin-left:auto;
