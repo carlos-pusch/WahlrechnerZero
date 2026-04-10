@@ -157,3 +157,36 @@ def handler500(request):
 
 def test500(request):
     return render(request, template_name="error/500.html")
+
+# lz_c_1: Bulk-Bildupload-View
+from django.contrib.admin.views.decorators import staff_member_required
+from django.shortcuts import render
+from django.http import HttpResponse
+from .bulk_image_import import process_uploaded_images
+import csv
+import io
+
+@staff_member_required
+def bulk_upload(request):
+    """
+    Zeigt ein Formular für den Bulk-Upload von Parteibildern an.
+    Bei POST werden alle hochgeladenen Dateien verarbeitet.
+    Anschließend wird eine CSV-Datei mit den Ergebnissen zum Download angeboten.
+    """
+    if request.method == 'POST' and request.FILES.getlist('images'):
+        uploaded_files = request.FILES.getlist('images')
+        results = process_uploaded_images(uploaded_files)   # Liste von Dikt
+
+        # CSV-Datei im Arbeitsspeicher erzeugen
+        output = io.StringIO()
+        writer = csv.DictWriter(output, fieldnames=['filename', 'partei_name', 'status', 'target_path'])
+        writer.writeheader()
+        for row in results:
+            writer.writerow(row)
+
+        response = HttpResponse(output.getvalue(), content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="bulk_upload_report.csv"'
+        return response
+
+    # GET: Formular anzeigen
+    return render(request, 'admin/bulk_upload.html')
