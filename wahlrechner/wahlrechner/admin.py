@@ -2,7 +2,8 @@ from django.contrib import admin
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 
-from .models import Antwort, Partei, These, Wahl, Wartungszustand   # lz_b_1
+from .models import Antwort, Partei, These, Wahl, Wartungszustand, BulkImageImport   # lz_b_1
+from django.shortcuts import redirect
 
 class WahlResource(resources.ModelResource):
     class Meta:
@@ -72,3 +73,23 @@ class ParteiAdmin(ImportExportModelAdmin):
 class WartungszustandAdmin(admin.ModelAdmin):
     list_display = ["__str__",'wartungsmodus', 'wartungsmeldung']
     list_editable = ['wartungsmodus', 'wartungsmeldung']
+
+# lz_c_1: Admin für den Bulk-Image-Upload
+@admin.register(BulkImageImport)
+class BulkImageImportAdmin(admin.ModelAdmin):
+    """
+    Erzeugt einen Menüpunkt "06. Bildimporte" im Admin.
+    Der Klick leitet auf die Bulk-Upload-View weiter.
+    """
+    def changelist_view(self, request, extra_context=None):
+        # Umleitung auf die eigentliche Bulk-Upload-URL
+        return redirect('bulk_upload')
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
