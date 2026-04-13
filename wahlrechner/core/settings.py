@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    'django_admin_logs',
     "wahlrechner",
     "import_export",
     "colorfield",
@@ -50,6 +51,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = "core.urls"
+DJANGO_ADMIN_LOGS_IGNORE_UNCHANGED = True
 
 TEMPLATES = [
     {
