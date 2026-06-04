@@ -3,6 +3,7 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.template.loader import render_to_string
 from .models import Wahl # lz_b_1
 from .parse import *
+from django.urls import reverse # lz_d_1
 
 # lz_b_1: Hilfsfunktion für Dummy-Wahl bei 404
 def _get_dummy_wahl():
@@ -22,7 +23,14 @@ def start(request, wahl_slug):
 
     thesen = alle_thesen(wahl)
     opinions = decode_zustand(0, wahl)
-    context = {"thesen": thesen, "opinions": opinions, "wahl": wahl}
+    context = { # lz_d_1
+        "thesen": thesen,
+        "opinions": opinions,
+        "wahl": wahl,
+        "share_url": request.build_absolute_uri(reverse('start', args=[wahl.slug])),
+        "share_title": wahl.titel,
+        "share_dialog_title": "Kennst du schon unseren Wahlcheck?\nErzähle anderen davon!",
+    }
     return render(request, "wahlrechner/start.html", context)
 
 # lz_b_1: Detailseite einer These
@@ -106,13 +114,16 @@ def result(request, wahl_slug, zustand):
 
     opinions = decode_zustand(zustand, wahl)
     thesen = alle_thesen(wahl)
-    context = {
+    context = { # lz_d_1
         "opinions": opinions,
         "thesen": thesen,
         "zustand_current": zustand,
         "result": calc_result(zustand, opinions, wahl),
         "aussagekraeftig": check_result(opinions, wahl),
         "wahl": wahl,
+        "share_url": request.build_absolute_uri(reverse('start', args=[wahl.slug])),
+        "share_title": wahl.titel,
+        "share_dialog_title": "Ich habe unseren Wahlcheck ausgefüllt!\nDu auch?",
     }
     increase_result_count()
     return render(request, "wahlrechner/result.html", context)
