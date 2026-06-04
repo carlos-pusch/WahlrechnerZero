@@ -239,3 +239,25 @@ class BulkImageImport(models.Model):
 
     def __str__(self):
         return "Bulk-Image-Import"
+
+# lz_d_1: Neues Modell für Team-Info pro Wahl
+class TeamInfo(models.Model):
+    wahl = models.ForeignKey(
+        Wahl,
+        on_delete=models.CASCADE,
+        verbose_name="Wahl",
+        related_name="team_infos"  # verwende Unterstrich, um im Template problemlos nutzen zu können
+    )
+    text = models.TextField(
+        "Team-Info Text",
+        help_text="Hier kann ein Text mit Informationen zum lokalen Team eingefügt werden. "
+                  "Zeilenumbrüche und Weblinks werden automatisch erkannt.",
+        blank=False,
+    )
+
+    class Meta:
+        verbose_name = "Team-Info"
+        verbose_name_plural = "07. Team-Infos"  # Sortierung
+
+    def __str__(self):
+        return f"Team-Info für {self.wahl.titel}"
