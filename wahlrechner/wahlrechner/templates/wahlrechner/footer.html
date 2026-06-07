@@ -1,27 +1,38 @@
 {% load static %}
 
-<footer class="w-full bg-gray-100 mt-auto footer_padding">
+<footer class="w-full bg-gray-100 mt-auto">
+    {# Kein eigenes Padding – das kommt vom umgebenden .container in base.html #}
     <div class="footer-content" id="footer-content">
-        {# lz_d_1: Team-Info anzeigen, falls vorhanden #}
-        {% with team_info=wahl.team_infos.first %}
-            {% if team_info and team_info.text %}
-                <div class="team-info mb-4 p-4 bg-gray-200 dark:bg-gray-700 rounded-lg shadow-sm">
-                    {{ team_info.text|linebreaks|urlize }}
-                </div>
-            {% endif %}
-        {% endwith %}
+        <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-7 md:space-x-5">
+            {# Unsichtbare Sidebar-Spalte #}
+            <div class="hidden md:block lg:col-span-2"></div>
 
-        {# Bisheriger Credit-Code #}
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div class="footer-left">
-                <p>&nbsp;Ein Angebot von GermanZero<br>und LocalZero</p>
-            </div>
-            <div class="footer-middle">
-                <p>Kontakt unter<br>wahlcheck[at]germanzero.de</p>
-            </div>
-            <div class="footer-right">
-                <p>Die Thesen wurden durch<br>das lokale Team erarbeitet&nbsp;</p>
-            </div>
+            {# EXAKT die gleichen Klassen wie der Content-Container in base.html #}
+            <div class="row-span-1 row-start-1 md:row-start-auto md:col-span-2 lg:col-span-5">
+                {# lz_d_1: Team-Info nur auf der Startseite anzeigen #}
+                {% if request.resolver_match.url_name == 'start' %}
+                    {% with team_info=wahl.team_infos.first %}
+                        {% if team_info and team_info.text and team_info.aktiv %}
+                            <div class="team-info mb-4">
+                                {{ team_info.text|linebreaks|urlize }}
+                            </div>
+                        {% endif %}
+                    {% endwith %}
+                {% endif %}
+
+                {# Credit-Bereich (weiterhin überall sichtbar) #}
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-4">
+                    <div class="footer-left">
+                        <p>&nbsp;Ein Angebot von GermanZero<br>und LocalZero</p>
+                    </div>
+                    <div class="footer-middle">
+                        <p>Kontakt unter<br>wahlcheck[at]germanzero.de</p>
+                    </div>
+                    <div class="footer-right">
+                        <p>Die Thesen wurden durch<br>das lokale Team erarbeitet&nbsp;</p>
+                    </div>
+                </div>
+            </div>            
         </div>
     </div>
 </footer>
