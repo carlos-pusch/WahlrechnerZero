@@ -102,8 +102,9 @@ class TeamInfoResource(resources.ModelResource):
 @admin.register(TeamInfo)
 class TeamInfoAdmin(ImportExportModelAdmin):
     resource_class = TeamInfoResource
-    list_display = ['wahl', 'text_preview']
+    list_display = ['wahl', 'text', 'aktiv']
     list_filter = ['wahl']
+    list_editable = ['text', 'aktiv']
     search_fields = ['wahl__titel', 'text']
     autocomplete_fields = ['wahl']   # falls du Autocomplete für die Wahl haben möchtest
 
