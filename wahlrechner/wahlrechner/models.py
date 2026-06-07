@@ -254,6 +254,11 @@ class TeamInfo(models.Model):
                   "Zeilenumbrüche und Weblinks werden automatisch erkannt.",
         blank=False,
     )
+    aktiv = models.BooleanField(
+        "Aktiv?",
+        default=False,
+        help_text="Nur wenn aktiv, wird die Team-Info auf der Startseite angezeigt."
+    )
 
     class Meta:
         verbose_name = "Team-Info"
@@ -261,3 +266,4 @@ class TeamInfo(models.Model):
 
     def __str__(self):
         return f"Team-Info für {self.wahl.titel}"
+
