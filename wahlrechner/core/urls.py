@@ -4,12 +4,13 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 
-from wahlrechner.views import bulk_upload # lz_c_1: Bulk-Upload-View importieren
+from wahlrechner.views import bulk_upload, points_bulk_upload # lz_c_1 # lz_d_1
 
 # lz_b_1: Die feste URL_PREFIX wird entfernt, stattdessen dynamischer Slug
 
 urlpatterns = [
     path('admin/bulk-upload/', bulk_upload, name='bulk_upload'),
+    path('admin/points-bulk-upload/', points_bulk_upload, name='points_bulk_upload'),  # lz_d_1
     path('admin/', admin.site.urls),
     path('<slug:wahl_slug>/', include('wahlrechner.tenant_urls')),
 ]
