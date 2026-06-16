@@ -87,6 +87,32 @@
         </div>
     {% endfor %}
 
+    {# lz_d_1: Anzeige der Punktegrafiken (falls vorhanden) #}
+    {% if points_parlament_url or points_these_url %}
+        <div class="points-graphics-section mt-8 space-y-6">
+            {% if points_parlament_url %}
+                <div class="card p-4">
+                    <h3 class="text-xl font-semibold mb-3">Gesamtpunktzahl nach Parlamentswahl</h3>
+                    {% if points_parlament_url|lower|slice:"-4:" == ".png" %}
+                        <img src="{{ points_parlament_url }}" alt="Gesamtpunkte nach Parlamentswahl" class="w-full h-auto rounded shadow">
+                    {% else %}
+                        <iframe src="{{ points_parlament_url }}" class="w-full h-auto min-h-[500px] border-0 rounded shadow" loading="lazy"></iframe>
+                    {% endif %}
+                </div>
+            {% endif %}
+            {% if points_these_url %}
+                <div class="card p-4">
+                    <h3 class="text-xl font-semibold mb-3">Punktzahl nach These und Parlamentswahl</h3>
+                    {% if points_these_url|lower|slice:"-4:" == ".png" %}
+                        <img src="{{ points_these_url }}" alt="Punkte nach These und Parlamentswahl" class="w-full h-auto rounded shadow">
+                    {% else %}
+                        <iframe src="{{ points_these_url }}" class="w-full h-auto min-h-[500px] border-0 rounded shadow" loading="lazy"></iframe>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    {% endif %}
+
     <div class="btn-row">
 
         {# lz_d_1: Teilen-Button #}
