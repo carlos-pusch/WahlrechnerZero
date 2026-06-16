@@ -14,7 +14,10 @@
                     {% with team_info=wahl.team_infos.first %}
                         {% if team_info and team_info.text and team_info.aktiv %}
                             <div class="team-info mb-4">
-                                {{ team_info.text|linebreaks|urlize }}
+                                {% autoescape off %}
+                                    {{ team_info.text|linebreaks|safe }}
+                                    {# falls |safe genutzt wird, dann gehen HTML-Links (z.B. <a href='...'>Text</a>) als Text mit Verlinkung, sonst urlize #}
+                                {% endautoescape %}
                             </div>
                         {% endif %}
                     {% endwith %}
