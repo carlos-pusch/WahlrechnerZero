@@ -1,0 +1,40 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block content %}
+<div class="module">
+    <h1>Punkte-Bulkimport für Wahlgrafiken</h1>
+    <p>
+        Hier können Sie mehrere PNG- oder HTML-Dateien hochladen, die Punktegrafiken für eine Wahl darstellen.
+        Die Dateinamen müssen dem Schema <code>&lt;slug&gt;__&lt;grafikkennung&gt;.png</code> oder <code>.html</code> entsprechen.
+    </p>
+    <ul>
+        <li><strong>Slug</strong>: der eindeutige URL-Identifikator der Wahl (z. B. <code>kommunalwahl_by_2026_augsburg_srw</code>).</li>
+        <li><strong>Grafikkennung</strong>: einer der folgenden Werte:
+            <ul>
+                <li><code>Gesamtpunkte_nach_Parlamentswahl__-1_1</code></li>
+                <li><code>Punkte_nach_These_und_Parlamentswahl__-1_1</code></li>
+            </ul>
+        </li>
+    </ul>
+    <p>Beispiel: <code>kommunalwahl_by_2026_augsburg_srw__Gesamtpunkte_nach_Parlamentswahl__-1_1.png</code></p>
+    <p><strong>Hinweis:</strong> HTML-Dateien werden bevorzugt dargestellt, falls vorhanden; andernfalls wird das PNG-Bild verwendet.</p>
+    <p>Bereits vorhandene Dateien werden überschrieben (gleicher Dateiname).</p>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div>
+            <label for="id_images">Wählen Sie die Dateien aus:</label>
+            <input type="file" name="images" id="id_images" multiple accept=".png,.html">
+        </div>
+        <div style="margin-top: 1em;">
+            <input type="submit" value="Hochladen und Bericht erstellen">
+        </div>
+    </form>
+
+    <p style="margin-top: 2em;">
+        Nach dem Upload wird eine CSV-Datei mit allen verarbeiteten Dateien heruntergeladen. 
+        Sie können diese nutzen, um den Status jedes Uploads nachzuvollziehen.
+    </p>
+</div>
+{% endblock %}
