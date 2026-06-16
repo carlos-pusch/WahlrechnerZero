@@ -225,3 +225,17 @@ class Wartungszustand(models.Model):
 
     def __str__(self):
         return f"Wartungsmodus gerade: {'aktiv' if self.wartungsmodus else 'inaktiv'}"
+
+# lz_c_1: Dummy-Modell für den Admin-Eintrag "06. Bildimporte"
+class BulkImageImport(models.Model):
+    """
+    Dieses Modell existiert nur, um im Admin einen Menüpunkt
+    für den Bulk-Image-Upload zu erzeugen. Es wird keine Datenbanktabelle angelegt.
+    """
+    class Meta:
+        managed = False               # Keine Migration / Tabelle
+        verbose_name = "Bildimport"
+        verbose_name_plural = "06. Bildimporte"
+
+    def __str__(self):
+        return "Bulk-Image-Import"

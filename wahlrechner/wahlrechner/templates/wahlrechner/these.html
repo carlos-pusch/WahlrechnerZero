@@ -58,17 +58,12 @@
                     class="btn btn-disagree {% if opinion == "d" %}active{% endif %}" id="disagree">
                 {% include "snippets/icon.html" with icon="disagree" color="white" %} stimme nicht zu
             </button>
-
-            <!-- lz_a_1: Info-Button ; würde gehen, aber für NW_KOM_25 wieder deaktiviert-->
-            <button onClick="" class="btn btn-background" id="background-button">
-                Info
-            </button>
         </div>
 
-        <!-- lz_a_1: Sichtbarer Info-Bereich mit Erklärungstext -->
-        <div id="background-info-section" class="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200 hidden">
+        {# lz_c_1: Hintergrundinfo immer anzeigen, ohne Button #}
+        <div class="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
             <div class="font-semibold text-blue-800 mb-2">Hintergrundinformation:</div>
-            <div class="text-gray-700" id="background-info">
+            <div class="text-gray-700">
                 {% if these_current.these_explainer %}
                     {{ these_current.these_explainer|linebreaks }}
                 {% else %}
@@ -76,52 +71,9 @@
                 {% endif %}
             </div>
         </div>
-        
+
+        {# lz_c_1: Keyboard-Shortcuts um "H" reduziert #}
         <script>
-            // lz_a_1: Neue Modal-Funktionalität
-            const bgBtn = document.getElementById('background-button');
-            /* const modal = document.getElementById('background-modal');
-            const closeBtn = document.querySelector('.modal-close'); */
-
-            bgBtn.addEventListener('click', () => {
-                modal.style.display = 'flex';
-                bgBtn.classList.add('active');
-
-                setTimeout(() => {
-                    bgBtn.classList.remove('active');
-                }, 3000);
-            });
-
-            /* closeBtn.addEventListener('click', () => {
-                modal.style.display = 'none';
-            }); */
-
-            window.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    modal.style.display = 'none';
-                }
-            });
-
-            // lz_a_1: Toggle-Funktion mit Timeout für Farbänderung
-            $('#background-button').click(function() {
-                const infoSection = $('#background-info-section');
-                const isVisible = !infoSection.hasClass('hidden');
-
-                if (isVisible) {
-                    infoSection.addClass('hidden');
-                } else {
-                    infoSection.removeClass('hidden');
-                }
-
-                // Füge 'active'-Klasse für visuelles Feedback hinzu
-                $(this).addClass('active');
-
-                // Entferne 'active'-Klasse nach 0,5 Sekunden
-                setTimeout(() => {
-                    $(this).removeClass('active');
-                }, 500);
-            });
-
             {# Keyboard Shortcuts #}
             $(document).keydown(function (event) {
                 if (event.which === 65) {  // A
@@ -132,9 +84,6 @@
                     event.preventDefault();
                 } else if (event.which === 68) {  // D
                     $('#disagree').trigger('click');
-                    event.preventDefault();
-                } else if (event.which === 72) {  // H
-                    $('#background-button').trigger('click');
                     event.preventDefault();
                 }
             });
@@ -177,7 +126,7 @@
     <li><span class="icon">A</span> stimme zu</li>
     <li><span class="icon">N</span> neutral</li>
     <li><span class="icon">D</span> stimme nicht zu</li>
-    <li><span class="icon">H</span> Hintergrundinfo</li>
+    {# lz_c_1: Shortcut für Hintergrundinfo entfernt #}
     {% if these_prev %}
         <li><span class="icon">&larr;</span> vorherige These</li>
     {% endif %}
