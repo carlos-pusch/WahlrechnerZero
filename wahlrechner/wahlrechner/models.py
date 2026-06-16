@@ -251,7 +251,7 @@ class TeamInfo(models.Model):
     text = models.TextField(
         "Team-Info Text",
         help_text="Hier kann ein Text mit Informationen zum lokalen Team eingefügt werden. "
-                  "Zeilenumbrüche und Weblinks werden automatisch erkannt.",
+                  "Zeilenumbrüche und HTML-Links (z.B. <a href='...'>Text</a>) sind erlaubt.",
         blank=False,
     )
     aktiv = models.BooleanField(
