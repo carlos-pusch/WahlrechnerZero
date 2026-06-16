@@ -1582,6 +1582,14 @@ footer img {
   font-weight: bold;
 }
 
+.team-info a {
+    color: white;
+    text-decoration: underline;
+}
+.team-info a:hover {
+    color: #ffc232;
+}
+
 .img-pl {
     padding-left: 0.5rem;
 }
