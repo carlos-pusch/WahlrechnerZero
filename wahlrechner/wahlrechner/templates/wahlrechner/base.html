@@ -14,11 +14,84 @@
     {% include 'wahlrechner/head.html' %}
 </head>
 
+<script>
+  const ANIMATION_START = 'immediate';  // 'immediate' oder 'viewport'
+
+  function animatePercentage(el, target, duration) {
+    const start = performance.now();
+
+    // Thresholds und Farben (Light / Dark)
+    const lightColors = {
+      transparent: { bg: 'transparent', text: '#000000' },
+      red:   { bg: 'rgba(226, 98, 101, 0.6)', text: '#000000' },
+      yellow:{ bg: 'rgba(255, 200, 10, 0.6)', text: '#000000' },
+      green: { bg: 'rgba(160, 215, 105, 0.6)', text: '#000000' }
+    };
+    const darkColors = {
+      transparent: { bg: 'transparent', text: '#000000' },
+      red:   { bg: 'rgba(226, 98, 101, 0.6)', text: '#000000' },
+      yellow:{ bg: 'rgba(255, 200, 10, 0.6)', text: '#000000' },
+      green: { bg: 'rgba(160, 215, 105, 0.6)', text: '#000000' }
+    };
+
+    function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
+
+    function update(now) {
+      const progress = Math.min((now - start) / duration, 1);
+      const current = easeOut(progress) * target;
+      el.textContent = current.toFixed(1).replace('.', ',') + '\u00A0%';
+
+      // Farbstufe bestimmen
+      let key = 'transparent'; // 0 bis < 10 --> transparent
+      if (current >= 10 && current < 60) key = 'red';
+      else if (current >= 60 && current < 85) key = 'yellow';
+      else if (current >= 85) key = 'green';
+
+      const isDark = document.documentElement.classList.contains('dark');
+      const colors = isDark ? darkColors[key] : lightColors[key];
+      el.style.backgroundColor = colors.bg;
+      el.style.color = colors.text;
+
+      if (progress < 1) requestAnimationFrame(update);
+    }
+    requestAnimationFrame(update);
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const spans = document.querySelectorAll('.percentage');
+
+    if (ANIMATION_START === 'immediate') {
+      // Alle Animationen sofort starten
+      spans.forEach(span => {
+        const target = parseFloat(span.dataset.target);
+        if (!isNaN(target)) animatePercentage(span, target, target * 100);
+      });
+    } else {
+      // Nur bei Sichtbarkeit starten (IntersectionObserver)
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const span = entry.target;
+            const target = parseFloat(span.dataset.target);
+            if (!isNaN(target)) {
+              animatePercentage(span, target, target * 75);
+              observer.unobserve(span);
+            }
+          }
+        });
+      }, { threshold: 0.05 });
+
+      spans.forEach(span => observer.observe(span));
+    }
+  });
+</script>
+
 <body class="theme-{{ wahl.theme }} flex flex-col min-h-screen">
 
 {% include 'wahlrechner/header.html' %}
 
-<div class="container flex-grow p-4 mx-auto xl:max-w-7xl sm:p-8 sm:px-16 md:p-8 lg:p-12 xl:p-16 2xl:p-28">
+<div class="container flex-grow p-4 mx-auto xl:max-w-full sm:p-8 sm:px-16 md:p-8 lg:p-12 xl:p-16 2xl:p-28">
 
     <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-7 md:space-x-5">
 
@@ -72,6 +145,25 @@
 </footer>
 </div>
 <!-- {% include 'wahlrechner/footer.html' %}-->
+
+<!-- lz_d_1: Teilen-Funktion für alle Seiten -->
+<script>
+function shareWahlcheck(title, text, url) {
+    if (navigator.share) {
+        navigator.share({
+            title: title,
+            text: text,
+            url: url
+        }).catch(function(e) { console.error('Share failed', e); });
+    } else {
+        navigator.clipboard.writeText(url).then(function() {
+            alert('Link wurde in die Zwischenablage kopiert: ' + url);
+        }).catch(function() {
+            alert('Bitte kopiere den Link manuell: ' + url);
+        });
+    }
+}
+</script>
 
 </body>
 

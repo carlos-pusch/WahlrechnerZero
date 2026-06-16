@@ -24,6 +24,10 @@
     </div>
 
     <div class="btn-row">
+
+        {# lz_d_1: Teilen-Button #}
+        {% include 'wahlrechner/share.html' %}
+
         {% url "confirm" wahl.slug zustand_current as url %}
         {% include "snippets/btn.html" with text="Gewichtung bearbeiten" url=url icon="edit" pos="l" %}
 
@@ -43,25 +47,16 @@
 
                 {# Hinweis auf höchste Übereinstimmung bei oberster Partei #}
                 {% if forloop.first %}
-                    <div class="mb-3 text-sm text-gray-500 dark:text-gray-400">
+                    <div class="mb-3 mb3-pl text-sm text-gray-500 dark:text-gray-400">
                         {% include "snippets/icon.html" with icon="winner" %} Höchste Übereinstimmung
                     </div>
                 {% endif %}
 
                 {# Prozentzahl und Parteititel #}
-                <h2 class="mb-3">
+                <h2 class="mb-3 mb3-pl">
 
-                    {# Badge mit Farbe abhängig von Prozentzahl #}
-                    {% if percentage >= 85 %}
-                        <span class="percentage text-green-700 dark:text-green-300 bg-green-200 dark:bg-green-900">
-                            {{ percentage }}%</span>
-                    {% elif percentage >= 60 %}
-                        <span class="percentage text-yellow-600 dark:text-yellow-300 bg-yellow-200 dark:bg-yellow-900">
-                            {{ percentage }}%</span>
-                    {% else %}
-                        <span class="percentage text-red-700 dark:text-red-300 bg-red-200 dark:bg-red-900">
-                            {{ percentage }}%</span>
-                    {% endif %}
+                    {# Badge mit Farbe abhängig von Prozentzahl; Farben und Grenzwerte in base.html #}
+                    <span class="percentage rounded px-2 py-0.5" style="background-color: transparent; color: transparent;" data-target="{{ percentage|floatformat:1|default:'0.0' }}">0%</span>                    
 
                     {# Parteidownload #}
                     <span class="text-lg font-semibold text-gray-700 dark:text-gray-100">{{ partei.partei_name }}</span>
@@ -93,6 +88,10 @@
     {% endfor %}
 
     <div class="btn-row">
+
+        {# lz_d_1: Teilen-Button #}
+        {% include 'wahlrechner/share.html' %}
+
         {% url "confirm" wahl.slug zustand_current as url %}
         {% include "snippets/btn.html" with text="Gewichtung bearbeiten" url=url icon="edit" pos="l" sc="37" %}
 
