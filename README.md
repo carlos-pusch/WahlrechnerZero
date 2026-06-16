@@ -15,18 +15,18 @@
       <li>CSS für eigene Bedürfnisse angepasst</li>
       <li>docker/wait-for-it lokal ergänzt</li>
       <li>Zentraler Wartungszustand per Admin Interface aktivierbar</li>
+      <li>vor dem eigentlichen Start Kurzvorstellung des lokalen Teams</li>
+      <li>Einbindung von Grafiken zur Bewertung der Kandidierenden / Parteien durch die Positionierung bei den klimapositiven Thesen</li>
     </ul>
   </li>
   <li>Mögliche Änderungen
     <ul>
-      <li>in Einarbeitung: Freitext Antworten nach dem / außerhalb des quantifizierbaren Wahlchecks darstellen</li>
-      <li>in Einarbeitung: Einbindung von Grafiken zur Bewertung der Kandidierenden durch die Positionierung bei den klimapositiven Thesen</li>
-      <li>in Umsetzung: vor dem eigentlichen Start Kurzvorstellung des lokalen Teams und die Darstellung der Übersicht der nicht geantworteten Kandidierenden</li>
-      <li>in Umsetzung: Einbindung von Grafiken zur Bewertung der Kandidierenden durch die Positionierung bei den klimapositiven Thesen</li>
+      <li>in Einarbeitung: Freitext Antworten nach dem / außerhalb des quantifizierbaren Wahlchecks darstellen</li>      
       <li>to-do: Direkter Vergleich von 3 Kandidierenden / Parteien mit detaillierte Auswertung, wo Unterschiede sind</li>
       <li>to-do: Link teilen Funktion (nach dem Motto "ich habe den Wahlcheck gemacht, du auch?)</li>
       <li>in Planung: Einbau von Klimadatenanalysen runtergeschnitten auf geografische Bereiche der Wahlkreise oder Landkreise</li>
       <li>in Planung: Möglichkeit des Exports der eigenen Abstimmungen als PDF oder SharePics</li>
+      <li>zu prüfen: vor dem eigentlichen Start die Darstellung der Übersicht der nicht geantworteten Kandidierenden</li>
       <li>zu prüfen: Feedback-Mechanismus - Nutzer:innen können melden, wenn eine These oder Antwort unklar oder irreführend ist</li>
       <li>zu prüfen: aktuelle Antworten im Vergleich mit den Wahlkreisabstimmungen / Statistik darstellen</li>
       <li>zu prüfen: Vorlesefunktion per Browser-API, https://developer.mozilla.org/de/docs/Web/API/Web_Speech_API/Using_the_Web_Speech_API</li>
