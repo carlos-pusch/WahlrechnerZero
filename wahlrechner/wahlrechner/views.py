@@ -4,6 +4,9 @@ from django.template.loader import render_to_string
 from .models import Wahl # lz_b_1
 from .parse import *
 from django.urls import reverse # lz_d_1
+import os
+from django.conf import settings
+from .bulk_points_import import process_uploaded_points_files
 
 # lz_b_1: Hilfsfunktion für Dummy-Wahl bei 404
 def _get_dummy_wahl():
@@ -112,6 +115,24 @@ def result(request, wahl_slug, zustand):
     if not wahl.ist_aktiv:
         return render(request, "wahlrechner/inactive.html", {"wahl": wahl})
 
+    points_parlament_url = None
+    points_these_url = None
+
+    points_dir = os.path.join(settings.MEDIA_ROOT, 'punkte_grafiken', wahl.slug)
+    if os.path.isdir(points_dir):
+        base_parlament = f"{wahl.slug}__Gesamtpunkte_nach_Parlamentswahl__-1_1"
+        base_these = f"{wahl.slug}__Punkte_nach_These_und_Parlamentswahl__-1_1"
+        
+        if os.path.exists(os.path.join(points_dir, f"{base_parlament}.html")):
+            points_parlament_url = settings.MEDIA_URL + f"punkte_grafiken/{wahl.slug}/{base_parlament}.html"
+        elif os.path.exists(os.path.join(points_dir, f"{base_parlament}.png")):
+            points_parlament_url = settings.MEDIA_URL + f"punkte_grafiken/{wahl.slug}/{base_parlament}.png"
+        
+        if os.path.exists(os.path.join(points_dir, f"{base_these}.html")):
+            points_these_url = settings.MEDIA_URL + f"punkte_grafiken/{wahl.slug}/{base_these}.html"
+        elif os.path.exists(os.path.join(points_dir, f"{base_these}.png")):
+            points_these_url = settings.MEDIA_URL + f"punkte_grafiken/{wahl.slug}/{base_these}.png"
+    
     opinions = decode_zustand(zustand, wahl)
     thesen = alle_thesen(wahl)
     context = { # lz_d_1
@@ -124,8 +145,11 @@ def result(request, wahl_slug, zustand):
         "share_url": request.build_absolute_uri(reverse('start', args=[wahl.slug])),
         "share_title": wahl.titel,
         "share_dialog_title": "Ich habe unseren Wahlcheck ausgefüllt!\nDu auch?",
+        "points_parlament_url": points_parlament_url,
+        "points_these_url": points_these_url,
     }
     increase_result_count()
+
     return render(request, "wahlrechner/result.html", context)
 
 # lz_b_1: Begründungs-Seite
@@ -201,3 +225,37 @@ def bulk_upload(request):
 
     # GET: Formular anzeigen
     return render(request, 'admin/bulk_upload.html')
+
+@staff_member_required
+def points_bulk_upload(request):
+    """
+    Zeigt ein Formular für den Bulk-Upload von Punktegrafiken (PNG/HTML) an.
+    Bei POST werden alle hochgeladenen Dateien verarbeitet.
+    Anschließend wird eine CSV-Datei mit den Ergebnissen zum Download angeboten.
+    """
+    if request.method == 'POST' and request.FILES.getlist('images'):
+        uploaded_files = request.FILES.getlist('images')
+        results = process_uploaded_points_files(uploaded_files)
+
+        # CSV-Datei im Arbeitsspeicher erzeugen
+        output = io.StringIO()
+        writer = csv.DictWriter(output, fieldnames=['filename', 'wahl_slug', 'wahl_titel', 'status', 'target_path', 'message'])
+        writer.writeheader()
+        for row in results:
+            # Nur vorhandene Felder ausgeben
+            flat_row = {
+                'filename': row.get('filename', ''),
+                'wahl_slug': row.get('wahl_slug', ''),
+                'wahl_titel': row.get('wahl_titel', ''),
+                'status': row.get('status', ''),
+                'target_path': row.get('target_path', ''),
+                'message': row.get('message', '')
+            }
+            writer.writerow(flat_row)
+
+        response = HttpResponse(output.getvalue(), content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="points_bulk_upload_report.csv"'
+        return response
+
+    # GET: Formular anzeigen (gleiches Template wie bei Bildimport)
+    return render(request, 'admin/bulk_upload_punkte.html')
