@@ -36,5 +36,48 @@
         Nach dem Upload wird eine CSV-Datei mit allen verarbeiteten Dateien heruntergeladen. 
         Sie können diese nutzen, um den Status jedes Uploads nachzuvollziehen.
     </p>
+
+    <!-- Tabelle der bereits hochgeladenen Dateien -->
+    {% if files %}
+        <h2 style="margin-top: 2em;">Bereits hochgeladene Dateien</h2>
+        <table style="width:100%; border-collapse:collapse; margin-top:1em;">
+            <thead>
+                <tr style="background:#f0f0f0; text-align:left;">
+                    <th style="padding:8px; border-bottom:1px solid #ddd;">Wahl (Slug)</th>
+                    <th style="padding:8px; border-bottom:1px solid #ddd;">Dateiname</th>
+                    <th style="padding:8px; border-bottom:1px solid #ddd;">Vorschau</th>
+                    <th style="padding:8px; border-bottom:1px solid #ddd;">Größe</th>
+                    <th style="padding:8px; border-bottom:1px solid #ddd;">Geändert</th>
+                    <th style="padding:8px; border-bottom:1px solid #ddd;">Aktion</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for file in files %}
+                <tr>
+                    <td style="padding:8px; border-bottom:1px solid #eee;">{{ file.slug }}</td>
+                    <td style="padding:8px; border-bottom:1px solid #eee;">{{ file.filename }}</td>
+                    <td style="padding:8px; border-bottom:1px solid #eee;">
+                        {% if file.filename|lower|slice:"-4:" == ".png" %}
+                            <img src="{{ file.url }}" alt="{{ file.filename }}" style="max-height:50px; max-width:100px;">
+                        {% else %}
+                            <a href="{{ file.url }}" target="_blank">HTML anzeigen</a>
+                        {% endif %}
+                    </td>
+                    <td style="padding:8px; border-bottom:1px solid #eee;">{{ file.size|filesizeformat }}</td>
+                    <td style="padding:8px; border-bottom:1px solid #eee;">{{ file.modified }}</td>
+                    <td style="padding:8px; border-bottom:1px solid #eee;">
+                        <a href="{% url 'points_delete_file' slug=file.slug filename=file.filename %}"
+                           onclick="return confirm('Möchten Sie die Datei „{{ file.filename }}“ wirklich löschen?');"
+                           style="color: #b94a48; text-decoration: none; font-weight: bold;">
+                            Löschen
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p style="margin-top: 2em; color: #999;">Bisher wurden noch keine Dateien hochgeladen.</p>
+    {% endif %}
 </div>
 {% endblock %}
