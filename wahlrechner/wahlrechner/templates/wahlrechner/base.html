@@ -134,6 +134,16 @@ function shareWahlcheck(title, text, url) {
 }
 </script>
 
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const teamInfoLinks = document.querySelectorAll('.team-info a');
+    teamInfoLinks.forEach(function(link) {
+        link.setAttribute('target', '_blank');
+        link.setAttribute('rel', 'noopener noreferrer');
+    });
+});
+</script>
+
 </body>
 
 </html>
