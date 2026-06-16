@@ -1,4 +1,4 @@
-from django.http.response import HttpResponseNotFound, HttpResponseServerError
+from django.http.response import HttpResponseNotFound, HttpResponseServerError, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, render, redirect
 from django.template.loader import render_to_string
 from .models import Wahl # lz_b_1
@@ -7,6 +7,8 @@ from django.urls import reverse # lz_d_1
 import os
 from django.conf import settings
 from .bulk_points_import import process_uploaded_points_files
+from django.contrib import messages
+import time
 
 # lz_b_1: Hilfsfunktion für Dummy-Wahl bei 404
 def _get_dummy_wahl():
@@ -228,34 +230,79 @@ def bulk_upload(request):
 
 @staff_member_required
 def points_bulk_upload(request):
-    """
-    Zeigt ein Formular für den Bulk-Upload von Punktegrafiken (PNG/HTML) an.
-    Bei POST werden alle hochgeladenen Dateien verarbeitet.
-    Anschließend wird eine CSV-Datei mit den Ergebnissen zum Download angeboten.
-    """
     if request.method == 'POST' and request.FILES.getlist('images'):
         uploaded_files = request.FILES.getlist('images')
         results = process_uploaded_points_files(uploaded_files)
 
-        # CSV-Datei im Arbeitsspeicher erzeugen
-        output = io.StringIO()
-        writer = csv.DictWriter(output, fieldnames=['filename', 'wahl_slug', 'wahl_titel', 'status', 'target_path', 'message'])
-        writer.writeheader()
-        for row in results:
-            # Nur vorhandene Felder ausgeben
-            flat_row = {
-                'filename': row.get('filename', ''),
-                'wahl_slug': row.get('wahl_slug', ''),
-                'wahl_titel': row.get('wahl_titel', ''),
-                'status': row.get('status', ''),
-                'target_path': row.get('target_path', ''),
-                'message': row.get('message', '')
-            }
-            writer.writerow(flat_row)
+        # Erfolgs- und Fehlerzahlen für eine kurze Zusammenfassung
+        success_count = sum(1 for r in results if r['status'] == 'Erfolg')
+        error_count = len(results) - success_count
 
-        response = HttpResponse(output.getvalue(), content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename="points_bulk_upload_report.csv"'
-        return response
+        if success_count:
+            messages.success(request, f"{success_count} Datei(en) erfolgreich hochgeladen.")
+        if error_count:
+            messages.warning(request, f"{error_count} Datei(en) konnten nicht hochgeladen werden. Details siehe unten.")
 
-    # GET: Formular anzeigen (gleiches Template wie bei Bildimport)
-    return render(request, 'admin/bulk_upload_punkte.html')
+        # Detaillierte Ergebnisse in der Session speichern
+        request.session['upload_results'] = results
+
+        # Redirect auf die gleiche Seite (GET), damit die Tabelle aktualisiert wird
+        return redirect('points_bulk_upload')
+
+    # --- GET: Liste vorhandener Dateien anzeigen ---
+    points_base = os.path.join(settings.MEDIA_ROOT, 'punkte_grafiken')
+    files_data = []
+    if os.path.isdir(points_base):
+        for slug in os.listdir(points_base):
+            dir_path = os.path.join(points_base, slug)
+            if os.path.isdir(dir_path):
+                for filename in os.listdir(dir_path):
+                    if filename.lower().endswith(('.png', '.html')):
+                        filepath = os.path.join(dir_path, filename)
+                        files_data.append({
+                            'slug': slug,
+                            'filename': filename,
+                            'url': settings.MEDIA_URL + f"punkte_grafiken/{slug}/{filename}",
+                            'size': os.path.getsize(filepath),
+                            'modified': time.strftime('%Y-%m-%d %H:%M', time.localtime(os.path.getmtime(filepath))),
+                        })
+    files_data.sort(key=lambda x: (x['slug'], x['filename']))
+
+    # Prüfen, ob es detaillierte Ergebnisse aus einem vorherigen Upload gibt
+    upload_results = request.session.pop('upload_results', None)
+    if upload_results:
+        # Sortiere: Fehler zuerst (status == 'Fehler'), dann Erfolg
+        upload_results.sort(key=lambda x: 0 if x['status'] == 'Fehler' else 1)
+        for result in upload_results:
+            if result['status'] == 'Erfolg':
+                messages.success(request, f"✅ {result['filename']} – hochgeladen nach {result.get('target_path', '')}")
+            else:
+                messages.error(request, f"❌ {result['filename']}: {result.get('message', 'Unbekannter Fehler')}")
+
+    return render(request, 'admin/bulk_upload_punkte.html', {'files': files_data})
+
+@staff_member_required
+def points_delete_file(request, slug, filename):
+    """
+    Löscht eine einzelne Punktegrafik-Datei.
+    Nur PNG und HTML sind erlaubt.
+    """
+    # Sicherheitsprüfung: nur erlaubte Endungen
+    if not filename.lower().endswith(('.png', '.html')):
+        return HttpResponseBadRequest("Ungültiger Dateiname – nur PNG und HTML sind erlaubt.")
+
+    # Absoluten Pfad berechnen und prüfen, ob er innerhalb des Punkte-Ordners liegt
+    base_dir = os.path.abspath(os.path.join(settings.MEDIA_ROOT, 'punkte_grafiken'))
+    filepath = os.path.join(base_dir, slug, filename)
+    abs_path = os.path.abspath(filepath)
+
+    if not abs_path.startswith(base_dir):
+        return HttpResponseBadRequest("Ungültiger Pfad.")
+
+    if os.path.exists(abs_path):
+        os.remove(abs_path)
+        messages.success(request, f"Die Datei „{filename}“ wurde erfolgreich gelöscht.")
+    else:
+        messages.error(request, f"Die Datei „{filename}“ wurde nicht gefunden.")
+
+    return redirect('points_bulk_upload')
