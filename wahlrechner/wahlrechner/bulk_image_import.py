@@ -1,7 +1,16 @@
 # lz_c_1: Hilfsfunktionen für den Bulk-Image-Import
+# und Anpassunge lz_d_1
 import os
 from django.conf import settings
 from .models import Partei
+
+def extract_slug_from_filename(filename):
+    """Extrahiert den Slug aus dem Dateinamen (vor dem ersten '__')."""
+    base = os.path.basename(filename)
+    if '__' not in base:
+        return None
+    slug, _ = base.split('__', 1)
+    return slug if slug else None
 
 def find_partei_by_filename(filename):
     """
@@ -25,14 +34,11 @@ def save_uploaded_image(uploaded_file, partei):
     target_relative = partei.partei_bild.name   # z.B. "partei_bild/spd_logo.jpg"
     target_absolute = os.path.join(settings.MEDIA_ROOT, target_relative)
 
-    # Prüfen, ob Datei bereits existiert
     if os.path.exists(target_absolute):
         return False, target_relative, "Datei existiert bereits"
 
-    # Zielverzeichnis anlegen (falls nötig)
     os.makedirs(os.path.dirname(target_absolute), exist_ok=True)
 
-    # Datei in Blöcken schreiben
     try:
         with open(target_absolute, 'wb') as dest:
             for chunk in uploaded_file.chunks():
@@ -49,13 +55,21 @@ def process_uploaded_images(uploaded_files):
     results = []
     for uploaded in uploaded_files:
         filename = uploaded.name
+        # Prüfe, ob der Dateiname dem Schema entspricht (optional)
+        slug = extract_slug_from_filename(filename)
+        if not slug:
+            # Kein Fehler, aber für die Tabelle wird später 'unbekannt' angezeigt
+            pass
+
         partei = find_partei_by_filename(filename)
         if not partei:
             results.append({
                 'filename': filename,
                 'partei_name': '– nicht gefunden –',
-                'status': 'Fehler: Keine passende Partei',
-                'target_path': ''
+                'status': 'Fehler',
+                'message': 'Keine Partei mit diesem Dateinamen gefunden',
+                'target_path': '',
+                'slug': slug or 'unbekannt'
             })
             continue
 
@@ -64,14 +78,18 @@ def process_uploaded_images(uploaded_files):
             results.append({
                 'filename': filename,
                 'partei_name': partei.partei_name,
-                'status': 'hochgeladen',
-                'target_path': target_path
+                'status': 'Erfolg',
+                'message': '',
+                'target_path': target_path,
+                'slug': slug or partei.wahl.slug  # Fallback auf Wahl-Slug der Partei
             })
         else:
             results.append({
                 'filename': filename,
                 'partei_name': partei.partei_name,
-                'status': f'übersprungen ({error})',
-                'target_path': target_path if target_path else ''
+                'status': 'Fehler',
+                'message': error,
+                'target_path': target_path if target_path else '',
+                'slug': slug or partei.wahl.slug
             })
     return results

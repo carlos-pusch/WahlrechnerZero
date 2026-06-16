@@ -1,0 +1,83 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block content %}
+<div class="module">
+    <h1>Punkte-Bulkimport für Wahlgrafiken</h1>
+    <p>
+        Hier können Sie mehrere PNG- oder HTML-Dateien hochladen, die Punktegrafiken für eine Wahl darstellen.
+        Die Dateinamen müssen dem Schema <code>&lt;slug&gt;__&lt;grafikkennung&gt;.png</code> oder <code>.html</code> entsprechen.
+    </p>
+    <ul>
+        <li><strong>Slug</strong>: der eindeutige URL-Identifikator der Wahl (z. B. <code>kommunalwahl_by_2026_augsburg_srw</code>).</li>
+        <li><strong>Grafikkennung</strong>: einer der folgenden Werte:
+            <ul>
+                <li><code>Gesamtpunkte_nach_Parlamentswahl__-1_1</code></li>
+                <li><code>Punkte_nach_These_und_Parlamentswahl__-1_1</code></li>
+            </ul>
+        </li>
+    </ul>
+    <p>Beispiel: <code>kommunalwahl_by_2026_augsburg_srw__Gesamtpunkte_nach_Parlamentswahl__-1_1.png</code></p>
+    <p><strong>Hinweis:</strong> HTML-Dateien werden bevorzugt dargestellt, falls vorhanden; andernfalls wird das PNG-Bild verwendet.</p>
+    <p>Bereits vorhandene Dateien werden überschrieben (gleicher Dateiname).</p>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div>
+            <label for="id_images">Wählen Sie die Dateien aus:</label>
+            <input type="file" name="images" id="id_images" multiple accept=".png,.html">
+        </div>
+        <div style="margin-top: 1em;">
+            <input type="submit" value="Hochladen und Bericht erstellen">
+        </div>
+    </form>
+
+    <p style="margin-top: 2em;">
+        Nach dem Upload wird eine CSV-Datei mit allen verarbeiteten Dateien heruntergeladen. 
+        Sie können diese nutzen, um den Status jedes Uploads nachzuvollziehen.
+    </p>
+
+    <!-- Tabelle der bereits hochgeladenen Dateien -->
+    {% if files %}
+        <h2 style="margin-top: 2em;">Bereits hochgeladene Dateien</h2>
+        <table style="width:100%; border-collapse:collapse; margin-top:1em;">
+            <thead>
+                <tr style="background:#f0f0f0; text-align:left;">
+                    <th style="padding:8px; border-bottom:1px solid #ddd;">Wahl (Slug)</th>
+                    <th style="padding:8px; border-bottom:1px solid #ddd;">Dateiname</th>
+                    <th style="padding:8px; border-bottom:1px solid #ddd;">Vorschau</th>
+                    <th style="padding:8px; border-bottom:1px solid #ddd;">Größe</th>
+                    <th style="padding:8px; border-bottom:1px solid #ddd;">Geändert</th>
+                    <th style="padding:8px; border-bottom:1px solid #ddd;">Aktion</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for file in files %}
+                <tr>
+                    <td style="padding:8px; border-bottom:1px solid #eee;">{{ file.slug }}</td>
+                    <td style="padding:8px; border-bottom:1px solid #eee;">{{ file.filename }}</td>
+                    <td style="padding:8px; border-bottom:1px solid #eee;">
+                        {% if file.filename|lower|slice:"-4:" == ".png" %}
+                            <img src="{{ file.url }}" alt="{{ file.filename }}" style="max-height:50px; max-width:100px;">
+                        {% else %}
+                            <a href="{{ file.url }}" target="_blank">HTML anzeigen</a>
+                        {% endif %}
+                    </td>
+                    <td style="padding:8px; border-bottom:1px solid #eee;">{{ file.size|filesizeformat }}</td>
+                    <td style="padding:8px; border-bottom:1px solid #eee;">{{ file.modified }}</td>
+                    <td style="padding:8px; border-bottom:1px solid #eee;">
+                        <a href="{% url 'points_delete_file' slug=file.slug filename=file.filename %}"
+                           onclick="return confirm('Möchten Sie die Datei „{{ file.filename }}“ wirklich löschen?');"
+                           style="color: #b94a48; text-decoration: none; font-weight: bold;">
+                            Löschen
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p style="margin-top: 2em; color: #999;">Bisher wurden noch keine Dateien hochgeladen.</p>
+    {% endif %}
+</div>
+{% endblock %}

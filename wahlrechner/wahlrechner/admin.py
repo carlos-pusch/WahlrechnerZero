@@ -2,7 +2,7 @@ from django.contrib import admin
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 
-from .models import Antwort, Partei, These, Wahl, Wartungszustand, BulkImageImport # lz_b_1 # lz_c_1
+from .models import Antwort, Partei, These, Wahl, Wartungszustand, BulkImageImport, TeamInfo, PointsBulkImport # lz_b_1 # lz_c_1 # lz_d_1
 from django.shortcuts import redirect # lz_c_1
 
 class WahlResource(resources.ModelResource):
@@ -84,6 +84,40 @@ class BulkImageImportAdmin(admin.ModelAdmin):
     def changelist_view(self, request, extra_context=None):
         # Umleitung auf die eigentliche Bulk-Upload-URL
         return redirect('bulk_upload')
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+# lz_d_1: Resource und Admin für TeamInfo
+class TeamInfoResource(resources.ModelResource):
+    class Meta:
+        model = TeamInfo
+
+@admin.register(TeamInfo)
+class TeamInfoAdmin(ImportExportModelAdmin):
+    resource_class = TeamInfoResource
+    list_display = ['wahl', 'text', 'aktiv']
+    list_filter = ['wahl']
+    list_editable = ['text', 'aktiv']
+    search_fields = ['wahl__titel', 'text']
+    autocomplete_fields = ['wahl']   # falls du Autocomplete für die Wahl haben möchtest
+
+    def text_preview(self, obj):
+        """Zeigt einen kurzen Ausschnitt des Textes in der Listenansicht an."""
+        return obj.text[:100] + '…' if len(obj.text) > 100 else obj.text
+    text_preview.short_description = 'Text (Auszug)'
+
+# lz_d_1: Admin für den Punkte-Bulkimport
+@admin.register(PointsBulkImport)
+class PointsBulkImportAdmin(admin.ModelAdmin):
+    def changelist_view(self, request, extra_context=None):
+        return redirect('points_bulk_upload')
 
     def has_add_permission(self, request):
         return False

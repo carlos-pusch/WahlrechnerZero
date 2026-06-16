@@ -1,9 +1,14 @@
-from django.http.response import HttpResponseNotFound, HttpResponseServerError
+from django.http.response import HttpResponseNotFound, HttpResponseServerError, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, render, redirect
 from django.template.loader import render_to_string
 from .models import Wahl # lz_b_1
 from .parse import *
 from django.urls import reverse # lz_d_1
+import os
+from django.conf import settings
+from .bulk_points_import import process_uploaded_points_files
+from django.contrib import messages
+import time
 
 # lz_b_1: Hilfsfunktion für Dummy-Wahl bei 404
 def _get_dummy_wahl():
@@ -112,6 +117,24 @@ def result(request, wahl_slug, zustand):
     if not wahl.ist_aktiv:
         return render(request, "wahlrechner/inactive.html", {"wahl": wahl})
 
+    points_parlament_url = None
+    points_these_url = None
+
+    points_dir = os.path.join(settings.MEDIA_ROOT, 'punkte_grafiken', wahl.slug)
+    if os.path.isdir(points_dir):
+        base_parlament = f"{wahl.slug}__Gesamtpunkte_nach_Parlamentswahl__-1_1"
+        base_these = f"{wahl.slug}__Punkte_nach_These_und_Parlamentswahl__-1_1"
+        
+        if os.path.exists(os.path.join(points_dir, f"{base_parlament}.html")):
+            points_parlament_url = settings.MEDIA_URL + f"punkte_grafiken/{wahl.slug}/{base_parlament}.html"
+        elif os.path.exists(os.path.join(points_dir, f"{base_parlament}.png")):
+            points_parlament_url = settings.MEDIA_URL + f"punkte_grafiken/{wahl.slug}/{base_parlament}.png"
+        
+        if os.path.exists(os.path.join(points_dir, f"{base_these}.html")):
+            points_these_url = settings.MEDIA_URL + f"punkte_grafiken/{wahl.slug}/{base_these}.html"
+        elif os.path.exists(os.path.join(points_dir, f"{base_these}.png")):
+            points_these_url = settings.MEDIA_URL + f"punkte_grafiken/{wahl.slug}/{base_these}.png"
+    
     opinions = decode_zustand(zustand, wahl)
     thesen = alle_thesen(wahl)
     context = { # lz_d_1
@@ -124,8 +147,11 @@ def result(request, wahl_slug, zustand):
         "share_url": request.build_absolute_uri(reverse('start', args=[wahl.slug])),
         "share_title": wahl.titel,
         "share_dialog_title": "Ich habe unseren Wahlcheck ausgefüllt!\nDu auch?",
+        "points_parlament_url": points_parlament_url,
+        "points_these_url": points_these_url,
     }
     increase_result_count()
+
     return render(request, "wahlrechner/result.html", context)
 
 # lz_b_1: Begründungs-Seite
@@ -179,25 +205,155 @@ import io
 
 @staff_member_required
 def bulk_upload(request):
-    """
-    Zeigt ein Formular für den Bulk-Upload von Parteibildern an.
-    Bei POST werden alle hochgeladenen Dateien verarbeitet.
-    Anschließend wird eine CSV-Datei mit den Ergebnissen zum Download angeboten.
-    """
     if request.method == 'POST' and request.FILES.getlist('images'):
         uploaded_files = request.FILES.getlist('images')
-        results = process_uploaded_images(uploaded_files)   # Liste von Dikt
+        results = process_uploaded_images(uploaded_files)
 
-        # CSV-Datei im Arbeitsspeicher erzeugen
-        output = io.StringIO()
-        writer = csv.DictWriter(output, fieldnames=['filename', 'partei_name', 'status', 'target_path'])
-        writer.writeheader()
-        for row in results:
-            writer.writerow(row)
+        success_count = sum(1 for r in results if r['status'] == 'Erfolg')
+        error_count = len(results) - success_count
 
-        response = HttpResponse(output.getvalue(), content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename="bulk_upload_report.csv"'
-        return response
+        if success_count:
+            messages.success(request, f"{success_count} Bild(er) erfolgreich hochgeladen.")
+        if error_count:
+            messages.warning(request, f"{error_count} Bild(er) konnten nicht hochgeladen werden. Details siehe unten.")
 
-    # GET: Formular anzeigen
-    return render(request, 'admin/bulk_upload.html')
+        request.session['upload_results'] = results
+        return redirect('bulk_upload')
+
+    # --- GET: Liste vorhandener Bilder anzeigen ---
+    bilder_ordner = os.path.join(settings.MEDIA_ROOT, 'partei_bild')
+    files_data = []
+    if os.path.isdir(bilder_ordner):
+        for filename in os.listdir(bilder_ordner):
+            # Nur Bilddateien berücksichtigen
+            if filename.lower().endswith(('.png', '.jpg', '.jpeg')):
+                filepath = os.path.join(bilder_ordner, filename)
+                # Slug aus Dateinamen extrahieren
+                slug = 'unbekannt'
+                if '__' in filename:
+                    slug, _ = filename.split('__', 1)
+                files_data.append({
+                    'slug': slug,
+                    'filename': filename,
+                    'url': settings.MEDIA_URL + f"partei_bild/{filename}",
+                    'size': os.path.getsize(filepath),
+                    'modified': time.strftime('%Y-%m-%d %H:%M', time.localtime(os.path.getmtime(filepath))),
+                })
+    # Sortierung nach Slug, dann Dateiname
+    files_data.sort(key=lambda x: (x['slug'], x['filename']))
+
+    # Detaillierte Ergebnisse aus Session holen
+    upload_results = request.session.pop('upload_results', None)
+    if upload_results:
+        upload_results.sort(key=lambda x: 0 if x['status'] == 'Fehler' else 1)
+        for result in upload_results:
+            if result['status'] == 'Erfolg':
+                messages.success(request, f"✅ {result['filename']} – hochgeladen nach {result.get('target_path', '')}")
+            else:
+                messages.error(request, f"❌ {result['filename']}: {result.get('message', 'Unbekannter Fehler')}")
+
+    return render(request, 'admin/bulk_upload.html', {'files': files_data})
+
+@staff_member_required
+def image_delete_file(request, filename):
+    """
+    Löscht eine einzelne Partei-Bild-Datei.
+    Nur PNG, JPG, JPEG sind erlaubt.
+    """
+    # Sicherheitsprüfung: nur erlaubte Endungen
+    if not filename.lower().endswith(('.png', '.jpg', '.jpeg')):
+        return HttpResponseBadRequest("Ungültiger Dateiname – nur PNG, JPG und JPEG sind erlaubt.")
+
+    base_dir = os.path.abspath(os.path.join(settings.MEDIA_ROOT, 'partei_bild'))
+    filepath = os.path.join(base_dir, filename)
+    abs_path = os.path.abspath(filepath)
+
+    if not abs_path.startswith(base_dir):
+        return HttpResponseBadRequest("Ungültiger Pfad.")
+
+    if os.path.exists(abs_path):
+        os.remove(abs_path)
+        messages.success(request, f"Die Datei „{filename}“ wurde erfolgreich gelöscht.")
+    else:
+        messages.error(request, f"Die Datei „{filename}“ wurde nicht gefunden.")
+
+    return redirect('bulk_upload')
+
+@staff_member_required
+def points_bulk_upload(request):
+    if request.method == 'POST' and request.FILES.getlist('images'):
+        uploaded_files = request.FILES.getlist('images')
+        results = process_uploaded_points_files(uploaded_files)
+
+        # Erfolgs- und Fehlerzahlen für eine kurze Zusammenfassung
+        success_count = sum(1 for r in results if r['status'] == 'Erfolg')
+        error_count = len(results) - success_count
+
+        if success_count:
+            messages.success(request, f"{success_count} Datei(en) erfolgreich hochgeladen.")
+        if error_count:
+            messages.warning(request, f"{error_count} Datei(en) konnten nicht hochgeladen werden. Details siehe unten.")
+
+        # Detaillierte Ergebnisse in der Session speichern
+        request.session['upload_results'] = results
+
+        # Redirect auf die gleiche Seite (GET), damit die Tabelle aktualisiert wird
+        return redirect('points_bulk_upload')
+
+    # --- GET: Liste vorhandener Dateien anzeigen ---
+    points_base = os.path.join(settings.MEDIA_ROOT, 'punkte_grafiken')
+    files_data = []
+    if os.path.isdir(points_base):
+        for slug in os.listdir(points_base):
+            dir_path = os.path.join(points_base, slug)
+            if os.path.isdir(dir_path):
+                for filename in os.listdir(dir_path):
+                    if filename.lower().endswith(('.png', '.html')):
+                        filepath = os.path.join(dir_path, filename)
+                        files_data.append({
+                            'slug': slug,
+                            'filename': filename,
+                            'url': settings.MEDIA_URL + f"punkte_grafiken/{slug}/{filename}",
+                            'size': os.path.getsize(filepath),
+                            'modified': time.strftime('%Y-%m-%d %H:%M', time.localtime(os.path.getmtime(filepath))),
+                        })
+    files_data.sort(key=lambda x: (x['slug'], x['filename']))
+
+    # Prüfen, ob es detaillierte Ergebnisse aus einem vorherigen Upload gibt
+    upload_results = request.session.pop('upload_results', None)
+    if upload_results:
+        # Sortiere: Fehler zuerst (status == 'Fehler'), dann Erfolg
+        upload_results.sort(key=lambda x: 0 if x['status'] == 'Fehler' else 1)
+        for result in upload_results:
+            if result['status'] == 'Erfolg':
+                messages.success(request, f"✅ {result['filename']} – hochgeladen nach {result.get('target_path', '')}")
+            else:
+                messages.error(request, f"❌ {result['filename']}: {result.get('message', 'Unbekannter Fehler')}")
+
+    return render(request, 'admin/bulk_upload_punkte.html', {'files': files_data})
+
+@staff_member_required
+def points_delete_file(request, slug, filename):
+    """
+    Löscht eine einzelne Punktegrafik-Datei.
+    Nur PNG und HTML sind erlaubt.
+    """
+    # Sicherheitsprüfung: nur erlaubte Endungen
+    if not filename.lower().endswith(('.png', '.html')):
+        return HttpResponseBadRequest("Ungültiger Dateiname – nur PNG und HTML sind erlaubt.")
+
+    # Absoluten Pfad berechnen und prüfen, ob er innerhalb des Punkte-Ordners liegt
+    base_dir = os.path.abspath(os.path.join(settings.MEDIA_ROOT, 'punkte_grafiken'))
+    filepath = os.path.join(base_dir, slug, filename)
+    abs_path = os.path.abspath(filepath)
+
+    if not abs_path.startswith(base_dir):
+        return HttpResponseBadRequest("Ungültiger Pfad.")
+
+    if os.path.exists(abs_path):
+        os.remove(abs_path)
+        messages.success(request, f"Die Datei „{filename}“ wurde erfolgreich gelöscht.")
+    else:
+        messages.error(request, f"Die Datei „{filename}“ wurde nicht gefunden.")
+
+    return redirect('points_bulk_upload')

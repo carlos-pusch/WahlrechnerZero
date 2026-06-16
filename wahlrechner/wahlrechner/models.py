@@ -239,3 +239,45 @@ class BulkImageImport(models.Model):
 
     def __str__(self):
         return "Bulk-Image-Import"
+
+# lz_d_1: Neues Modell für Team-Info pro Wahl
+class TeamInfo(models.Model):
+    wahl = models.ForeignKey(
+        Wahl,
+        on_delete=models.CASCADE,
+        verbose_name="Wahl",
+        related_name="team_infos"  # verwende Unterstrich, um im Template problemlos nutzen zu können
+    )
+    text = models.TextField(
+        "Team-Info Text",
+        help_text="Hier kann ein Text mit Informationen zum lokalen Team eingefügt werden. "
+                  "Zeilenumbrüche und HTML-Links (z.B. <a href='...'>Text</a>) sind erlaubt.",
+        blank=False,
+    )
+    aktiv = models.BooleanField(
+        "Aktiv?",
+        default=False,
+        help_text="Nur wenn aktiv, wird die Team-Info auf der Startseite angezeigt."
+    )
+
+    class Meta:
+        verbose_name = "Team-Info"
+        verbose_name_plural = "07. Team-Infos"  # Sortierung
+
+    def __str__(self):
+        return f"Team-Info für {self.wahl.titel}"
+
+# lz_d_1: Dummy-Modell für den Admin-Eintrag "08. Punkte-Bulkimport"
+class PointsBulkImport(models.Model):
+    """
+    Dieses Modell existiert nur, um im Admin einen Menüpunkt
+    für den Bulk-Upload von Punktediagrammen (PNG/HTML) zu erzeugen.
+    Es wird keine Datenbanktabelle angelegt.
+    """
+    class Meta:
+        managed = False
+        verbose_name = "Punkte-Bild-Bulkimport"
+        verbose_name_plural = "08. Punkte-Bild-Bulkimporte"
+
+    def __str__(self):
+        return "Bulk-Import von Punktediagrammen"

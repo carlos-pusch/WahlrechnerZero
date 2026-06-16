@@ -68,7 +68,7 @@
                     {# Bild der Partei #}
                     {% if partei.partei_bild %}
                         <img src="{{ partei.partei_bild.url }}"
-                             class="rounded-full w-24 h-24 flex-none m-auto sm:m-0 object-cover"
+                             class="rounded-full w-24 h-24 flex-none m-auto sm:m-0 object-cover img-pl"
                              alt="{{ partei.partei_name }}">
                     {% endif %}
 
@@ -86,6 +86,37 @@
             </div>
         </div>
     {% endfor %}
+
+    {# lz_d_1: Anzeige der Punktegrafiken (falls vorhanden) #}
+    {% if points_parlament_url or points_these_url %}
+        <div class="points-graphics-section mt-8 space-y-6" style="padding-top: 2rem;">
+
+            <p class="text-sm text-left text-gray-600 dark:text-gray-300">
+                Die Punkte in den Diagrammen werden so berechnet: eine Zustimmung entspricht +1, eine Enthaltung 0, eine Ablehnung -1.
+                Umso höher die Anzahl der Punkte, desto klimafreundlicher sind die Positionierungen.
+            </p>            
+            {% if points_these_url %}
+                <div class="card p-4">
+                    <h3 class="text-xl font-semibold mb-3">Punktzahl nach These</h3>
+                    {% if points_these_url|lower|slice:"-4:" == ".png" %}
+                        <img src="{{ points_these_url }}" alt="Punkte nach These und Parlamentswahl" class="w-full h-auto rounded shadow">
+                    {% else %}
+                        <iframe src="{{ points_these_url }}" class="w-full h-auto min-h-[500px] border-0 rounded shadow" loading="lazy"></iframe>
+                    {% endif %}
+                </div>
+            {% endif %}
+            {% if points_parlament_url %}
+                <div class="card p-4">
+                    <h3 class="text-xl font-semibold mb-3">Gesamtpunktzahl</h3>
+                    {% if points_parlament_url|lower|slice:"-4:" == ".png" %}
+                        <img src="{{ points_parlament_url }}" alt="Gesamtpunkte nach Parlamentswahl" class="w-full h-auto rounded shadow">
+                    {% else %}
+                        <iframe src="{{ points_parlament_url }}" class="w-full h-auto min-h-[500px] border-0 rounded shadow" loading="lazy"></iframe>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    {% endif %}
 
     <div class="btn-row">
 

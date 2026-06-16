@@ -5,27 +5,66 @@
 
 {% block content %}
 <div id="content-main">
-  <h1>Bulk-Image-Import für Parteienbilder</h1>
-  <div style="margin: 20px 0; padding: 15px; background: #f8f8f8; border-left: 4px solid #79aec8;">
-    <p><strong>Hinweis:</strong> Die hochgeladenen Bilddateien müssen <strong>exakt</strong> dem Dateinamen entsprechen,
-    der im <code>partei_bild</code>-Feld der jeweiligen Partei eingetragen ist (z. B. <code>slug__vorname_nachname_partei.png</code>).</p>
-    <p>Bereits vorhandene Bilder werden <strong>nicht überschrieben</strong> und erscheinen im späteren CSV-Bericht als „übersprungen“.</p>
-  </div>
+    <h1>Bulk-Image-Import für Parteienbilder</h1>
 
-  <form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    <div>
-      <label for="id_images"><strong>Bilder auswählen:</strong></label>
-      <input type="file" name="images" id="id_images" multiple accept="image/png,image/jpeg,image/jpg" required>
+    <div style="margin: 20px 0; padding: 15px; background: #f8f8f8; border-left: 4px solid #79aec8;">
+        <p><strong>Hinweis:</strong> Die hochgeladenen Bilddateien müssen <strong>exakt</strong> dem Dateinamen entsprechen,
+        der im <code>partei_bild</code>-Feld der jeweiligen Partei eingetragen ist (z. B. <code>slug__vorname_nachname_partei.png</code>).</p>
+        <p>Bereits vorhandene Bilder werden <strong>nicht überschrieben</strong> und erscheinen im späteren CSV-Bericht als „übersprungen“.</p>
     </div>
-    <div style="margin-top: 20px;">
-      <input type="submit" value="Hochladen und CSV erzeugen" class="default" style="background: #79aec8;">
-    </div>
-  </form>
 
-  <div style="margin-top: 40px;">
-    <p>Nach dem Upload wird eine CSV-Datei mit allen verarbeiteten Bildern heruntergeladen.
-    Du kannst sie nutzen, um in deinem R‑Skript bereits hochgeladene Bilder zu identifizieren.</p>
-  </div>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div>
+            <label for="id_images"><strong>Bilder auswählen:</strong></label>
+            <input type="file" name="images" id="id_images" multiple accept="image/png,image/jpeg,image/jpg" required>
+        </div>
+        <div style="margin-top: 20px;">
+            <input type="submit" value="Hochladen und Bericht erzeugen" class="default" style="background: #79aec8;">
+        </div>
+    </form>
+
+    <div style="margin-top: 40px;">
+        <p>Nach dem Upload wird ein CSV‑Bericht heruntergeladen. Die Ergebnisse erscheinen zusätzlich als Meldungen auf dieser Seite.</p>
+    </div>
+
+    <!-- Tabelle der bereits hochgeladenen Bilder -->
+    {% if files %}
+        <h2 style="margin-top: 2em;">Bereits hochgeladene Bilder</h2>
+        <table style="width:100%; border-collapse:collapse; margin-top:1em;">
+            <thead>
+                <tr style="background:#f0f0f0; text-align:left;">
+                    <th style="padding:8px; border-bottom:1px solid #ddd;">Wahl (Slug)</th>
+                    <th style="padding:8px; border-bottom:1px solid #ddd;">Dateiname</th>
+                    <th style="padding:8px; border-bottom:1px solid #ddd;">Vorschau</th>
+                    <th style="padding:8px; border-bottom:1px solid #ddd;">Größe</th>
+                    <th style="padding:8px; border-bottom:1px solid #ddd;">Geändert</th>
+                    <th style="padding:8px; border-bottom:1px solid #ddd;">Aktion</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for file in files %}
+                <tr>
+                    <td style="padding:8px; border-bottom:1px solid #eee;">{{ file.slug }}</td>
+                    <td style="padding:8px; border-bottom:1px solid #eee;">{{ file.filename }}</td>
+                    <td style="padding:8px; border-bottom:1px solid #eee;">
+                        <img src="{{ file.url }}" alt="{{ file.filename }}" style="max-height:50px; max-width:100px;">
+                    </td>
+                    <td style="padding:8px; border-bottom:1px solid #eee;">{{ file.size|filesizeformat }}</td>
+                    <td style="padding:8px; border-bottom:1px solid #eee;">{{ file.modified }}</td>
+                    <td style="padding:8px; border-bottom:1px solid #eee;">
+                        <a href="{% url 'image_delete_file' filename=file.filename %}"
+                           onclick="return confirm('Möchten Sie die Datei „{{ file.filename }}“ wirklich löschen?');"
+                           style="color: #b94a48; text-decoration: none; font-weight: bold;">
+                            Löschen
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p style="margin-top: 2em; color: #999;">Bisher wurden noch keine Bilder hochgeladen.</p>
+    {% endif %}
 </div>
 {% endblock %}
