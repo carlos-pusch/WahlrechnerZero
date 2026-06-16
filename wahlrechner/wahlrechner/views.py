@@ -205,28 +205,79 @@ import io
 
 @staff_member_required
 def bulk_upload(request):
-    """
-    Zeigt ein Formular für den Bulk-Upload von Parteibildern an.
-    Bei POST werden alle hochgeladenen Dateien verarbeitet.
-    Anschließend wird eine CSV-Datei mit den Ergebnissen zum Download angeboten.
-    """
     if request.method == 'POST' and request.FILES.getlist('images'):
         uploaded_files = request.FILES.getlist('images')
-        results = process_uploaded_images(uploaded_files)   # Liste von Dikt
+        results = process_uploaded_images(uploaded_files)
 
-        # CSV-Datei im Arbeitsspeicher erzeugen
-        output = io.StringIO()
-        writer = csv.DictWriter(output, fieldnames=['filename', 'partei_name', 'status', 'target_path'])
-        writer.writeheader()
-        for row in results:
-            writer.writerow(row)
+        success_count = sum(1 for r in results if r['status'] == 'Erfolg')
+        error_count = len(results) - success_count
 
-        response = HttpResponse(output.getvalue(), content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename="bulk_upload_report.csv"'
-        return response
+        if success_count:
+            messages.success(request, f"{success_count} Bild(er) erfolgreich hochgeladen.")
+        if error_count:
+            messages.warning(request, f"{error_count} Bild(er) konnten nicht hochgeladen werden. Details siehe unten.")
 
-    # GET: Formular anzeigen
-    return render(request, 'admin/bulk_upload.html')
+        request.session['upload_results'] = results
+        return redirect('bulk_upload')
+
+    # --- GET: Liste vorhandener Bilder anzeigen ---
+    bilder_ordner = os.path.join(settings.MEDIA_ROOT, 'partei_bild')
+    files_data = []
+    if os.path.isdir(bilder_ordner):
+        for filename in os.listdir(bilder_ordner):
+            # Nur Bilddateien berücksichtigen
+            if filename.lower().endswith(('.png', '.jpg', '.jpeg')):
+                filepath = os.path.join(bilder_ordner, filename)
+                # Slug aus Dateinamen extrahieren
+                slug = 'unbekannt'
+                if '__' in filename:
+                    slug, _ = filename.split('__', 1)
+                files_data.append({
+                    'slug': slug,
+                    'filename': filename,
+                    'url': settings.MEDIA_URL + f"partei_bild/{filename}",
+                    'size': os.path.getsize(filepath),
+                    'modified': time.strftime('%Y-%m-%d %H:%M', time.localtime(os.path.getmtime(filepath))),
+                })
+    # Sortierung nach Slug, dann Dateiname
+    files_data.sort(key=lambda x: (x['slug'], x['filename']))
+
+    # Detaillierte Ergebnisse aus Session holen
+    upload_results = request.session.pop('upload_results', None)
+    if upload_results:
+        upload_results.sort(key=lambda x: 0 if x['status'] == 'Fehler' else 1)
+        for result in upload_results:
+            if result['status'] == 'Erfolg':
+                messages.success(request, f"✅ {result['filename']} – hochgeladen nach {result.get('target_path', '')}")
+            else:
+                messages.error(request, f"❌ {result['filename']}: {result.get('message', 'Unbekannter Fehler')}")
+
+    return render(request, 'admin/bulk_upload.html', {'files': files_data})
+
+@staff_member_required
+def image_delete_file(request, filename):
+    """
+    Löscht eine einzelne Partei-Bild-Datei.
+    Nur PNG, JPG, JPEG sind erlaubt.
+    """
+    # Sicherheitsprüfung: nur erlaubte Endungen
+    if not filename.lower().endswith(('.png', '.jpg', '.jpeg')):
+        return HttpResponseBadRequest("Ungültiger Dateiname – nur PNG, JPG und JPEG sind erlaubt.")
+
+    base_dir = os.path.abspath(os.path.join(settings.MEDIA_ROOT, 'partei_bild'))
+    filepath = os.path.join(base_dir, filename)
+    abs_path = os.path.abspath(filepath)
+
+    if not abs_path.startswith(base_dir):
+        return HttpResponseBadRequest("Ungültiger Pfad.")
+
+    if os.path.exists(abs_path):
+        os.remove(abs_path)
+        messages.success(request, f"Die Datei „{filename}“ wurde erfolgreich gelöscht.")
+    else:
+        messages.error(request, f"Die Datei „{filename}“ wurde nicht gefunden.")
+
+    return redirect('bulk_upload')
 
 @staff_member_required
 def points_bulk_upload(request):
