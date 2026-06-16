@@ -267,3 +267,17 @@ class TeamInfo(models.Model):
     def __str__(self):
         return f"Team-Info für {self.wahl.titel}"
 
+# lz_d_1: Dummy-Modell für den Admin-Eintrag "08. Punkte-Bulkimport"
+class PointsBulkImport(models.Model):
+    """
+    Dieses Modell existiert nur, um im Admin einen Menüpunkt
+    für den Bulk-Upload von Punktediagrammen (PNG/HTML) zu erzeugen.
+    Es wird keine Datenbanktabelle angelegt.
+    """
+    class Meta:
+        managed = False
+        verbose_name = "Punkte-Bild-Bulkimport"
+        verbose_name_plural = "08. Punkte-Bild-Bulkimporte"
+
+    def __str__(self):
+        return "Bulk-Import von Punktediagrammen"
