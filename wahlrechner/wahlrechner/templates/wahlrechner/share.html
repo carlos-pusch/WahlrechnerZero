@@ -1,5 +1,5 @@
 <!-- lz_d_1: Share-Widget -->
-<!-- lz_e_1: Teilen-Widget – angepasst für iframe-Kompatibilität -->
+<!-- lz_e_1: Teilen-Widget für iframe und andere Sachen angepasst -->
 <style>
   /* Nur Dialog und Overlay – der Button verwendet die globale .btn-Klasse */
   .share-widget-dialog {
@@ -9,7 +9,7 @@
     left: 50%;
     transform: translate(-50%, -50%);
     width: 95%;
-    max-width: 600px;   /* von 520px auf 600px geändert */
+    max-width: 600px;
     background: #fff;
     border: 1px solid #ddd;
     border-radius: 8px;
@@ -30,7 +30,7 @@
     font-size: 20px;
     font-weight: 700;
     margin: 0;
-    white-space: pre-line;   /* Zeilenumbrüche werden dargestellt */
+    white-space: pre-line;
   }
   .share-widget-close {
     background: none;
@@ -150,10 +150,10 @@
   </svg>
 </div>
 
-<!-- Trigger-Button mit urlencodiertem desc -->
+<!-- Trigger-Button mit urlencode -->
 <button class="btn share-trigger" type="button" style="display: inline-flex; align-items: center; gap: 0.5rem;"
-        data-url="{{ share_url|escapejs }}"
-        data-title="{{ share_title|escapejs }}"
+        data-url="{{ share_url|urlencode }}"
+        data-title="{{ share_title|urlencode }}"
         data-desc="{{ share_dialog_title|default:'Seite teilen'|urlencode }}">
   {% include "icons/share.html" %}
   <span>Teilen</span>
@@ -161,13 +161,11 @@
 
 <script>
 (function() {
-  // Nur einmal initialisieren
   if (window._shareWidgetInitialized) return;
   window._shareWidgetInitialized = true;
 
-  // Funktion zum Erstellen des Dialogs und Overlays, falls nicht vorhanden
   function createShareDialog() {
-    if (document.getElementById('sw-dialog')) return; // bereits vorhanden
+    if (document.getElementById('sw-dialog')) return;
 
     const overlay = document.createElement('div');
     overlay.className = 'share-widget-overlay';
@@ -202,7 +200,6 @@
     `;
     document.body.appendChild(dialog);
 
-    // Event-Listener für Schließen
     const closeBtn = dialog.querySelector('.share-widget-close');
     const overlayEl = document.getElementById('sw-overlay');
 
@@ -217,14 +214,12 @@
       if (e.key === 'Escape' && dialog.classList.contains('is-open')) closeDialog();
     });
 
-    // Kopier-Button
     const copyBtn = document.getElementById('sw-copy');
     copyBtn.addEventListener('click', function() {
       const url = document.getElementById('sw-url').textContent;
       copyToClipboard(url).then(() => showCopyFeedback(copyBtn));
     });
 
-    // Ziel-Buttons (Plattformen)
     const targets = dialog.querySelectorAll('.share-widget-target');
     targets.forEach(btn => {
       btn.addEventListener('click', function(e) {
@@ -247,7 +242,6 @@
     });
   }
 
-  // Hilfsfunktionen
   function copyToClipboard(text) {
     if (navigator.clipboard?.writeText) return navigator.clipboard.writeText(text);
     const textarea = document.createElement('textarea');
@@ -267,20 +261,17 @@
     setTimeout(() => { btn.textContent = orig; btn.disabled = false; }, 1500);
   }
 
-  // Einmalig den Dialog erstellen
   createShareDialog();
 
-  // Event-Delegation für alle .share-trigger-Buttons
   document.addEventListener('click', function(e) {
     const trigger = e.target.closest('.share-trigger');
     if (!trigger) return;
 
-    const url = trigger.dataset.url;
-    const title = trigger.dataset.title;
-    // desc ist urlencodiert – dekodieren
+    // Werte dekodieren (URL-encoded)
+    const url = decodeURIComponent(trigger.dataset.url);
+    const title = decodeURIComponent(trigger.dataset.title);
     const desc = decodeURIComponent(trigger.dataset.desc || '');
 
-    // Prüfen, ob native Share API verfügbar und nicht im iframe
     const inIframe = window.self !== window.top;
     if (!inIframe && navigator.share) {
       navigator.share({
@@ -306,7 +297,6 @@
 
     dialog.classList.add('is-open');
     overlay.classList.add('is-open');
-    // Fokus setzen
     const closeBtn = dialog.querySelector('.share-widget-close');
     if (closeBtn) closeBtn.focus();
   }
