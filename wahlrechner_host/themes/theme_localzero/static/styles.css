@@ -1581,3 +1581,7 @@ footer img {
   color: white;
   font-weight: bold;
 }
+
+.img-pl {
+    padding-left: 0.5rem;
+}
