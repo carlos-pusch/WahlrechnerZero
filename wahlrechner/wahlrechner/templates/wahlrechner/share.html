@@ -1,7 +1,7 @@
 <!-- lz_d_1: Share-Widget -->
 <!-- lz_e_1: Teilen-Widget – angepasst für iframe-Kompatibilität -->
 <style>
-  /* Nur Dialog und Overlay – der Button verwendet das globale .btn */
+  /* Nur Dialog und Overlay – der Button verwendet die globale .btn-Klasse */
   .share-widget-dialog {
     display: none;
     position: fixed;
@@ -30,7 +30,7 @@
     font-size: 20px;
     font-weight: 700;
     margin: 0;
-    white-space: pre-line;   /* Zeilenumbrüche mit \n werden respektiert */
+    white-space: pre-line;   /* Zeilenumbrüche werden dargestellt */
   }
   .share-widget-close {
     background: none;
@@ -150,90 +150,104 @@
   </svg>
 </div>
 
-<!-- Overlay und Dialog -->
-<div class="share-widget-overlay" id="sw-overlay"></div>
-<div class="share-widget-dialog" id="sw-dialog" role="dialog" aria-modal="true">
-  <div class="share-widget-dialog-header">
-    <h3 class="share-widget-dialog-title" id="sw-dialog-title">{{ share_dialog_title|default:"Seite teilen" }}</h3>
-    <button class="share-widget-close" aria-label="Schließen">
-      <svg width="20" height="20"><use href="#sw-close"></use></svg>
-    </button>
-  </div>
-  <div class="share-widget-targets">
-    <a class="share-widget-target" data-platform="facebook" href="#"><svg><use href="#sw-facebook"></use></svg>Facebook</a>
-    <a class="share-widget-target" data-platform="linkedin" href="#"><svg><use href="#sw-linkedin"></use></svg>LinkedIn</a>
-    <a class="share-widget-target" data-platform="whatsapp" href="#"><svg><use href="#sw-whatsapp"></use></svg>WhatsApp</a>
-    <a class="share-widget-target" data-platform="email" href="#"><svg><use href="#sw-email"></use></svg>E-Mail</a>
-    <a class="share-widget-target" data-platform="signal" href="#"><svg><use href="#sw-signal"></use></svg>Signal</a>
-    <a class="share-widget-target" data-platform="instagram" href="#"><svg><use href="#sw-instagram"></use></svg>Instagram</a>
-  </div>
-  <div class="share-widget-link">
-    <div class="share-widget-url" id="sw-url"></div>
-    <button class="share-widget-copy" id="sw-copy">Link kopieren</button>
-  </div>
-</div>
-
-<!-- Trigger-Button: Einheitliches Design mit Icon und Text in einer Zeile -->
-<button class="btn" id="sw-trigger" type="button" style="display: inline-flex; align-items: center; gap: 0.5rem;">
+<!-- Trigger-Button mit urlencodiertem desc -->
+<button class="btn share-trigger" type="button" style="display: inline-flex; align-items: center; gap: 0.5rem;"
+        data-url="{{ share_url|escapejs }}"
+        data-title="{{ share_title|escapejs }}"
+        data-desc="{{ share_dialog_title|default:'Seite teilen'|urlencode }}">
   {% include "icons/share.html" %}
   <span>Teilen</span>
 </button>
 
 <script>
 (function() {
-  const shareUrl = "{{ share_url|escapejs }}";
-  const shareTitle = "{{ share_title|escapejs }}";
-  const shareDesc = "{{ share_dialog_title|default:'Seite teilen'|escapejs }}";
+  // Nur einmal initialisieren
+  if (window._shareWidgetInitialized) return;
+  window._shareWidgetInitialized = true;
 
-  const trigger = document.getElementById('sw-trigger');
-  const dialog = document.getElementById('sw-dialog');
-  const overlay = document.getElementById('sw-overlay');
-  const closeBtn = dialog.querySelector('.share-widget-close');
-  const urlSpan = document.getElementById('sw-url');
-  const copyBtn = document.getElementById('sw-copy');
-  const targets = dialog.querySelectorAll('.share-widget-target');
+  // Funktion zum Erstellen des Dialogs und Overlays, falls nicht vorhanden
+  function createShareDialog() {
+    if (document.getElementById('sw-dialog')) return; // bereits vorhanden
 
-  urlSpan.textContent = shareUrl;
+    const overlay = document.createElement('div');
+    overlay.className = 'share-widget-overlay';
+    overlay.id = 'sw-overlay';
+    document.body.appendChild(overlay);
 
-  function openDialog() {
-    dialog.classList.add('is-open');
-    overlay.classList.add('is-open');
-    closeBtn.focus();
-  }
-  function closeDialog() {
-    dialog.classList.remove('is-open');
-    overlay.classList.remove('is-open');
-    trigger.focus();
-  }
+    const dialog = document.createElement('div');
+    dialog.className = 'share-widget-dialog';
+    dialog.id = 'sw-dialog';
+    dialog.setAttribute('role', 'dialog');
+    dialog.setAttribute('aria-modal', 'true');
 
-  // lz_e_1: Prüfen, ob die Seite in einem iframe läuft
-  const inIframe = window.self !== window.top;
+    dialog.innerHTML = `
+      <div class="share-widget-dialog-header">
+        <h3 class="share-widget-dialog-title" id="sw-dialog-title"></h3>
+        <button class="share-widget-close" aria-label="Schließen">
+          <svg width="20" height="20"><use href="#sw-close"></use></svg>
+        </button>
+      </div>
+      <div class="share-widget-targets">
+        <a class="share-widget-target" data-platform="facebook" href="#"><svg><use href="#sw-facebook"></use></svg>Facebook</a>
+        <a class="share-widget-target" data-platform="linkedin" href="#"><svg><use href="#sw-linkedin"></use></svg>LinkedIn</a>
+        <a class="share-widget-target" data-platform="whatsapp" href="#"><svg><use href="#sw-whatsapp"></use></svg>WhatsApp</a>
+        <a class="share-widget-target" data-platform="email" href="#"><svg><use href="#sw-email"></use></svg>E-Mail</a>
+        <a class="share-widget-target" data-platform="signal" href="#"><svg><use href="#sw-signal"></use></svg>Signal</a>
+        <a class="share-widget-target" data-platform="instagram" href="#"><svg><use href="#sw-instagram"></use></svg>Instagram</a>
+      </div>
+      <div class="share-widget-link">
+        <div class="share-widget-url" id="sw-url"></div>
+        <button class="share-widget-copy" id="sw-copy">Link kopieren</button>
+      </div>
+    `;
+    document.body.appendChild(dialog);
 
-  trigger.addEventListener('click', () => {
-    // Wenn wir in einem iframe sind, überspringen wir die native Share‑API
-    if (!inIframe && navigator.share) {
-      navigator.share({
-        title: shareTitle,
-        text: shareDesc,
-        url: shareUrl
-      }).catch((err) => {
-        // Bei Fehler (z.B. Abbrechen durch Nutzer oder Berechtigungsproblem)
-        // öffnen wir trotzdem den Fallback‑Dialog
-        console.warn('Share API failed, fallback to dialog', err);
-        openDialog();
-      });
-    } else {
-      // Im iframe oder falls navigator.share nicht verfügbar → Dialog öffnen
-      openDialog();
+    // Event-Listener für Schließen
+    const closeBtn = dialog.querySelector('.share-widget-close');
+    const overlayEl = document.getElementById('sw-overlay');
+
+    function closeDialog() {
+      dialog.classList.remove('is-open');
+      overlayEl.classList.remove('is-open');
     }
-  });
 
-  closeBtn.addEventListener('click', closeDialog);
-  overlay.addEventListener('click', closeDialog);
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && dialog.classList.contains('is-open')) closeDialog();
-  });
+    closeBtn.addEventListener('click', closeDialog);
+    overlayEl.addEventListener('click', closeDialog);
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && dialog.classList.contains('is-open')) closeDialog();
+    });
 
+    // Kopier-Button
+    const copyBtn = document.getElementById('sw-copy');
+    copyBtn.addEventListener('click', function() {
+      const url = document.getElementById('sw-url').textContent;
+      copyToClipboard(url).then(() => showCopyFeedback(copyBtn));
+    });
+
+    // Ziel-Buttons (Plattformen)
+    const targets = dialog.querySelectorAll('.share-widget-target');
+    targets.forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        const platform = this.dataset.platform;
+        const url = document.getElementById('sw-url').textContent;
+        const title = document.getElementById('sw-dialog-title').textContent;
+        const encodedUrl = encodeURIComponent(url);
+        const encodedTitle = encodeURIComponent(title);
+        let shareHref = '';
+        switch (platform) {
+          case 'facebook': shareHref = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`; window.open(shareHref, '_blank'); break;
+          case 'linkedin': shareHref = `https://www.linkedin.com/shareArticle?mini=true&url=${encodedUrl}&title=${encodedTitle}`; window.open(shareHref, '_blank'); break;
+          case 'whatsapp': shareHref = `https://wa.me/?text=${encodedTitle}%20-%20${encodedUrl}`; window.open(shareHref, '_blank'); break;
+          case 'email': shareHref = `mailto:?subject=${encodedTitle}&body=${encodedUrl}`; window.location.href = shareHref; break;
+          default: copyToClipboard(url).then(() => showCopyFeedback(this));
+        }
+        if (['facebook','linkedin','whatsapp','email'].includes(platform)) closeDialog();
+      });
+    });
+  }
+
+  // Hilfsfunktionen
   function copyToClipboard(text) {
     if (navigator.clipboard?.writeText) return navigator.clipboard.writeText(text);
     const textarea = document.createElement('textarea');
@@ -245,6 +259,7 @@
     catch(e) { return Promise.reject(e); }
     finally { document.body.removeChild(textarea); }
   }
+
   function showCopyFeedback(btn) {
     const orig = btn.textContent;
     btn.textContent = 'Kopiert!';
@@ -252,26 +267,49 @@
     setTimeout(() => { btn.textContent = orig; btn.disabled = false; }, 1500);
   }
 
-  copyBtn.addEventListener('click', () => {
-    copyToClipboard(shareUrl).then(() => showCopyFeedback(copyBtn));
+  // Einmalig den Dialog erstellen
+  createShareDialog();
+
+  // Event-Delegation für alle .share-trigger-Buttons
+  document.addEventListener('click', function(e) {
+    const trigger = e.target.closest('.share-trigger');
+    if (!trigger) return;
+
+    const url = trigger.dataset.url;
+    const title = trigger.dataset.title;
+    // desc ist urlencodiert – dekodieren
+    const desc = decodeURIComponent(trigger.dataset.desc || '');
+
+    // Prüfen, ob native Share API verfügbar und nicht im iframe
+    const inIframe = window.self !== window.top;
+    if (!inIframe && navigator.share) {
+      navigator.share({
+        title: title,
+        text: desc,
+        url: url
+      }).catch((err) => {
+        console.warn('Share API failed, fallback to dialog', err);
+        openDialog(url, title, desc);
+      });
+    } else {
+      openDialog(url, title, desc);
+    }
   });
 
-  targets.forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.preventDefault();
-      const platform = btn.dataset.platform;
-      const encodedUrl = encodeURIComponent(shareUrl);
-      const encodedTitle = encodeURIComponent(shareTitle);
-      let shareHref = '';
-      switch (platform) {
-        case 'facebook': shareHref = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`; window.open(shareHref, '_blank'); break;
-        case 'linkedin': shareHref = `https://www.linkedin.com/shareArticle?mini=true&url=${encodedUrl}&title=${encodedTitle}`; window.open(shareHref, '_blank'); break;
-        case 'whatsapp': shareHref = `https://wa.me/?text=${encodedTitle}%20-%20${encodedUrl}`; window.open(shareHref, '_blank'); break;
-        case 'email': shareHref = `mailto:?subject=${encodedTitle}&body=${encodedUrl}`; window.location.href = shareHref; break;
-        default: copyToClipboard(shareUrl).then(() => showCopyFeedback(btn));
-      }
-      if (['facebook','linkedin','whatsapp','email'].includes(platform)) closeDialog();
-    });
-  });
+  function openDialog(url, title, desc) {
+    const dialog = document.getElementById('sw-dialog');
+    const overlay = document.getElementById('sw-overlay');
+    if (!dialog || !overlay) return;
+
+    document.getElementById('sw-url').textContent = url;
+    document.getElementById('sw-dialog-title').textContent = desc || 'Seite teilen';
+
+    dialog.classList.add('is-open');
+    overlay.classList.add('is-open');
+    // Fokus setzen
+    const closeBtn = dialog.querySelector('.share-widget-close');
+    if (closeBtn) closeBtn.focus();
+  }
+
 })();
 </script>
