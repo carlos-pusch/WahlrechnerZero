@@ -1,4 +1,5 @@
 <!-- lz_d_1: Share-Widget -->
+<!-- lz_e_1: Teilen-Widget – angepasst für iframe-Kompatibilität -->
 <style>
   /* Nur Dialog und Overlay – der Button verwendet das globale .btn */
   .share-widget-dialog {
@@ -205,14 +206,24 @@
     trigger.focus();
   }
 
+  // lz_e_1: Prüfen, ob die Seite in einem iframe läuft
+  const inIframe = window.self !== window.top;
+
   trigger.addEventListener('click', () => {
-    if (navigator.share) {
+    // Wenn wir in einem iframe sind, überspringen wir die native Share‑API
+    if (!inIframe && navigator.share) {
       navigator.share({
         title: shareTitle,
         text: shareDesc,
         url: shareUrl
-      }).catch(err => { if (err.name !== 'AbortError') console.error(err); });
+      }).catch((err) => {
+        // Bei Fehler (z.B. Abbrechen durch Nutzer oder Berechtigungsproblem)
+        // öffnen wir trotzdem den Fallback‑Dialog
+        console.warn('Share API failed, fallback to dialog', err);
+        openDialog();
+      });
     } else {
+      // Im iframe oder falls navigator.share nicht verfügbar → Dialog öffnen
       openDialog();
     }
   });
