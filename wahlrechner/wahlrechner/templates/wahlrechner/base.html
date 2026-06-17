@@ -20,7 +20,6 @@
   function animatePercentage(el, target, duration) {
     const start = performance.now();
 
-    // Thresholds und Farben (Light / Dark)
     const lightColors = {
       transparent: { bg: 'transparent', text: '#000000' },
       red:   { bg: 'rgba(226, 98, 101, 0.6)', text: '#000000' },
@@ -41,7 +40,6 @@
       const current = easeOut(progress) * target;
       el.textContent = current.toFixed(1).replace('.', ',') + '\u00A0%';
 
-      // Farbstufe bestimmen
       let key = 'transparent'; // 0 bis < 10 --> transparent
       if (current >= 10 && current < 60) key = 'red';
       else if (current >= 60 && current < 85) key = 'yellow';
@@ -61,14 +59,11 @@
     const spans = document.querySelectorAll('.percentage');
 
     if (ANIMATION_START === 'immediate') {
-      // Alle Animationen sofort starten
       spans.forEach(span => {
         const target = parseFloat(span.dataset.target);
         if (!isNaN(target)) animatePercentage(span, target, target * 100);
       });
     } else {
-      // Nur bei Sichtbarkeit starten (IntersectionObserver)
-
       const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
           if (entry.isIntersecting) {
@@ -142,6 +137,9 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+
+<!-- lz_f_1: Block für seiten-spezifisches JavaScript -->
+{% block extra_js %}{% endblock %}
 
 </body>
 
