@@ -13,4 +13,5 @@ urlpatterns = [
     path('confirm/<str:zustand>/submit/', views.confirm_submit, name='confirm_submit'),
     path('result/<str:zustand>/', views.result, name='result'),
     path('reason/<int:these_pk>/<str:zustand>/', views.reason, name='reason'),
+    path('compare/<str:zustand>/', views.compare, name='compare'),
 ]
