@@ -9,13 +9,44 @@
 
 {% block content %}
 
-    <div class="content">
-	
-        <div class="shift_for_icon">
-			<h1>Dein Ergebnis</h1>
-		</div>
-		<p>Auf Grundlage deiner Positionen zu jeder These haben wir deine Übereinstimmung mit den einzelnen Kandidierenden berechnet. Bitte beachte, dass Kandidierende mit einer ähnlichen Übereinstimmung nicht auch automatisch eine inhaltliche Nähe zueinander haben.</p>
+    <style>
+        .bookmark-wrapper {
+            cursor: pointer;
+            display: inline-block;
+            margin-left: 0.5rem;
+            vertical-align: middle;
+        }
+        .bookmark-wrapper svg {
+            width: 22px;
+            height: 22px;
+            transition: transform 0.15s;
+        }
+        .bookmark-wrapper:hover svg {
+            transform: scale(1.15);
+        }
+        .bookmark-filled {
+            fill: #fbbf24;
+            stroke: #fbbf24;
+        }
+        .bookmark-empty {
+            fill: none;
+            stroke: #9ca3af;
+        }
+        .bookmark-empty.hidden, .bookmark-filled.hidden {
+            display: none;
+        }
+        .btn-compare.disabled {
+            opacity: 0.4;
+            pointer-events: none;
+            cursor: default;
+        }
+    </style>
 
+    <div class="content">
+        <div class="shift_for_icon">
+            <h1>Dein Ergebnis</h1>
+        </div>
+        <p>Auf Grundlage deiner Positionen zu jeder These haben wir deine Übereinstimmung mit den einzelnen Kandidierenden berechnet. Bitte beachte, dass Kandidierende mit einer ähnlichen Übereinstimmung nicht auch automatisch eine inhaltliche Nähe zueinander haben.</p>
 
         {% if not aussagekraeftig %}
             <p class="mt-3 font-semibold text-red-700 dark:text-red-500">
@@ -24,55 +55,46 @@
     </div>
 
     <div class="btn-row">
-
-        {# lz_d_1: Teilen-Button #}
+		{# lz_d_1: Teilen-Button #}
         {% include 'wahlrechner/share.html' %}
-
+        <button id="compareBtnTop" class="btn btn-compare disabled" onclick="navigateCompare()">
+            {% include "snippets/icon.html" with icon="compare" %} Vergleich
+        </button>
         {% url "confirm" wahl.slug zustand_current as url %}
         {% include "snippets/btn.html" with text="Gewichtung bearbeiten" url=url icon="edit" pos="l" %}
-
         {% url "start" wahl.slug as url %}
         {% include "snippets/btn.html" with text="Neustart" url=url icon="restart" pos="l" %}
-
         {% url "reason" wahl.slug thesen.first.pk zustand_current as url %}
         {% include "snippets/btn.html" with text="Zu den Begründungen" url=url icon="cright" pos="r" %}
     </div>
 
     {% for partei, percentage in result %}
         <div class="card">
-
-            {# Farbiger Akzentstreifen, falls bei Partei vorhanden #}
             <div class="w-full h-full p-4 {% if partei.partei_farbe %}border-l-8{% endif %}"
                  {% if partei.partei_farbe %}style="border-color: {{ partei.partei_farbe }}"{% endif %}>
-
-                {# Hinweis auf höchste Übereinstimmung bei oberster Partei #}
                 {% if forloop.first %}
                     <div class="mb-3 mb3-pl text-sm text-gray-500 dark:text-gray-400">
                         {% include "snippets/icon.html" with icon="winner" %} Höchste Übereinstimmung
                     </div>
                 {% endif %}
-
-                {# Prozentzahl und Parteititel #}
-                <h2 class="mb-3 mb3-pl">
-
-                    {# Badge mit Farbe abhängig von Prozentzahl; Farben und Grenzwerte in base.html #}
-                    <span class="percentage rounded px-2 py-0.5" style="background-color: transparent; color: transparent;" data-target="{{ percentage|floatformat:1|default:'0.0' }}">0%</span>                    
-
-                    {# Parteidownload #}
+                <h2 class="mb-3 mb3-pl flex items-center flex-wrap">
+                    <span class="percentage rounded px-2 py-0.5" style="background-color: transparent; color: transparent;" data-target="{{ percentage|floatformat:1|default:'0.0' }}">0%</span>
                     <span class="text-lg font-semibold text-gray-700 dark:text-gray-100">{{ partei.partei_name }}</span>
+                    <span class="bookmark-wrapper" data-partei-id="{{ partei.pk }}" onclick="toggleBookmark(this, {{ partei.pk }})">
+                        <svg class="bookmark-empty" viewBox="0 0 24 24" width="22" height="22">
+                            <path d="M5 3h14a2 2 0 0 1 2 2v16l-7-4-7 4V5a2 2 0 0 1 2-2z" fill="none" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                        <svg class="bookmark-filled hidden" viewBox="0 0 24 24" width="22" height="22">
+                            <path d="M5 3h14a2 2 0 0 1 2 2v16l-7-4-7 4V5a2 2 0 0 1 2-2z" fill="#fbbf24" stroke="#fbbf24" stroke-width="2"/>
+                        </svg>
+                    </span>
                 </h2>
-
-                {# Flexbox für Bild und Beschreibung der Partei #}
                 <div class="flex justify-start sm:space-x-4 space-y-4 sm:space-y-0 flex-col sm:flex-row">
-
-                    {# Bild der Partei #}
                     {% if partei.partei_bild %}
                         <img src="{{ partei.partei_bild.url }}"
                              class="rounded-full w-24 h-24 flex-none m-auto sm:m-0 object-cover img-pl"
                              alt="{{ partei.partei_name }}">
                     {% endif %}
-
-                    {# Beschreibung der Partei #}
                     {% if partei.partei_beschreibung %}
                         <p class="text-sm text-left text-gray-600 dark:text-gray-300">
                             "{{ partei.partei_beschreibung.strip }}" <span
@@ -81,20 +103,19 @@
                         <p class="text-sm italic text-left text-gray-600 dark:text-gray-300">
                             Es liegt keine Beschreibung zu dieser Person vor.</p>
                     {% endif %}
-
                 </div>
             </div>
         </div>
     {% endfor %}
 
-    {# lz_d_1: Anzeige der Punktegrafiken (falls vorhanden) #}
+	 {# lz_d_1: Anzeige der Punktegrafiken (falls vorhanden) #}
+
     {% if points_parlament_url or points_these_url %}
         <div class="points-graphics-section mt-8 space-y-6" style="padding-top: 2rem;">
-
             <p class="text-sm text-left text-gray-600 dark:text-gray-300">
                 Die Punkte in den Diagrammen werden so berechnet: eine Zustimmung entspricht +1, eine Enthaltung 0, eine Ablehnung -1.
                 Umso höher die Anzahl der Punkte, desto klimafreundlicher sind die Positionierungen.
-            </p>            
+            </p>
             {% if points_these_url %}
                 <div class="card p-4">
                     <h3 class="text-xl font-semibold mb-3">Punktzahl nach These</h3>
@@ -119,16 +140,15 @@
     {% endif %}
 
     <div class="btn-row">
-
-        {# lz_d_1: Teilen-Button #}
+		{# lz_d_1: Teilen-Button #}
         {% include 'wahlrechner/share.html' %}
-
+        <button id="compareBtnBottom" class="btn btn-compare disabled" onclick="navigateCompare()">
+            {% include "snippets/icon.html" with icon="compare" %} Vergleich
+        </button>
         {% url "confirm" wahl.slug zustand_current as url %}
         {% include "snippets/btn.html" with text="Gewichtung bearbeiten" url=url icon="edit" pos="l" sc="37" %}
-
         {% url "start" wahl.slug as url %}
         {% include "snippets/btn.html" with text="Neustart" url=url icon="restart" pos="l" sc="78" %}
-
         {% url "reason" wahl.slug thesen.first.pk zustand_current as url %}
         {% include "snippets/btn.html" with text="Zu den Begründungen" url=url icon="cright" pos="r" sc="39" %}
     </div>
@@ -136,17 +156,69 @@
 {% endblock %}
 
 {% block shortcuts %}
+    <li><span class="icon">&larr;</span> Gewichtung bearbeiten</li>
+    <li><span class="icon">&rarr;</span> Zu den Begründungen</li>
+    <li><span class="icon">N</span> Neustart</li>
+{% endblock %}
 
-    <li>
-        <span class="icon">&larr;</span> Gewichtung bearbeiten
-    </li>
+{% block extra_js %}
+<script>
+    const wahlSlug = "{{ wahl.slug }}";
+    const zustandCurrent = "{{ zustand_current }}";
+    let selectedParties = [];
 
-    <li>
-        <span class="icon">&rarr;</span> Zu den Begründungen
-    </li>
+    function toggleBookmark(element, parteiId) {
+        const wrapper = element.closest('.bookmark-wrapper');
+        if (!wrapper) return;
 
-    <li>
-        <span class="icon">N</span> Neustart
-    </li>
+        const emptySvg = wrapper.querySelector('.bookmark-empty');
+        const filledSvg = wrapper.querySelector('.bookmark-filled');
 
+        const index = selectedParties.indexOf(parteiId);
+        if (index !== -1) {
+            selectedParties.splice(index, 1);
+            emptySvg.classList.remove('hidden');
+            filledSvg.classList.add('hidden');
+        } else {
+            if (selectedParties.length >= 4) {
+                alert('Du kannst maximal vier Parteien für den Vergleich auswählen.');
+                return;
+            }
+            selectedParties.push(parteiId);
+            emptySvg.classList.add('hidden');
+            filledSvg.classList.remove('hidden');
+        }
+        updateCompareButtons();
+    }
+
+    function updateCompareButtons() {
+        const btns = document.querySelectorAll('.btn-compare');
+        const enabled = selectedParties.length >= 2;
+        btns.forEach(btn => {
+            if (enabled) {
+                btn.classList.remove('disabled');
+                btn.disabled = false;
+            } else {
+                btn.classList.add('disabled');
+                btn.disabled = true;
+            }
+        });
+    }
+
+    function navigateCompare() {
+        if (selectedParties.length < 2) return;
+        const ids = selectedParties.join(',');
+        const url = `/${wahlSlug}/compare/${zustandCurrent}/?parteien=${ids}`;
+        window.location.href = url;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.bookmark-wrapper').forEach(w => {
+            w.querySelector('.bookmark-empty')?.classList.remove('hidden');
+            w.querySelector('.bookmark-filled')?.classList.add('hidden');
+        });
+        selectedParties = [];
+        updateCompareButtons();
+    });
+</script>
 {% endblock %}
