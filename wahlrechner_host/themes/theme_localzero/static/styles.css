@@ -1549,6 +1549,10 @@ footer img {
    display: block;
 }
 
+.hintergrundinfo {
+   min-height: 8rem;
+}
+
 /* Responsive Behavior */
 @media (max-width: 768px) {
    .thesen-container {
