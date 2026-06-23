@@ -1,5 +1,5 @@
 <!-- lz_d_1: Share-Widget -->
-<!-- lz_e_1: Teilen-Widget für iframe und andere Sachen angepasst -->
+<!-- lz_e_1: angepasst für HTTPS-Korrektur clientseitig, iframe-URL-Erkennung, mehrere Buttons -->
 <style>
   /* Nur Dialog und Overlay – der Button verwendet die globale .btn-Klasse */
   .share-widget-dialog {
@@ -150,7 +150,7 @@
   </svg>
 </div>
 
-<!-- Trigger-Button mit urlencode -->
+<!-- Trigger-Button – data-url wird als Fallback für Nicht-iframe verwendet -->
 <button class="btn share-trigger" type="button" style="display: inline-flex; justify-content: center; align-items: center; gap: 0.5rem;"
         data-url="{{ share_url|urlencode }}"
         data-title="{{ share_title|urlencode }}"
@@ -267,23 +267,42 @@
     const trigger = e.target.closest('.share-trigger');
     if (!trigger) return;
 
-    // Werte dekodieren (URL-encoded)
-    const url = decodeURIComponent(trigger.dataset.url);
+    // in iframe: <iframe src="https://wahlcheck.privat.de/wahlcheck_sub_seite?share_url=LZ-URL"></iframe>
+    // Dann wird der LZ Link zum Teilen genommen, sonst der private bzw. Originale
+    // Titel und Beschreibung dekodieren
     const title = decodeURIComponent(trigger.dataset.title);
     const desc = decodeURIComponent(trigger.dataset.desc || '');
+
+    // URL ermitteln
+    let shareUrl;
+
+    // 1. Prüfe, ob die Elternseite eine share_url per Query-Parameter mitgegeben hat
+    const urlParams = new URLSearchParams(window.location.search);
+    const parentShareUrl = urlParams.get('share_url');
+    if (parentShareUrl) {
+      shareUrl = decodeURIComponent(parentShareUrl);
+    } else {
+      // 2. Fallback: die ursprüngliche URL aus dem data-Attribut des Buttons
+      shareUrl = decodeURIComponent(trigger.dataset.url);
+    }
+
+    // HTTPS-Korrektur (falls nötig)
+    if (window.location.protocol === 'https:' && shareUrl.startsWith('http://')) {
+      shareUrl = shareUrl.replace('http://', 'https://');
+    }
 
     const inIframe = window.self !== window.top;
     if (!inIframe && navigator.share) {
       navigator.share({
         title: title,
         text: desc,
-        url: url
+        url: shareUrl
       }).catch((err) => {
         console.warn('Share API failed, fallback to dialog', err);
-        openDialog(url, title, desc);
+        openDialog(shareUrl, title, desc);
       });
     } else {
-      openDialog(url, title, desc);
+      openDialog(shareUrl, title, desc);
     }
   });
 
