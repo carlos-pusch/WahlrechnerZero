@@ -1611,6 +1611,10 @@ footer img {
       margin-top: -3rem;
       padding-left: 0rem;
    }
+
+   .team-info {
+      width: 37.5rem;
+   }
 }
 @media (max-width: 640px) {
    .shift_for_icon {
@@ -1631,6 +1635,7 @@ footer img {
    padding-bottom: 0.75rem;
    color: white;
    font-weight: bold;
+   width: 55rem;
 }
 
 .team-info a {
