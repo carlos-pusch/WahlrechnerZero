@@ -1475,8 +1475,8 @@ footer {
    display: flex;
    justify-content: space-between;
    max-width: 1200px;
-   margin: 0 auto;
-   padding: 0 1rem;
+   margin: -5rem auto 0 auto;
+   /* adding: 0 1rem; */
 }
 
 .footer-left,
@@ -1621,7 +1621,8 @@ footer img {
       flex-direction: column;
       gap: 1.5rem;
       text-align: center;
-      padding: 0rem;
+      padding-top: 1rem;
+      margin-top: -2rem;
    }
 
    .footer-left {
@@ -1647,8 +1648,23 @@ footer img {
       align-items: stretch;
       gap: 0.5rem;
    }
+
    .these.btn-container .btn {
       flex: none;
+   }
+
+   .footer-flex-container {
+      flex-direction: column;
+      align-items: center;
+      gap: 0.05rem;
+      padding: 0rem;
+   }
+
+   .footer-left,
+   .footer-middle,
+   .footer-right {
+      width: 100%;
+      justify-content: center;
    }
 }
 @media (max-width: 640px) {
@@ -1683,4 +1699,12 @@ footer img {
 
 .img-pl {
    padding-left: 0.5rem;
+}
+
+.footer-flex-container {
+  display: flex;
+  justify-content: space-evenly;  /* gleiche Abstände zwischen den Blöcken UND zu den äußeren Rändern */
+  align-items: center;           /* vertikale Zentrierung */
+  flex-wrap: wrap;               /* für den Fall, dass es doch mal eng wird */
+  padding: 1rem 0;               /* vertikaler Innenabstand nach Wunsch */
 }
