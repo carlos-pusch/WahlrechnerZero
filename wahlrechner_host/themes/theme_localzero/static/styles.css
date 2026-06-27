@@ -1467,15 +1467,13 @@ input:checked + svg {
 
 footer {
    width: 100%;
-   padding: 20px 0;
-   margin-top: 30px;
 }
 
 .footer-content {
    display: flex;
    justify-content: space-between;
    max-width: 1200px;
-   margin: -5rem auto 0 auto;
+   margin: 0 auto 0 auto;
    /* adding: 0 1rem; */
 }
 
@@ -1569,7 +1567,7 @@ footer img {
 }
 
 .hintergrundinfo {
-   min-height: 8rem;
+   min-height: 10rem;
 }
 
 /* Responsive Behavior */
@@ -1599,7 +1597,7 @@ footer img {
     
    .content .these.title {
       padding-top: 1rem;
-      min-height: 15rem;
+      min-height: 16rem;
     }
 
    .sidebar {
