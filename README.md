@@ -19,6 +19,7 @@
       <li>vor dem eigentlichen Start Kurzvorstellung des lokalen Teams</li>
       <li>Einbindung von Grafiken zur Bewertung der Kandidierenden / Parteien durch die Positionierung bei den klimapositiven Thesen</li>
       <li>Direkter Vergleich von 4 Kandidierenden / Parteien mit Übersicht, wo Unterschiede sind</li>
+      <li>"Mehr anzeigen" Button bei der Selbstbeschreibung ab 400 Zeichen hinzugefügt</li>
     </ul>
   </li>
   <li>Mögliche Änderungen
