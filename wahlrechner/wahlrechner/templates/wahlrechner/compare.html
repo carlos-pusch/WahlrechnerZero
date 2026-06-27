@@ -23,9 +23,11 @@
     <style>
         /* Sticky Header */
         .sticky-wrapper {
-            /* position: sticky; */
+            /* position: sticky; sticky */
             top: 0rem;
             z-index: 50;
+            padding-top: 1.5rem; /* non-sticky */
+            width: 99%;
             /* Der Wrapper selbst hat keinen Hintergrund – seine Kinder färben den sichtbaren Bereich */
         }
 
@@ -34,7 +36,7 @@
             /* border-radius, padding, background werden von .content geerbt */
             /* Damit der Header nicht mehr selbst sticky ist: */
             position: relative;        /* oder static, aber relative schadet nicht */
-            top: 2rem;
+            /* top: 2rem; sticky */ 
         }
         .dark .compare-header {
             background-color: #1f2937; /* Dunkles Theme */
@@ -86,9 +88,10 @@
 
         .compare-these-card {
             margin-bottom: 2rem;
-            scroll-margin-top: 160px; /* Höhe des Headers + etwas Puffer */
-            margin-top: 1.5rem;
-            border-radius: 50px 50px 50px 50px;
+            /* scroll-margin-top: 160px; sticky 
+            margin-top: 1.5rem; */
+            border-radius: 0px 50px 50px 50px;
+            width: 97%;
         }
         .dark .compare-these-card {
             background-color: #1f2937;
@@ -241,6 +244,57 @@
         .compare-header .btn-row {
             margin-top: 0.5rem;
             margin-bottom: 0;
+        }
+
+        @media (max-width: 764px) {
+            /* Das Grid jedes Eintrags auf zwei Zeilen umstellen */
+            .vergleichs-zeile-container {
+                grid-template-columns: 1fr auto;   /* zweite Zeile: links Position, rechts Button */
+                grid-template-rows: auto auto;     /* zwei Zeilen */
+                gap: 0.25rem 0.5rem;              /* etwas Abstand */
+            }
+
+            /* Name über die ganze Breite der ersten Zeile */
+            .vergleichs-name {
+                grid-column: 1 / -1;
+            }
+
+            /* Position (Icon + Text) in der zweiten Zeile links */
+            .vergleichs-position {
+                grid-column: 1;
+            }
+
+            /* Details‑Button in der zweiten Zeile rechts */
+            .detail-button {
+                grid-column: 2;
+            }
+
+            /* Der leere Platzhalter für die Zeile „Deine Position“ kann ausgeblendet werden */
+            .vergleichs-zeile-container .detail-placeholder {
+                display: none;
+            }
+
+            /* Für die Zeile ohne Button (User) soll die Position über die ganze Breite gehen */
+            .vergleichs-pt .vergleichs-position {
+                grid-column: 1 / -1;
+            }
+
+            /* Begründung (wenn ausgeklappt) wieder über die volle Breite */
+            .vergleichs-zeile-container .begruendung {
+                grid-column: 1 / -1;
+            }
+
+            /* Sicherstellen, dass die Karte selbst keinen horizontalen Overflow verursacht */
+            .compare-these-card {
+                width: 99%;
+                overflow-x: hidden;
+            }
+
+            .content {
+                word-wrap: break-word;
+                overflow-wrap: break-word;
+                box-sizing: border-box;
+            }
         }
     </style>
 
