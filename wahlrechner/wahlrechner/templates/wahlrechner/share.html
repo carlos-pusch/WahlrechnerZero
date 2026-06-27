@@ -5,9 +5,9 @@
   .share-widget-dialog {
     display: none;
     position: fixed;
-    top: 50%;
+    top: auto;
+    transform: translate(-50%,0);
     left: 50%;
-    transform: translate(-50%, -50%);
     width: 95%;
     max-width: 600px;
     background: #fff;
@@ -309,7 +309,16 @@
   function openDialog(url, title, desc) {
     const dialog = document.getElementById('sw-dialog');
     const overlay = document.getElementById('sw-overlay');
+
     if (!dialog || !overlay) return;
+
+    const button = event.target.closest('.share-trigger');
+    if (button) {
+      const rect = button.getBoundingClientRect();
+      dialog.style.top = (rect.top + window.scrollY - 150) + 'px';
+      dialog.classList.add('is-open');
+      overlay.classList.add('is-open');
+    }
 
     document.getElementById('sw-url').textContent = url;
     document.getElementById('sw-dialog-title').textContent = desc || 'Seite teilen';
