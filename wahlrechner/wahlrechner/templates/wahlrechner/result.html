@@ -96,12 +96,13 @@
                              alt="{{ partei.partei_name }}">
                     {% endif %}
                     {% if partei.partei_beschreibung %}
-                        <p class="text-sm text-left text-gray-600 dark:text-gray-300 img-pl">
-                            "{{ partei.partei_beschreibung.strip }}" <span
-                                class="text-gray-400 italic">(Selbstbeschreibung)</span></p>
+                        <p class="text-sm text-left text-gray-600 dark:text-gray-300 img-pl partei-beschreibung">
+                            <span class="desc-text">{{ partei.partei_beschreibung.strip }}</span>
+                            <span class="text-gray-400 italic desc-label">(Selbstbeschreibung)</span>
+                        </p>
                     {% else %}
                         <p class="text-sm italic text-left text-gray-600 dark:text-gray-300 img-pl">
-                            Es liegt keine Beschreibung zu dieser Person vor.</p>
+                            Es liegt keine Beschreibung vor.</p>
                     {% endif %}
                 </div>
             </div>
@@ -220,5 +221,68 @@
         selectedParties = [];
         updateCompareButtons();
     });
+</script>
+<script>
+    // Text kürzen und "mehr anzeigen"-Button
+    (function() {
+        const CHAR_LIMIT = 400;
+
+        function truncateText(fullText) {
+            // Entferne überflüssigen Whitespace
+            fullText = fullText.trim();
+            if (fullText.length <= CHAR_LIMIT) return fullText;
+
+            const words = fullText.split(/\s+/);
+            let result = '';
+            for (const word of words) {
+                const test = result ? result + ' ' + word : word;
+                if (test.length > CHAR_LIMIT) break;
+                result = test;
+            }
+            return result + '...';
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.partei-beschreibung').forEach(function(p) {
+                const textSpan = p.querySelector('.desc-text');
+                if (!textSpan) return;
+                const fullText = textSpan.textContent.trim();
+                const truncated = truncateText(fullText);
+                if (truncated === fullText) return; // nichts zu kürzen
+
+                // Ursprungstext sichern
+                textSpan.setAttribute('data-full-text', fullText);
+                textSpan.textContent = truncated;
+
+                // Button erstellen
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.style = "color: blue;"
+                btn.className = 'text-blue-500 hover:underline ml-1 text-sm';
+                btn.textContent = 'Mehr anzeigen';
+
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (textSpan.textContent === truncated) {
+                        // Ausklappen
+                        textSpan.textContent = fullText;
+                        btn.textContent = 'Weniger anzeigen';
+                    } else {
+                        // Einklappen
+                        textSpan.textContent = truncated;
+                        btn.textContent = 'Mehr anzeigen';
+                    }
+                });
+
+                // Button hinter dem (Selbstbeschreibung)-Label einfügen
+                const labelSpan = p.querySelector('.desc-label');
+                if (labelSpan) {
+                    labelSpan.insertAdjacentElement('afterend', btn);
+                } else {
+                    p.appendChild(btn);
+                }
+            });
+        });
+    })();
 </script>
 {% endblock %}
