@@ -858,9 +858,28 @@ p.text-gray-600 > span.text-gray-400 {
    padding-left: 0;
    padding-right: 0;
 }
+.these.btn-container {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  margin-top: 1rem;
+  width: 100%;
+  padding: 0;
+}
+
+.these.btn-container .btn {
+  flex: 0 0 12rem;
+  padding: 0.375rem 0.75rem;
+  white-space: nowrap;
+  text-align: center;
+  font-weight: bold;
+  height: 2.25rem;
+   align-content: center;
+}
+
 .content .these.btn-container > :not([hidden]) ~ :not([hidden]) {
    --tw-space-y-reverse: 0;
-   margin-top: calc(0.5rem * (1 - var(--tw-space-y-reverse)));
+   /* margin-top: calc(0.5rem * (1 - var(--tw-space-y-reverse))); */
    margin-bottom: calc(0.5rem * var(--tw-space-y-reverse));
 }
 @media (min-width: 1024px) {
@@ -1605,6 +1624,10 @@ footer img {
       padding: 0rem;
    }
 
+   .footer-left {
+      margin-top: -3rem;
+   }
+
    .footer-left,
    .footer-middle,
    .footer-right {
@@ -1618,6 +1641,14 @@ footer img {
 
    .team-info {
       width: 37.5rem;
+   }
+   .these.btn-container {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.5rem;
+   }
+   .these.btn-container .btn {
+      flex: none;
    }
 }
 @media (max-width: 640px) {
