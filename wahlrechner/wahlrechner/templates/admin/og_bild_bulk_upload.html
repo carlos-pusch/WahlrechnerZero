@@ -1,0 +1,66 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block content %}
+<div class="module">
+    <h1>OG‑Bilder‑Bulkimport</h1>
+    <p>
+        Laden Sie mehrere Open‑Graph‑Bilder hoch. Die Dateien werden automatisch der richtigen Wahl zugeordnet.
+    </p>
+    <ul>
+        <li><strong>Dateiname:</strong> <code>&lt;slug&gt;__&lt;beliebig&gt;.png</code> oder <code>.jpg</code></li>
+        <li>Der Teil vor dem ersten doppelten Unterstrich (<code>__</code>) wird als Wahl‑Slug interpretiert.</li>
+        <li>Das Bild wird als <em>og_image</em> der entsprechenden Wahl hinterlegt.</li>
+    </ul>
+    <p><strong>Hinweis:</strong> Bestehende OG‑Bilder einer Wahl werden durch den neuen Upload überschrieben.</p>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div>
+            <label for="id_images">Wählen Sie die Dateien aus:</label>
+            <input type="file" name="images" id="id_images" multiple accept=".png,.jpg,.jpeg">
+        </div>
+        <div style="margin-top: 1em;">
+            <input type="submit" value="Hochladen und zuordnen">
+        </div>
+    </form>
+
+    {% if files %}
+        <h2 style="margin-top: 2em;">Bereits hochgeladene OG‑Bilder</h2>
+        <table style="width:100%; border-collapse:collapse; margin-top:1em;">
+            <thead>
+                <tr style="background:#f0f0f0; text-align:left;">
+                    <th style="padding:8px; border-bottom:1px solid #ddd;">Wahl (Slug)</th>
+                    <th style="padding:8px; border-bottom:1px solid #ddd;">Dateiname</th>
+                    <th style="padding:8px; border-bottom:1px solid #ddd;">Vorschau</th>
+                    <th style="padding:8px; border-bottom:1px solid #ddd;">Größe</th>
+                    <th style="padding:8px; border-bottom:1px solid #ddd;">Geändert</th>
+                    <th style="padding:8px; border-bottom:1px solid #ddd;">Aktion</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for file in files %}
+                <tr>
+                    <td style="padding:8px; border-bottom:1px solid #eee;">{{ file.slug }}</td>
+                    <td style="padding:8px; border-bottom:1px solid #eee;">{{ file.filename }}</td>
+                    <td style="padding:8px; border-bottom:1px solid #eee;">
+                        <img src="{{ file.url }}" alt="{{ file.filename }}" style="max-height:50px; max-width:100px;">
+                    </td>
+                    <td style="padding:8px; border-bottom:1px solid #eee;">{{ file.size|filesizeformat }}</td>
+                    <td style="padding:8px; border-bottom:1px solid #eee;">{{ file.modified }}</td>
+                    <td style="padding:8px; border-bottom:1px solid #eee;">
+                        <a href="{% url 'og_bild_delete_file' filename=file.filename %}"
+                           onclick="return confirm('Möchten Sie die Datei „{{ file.filename }}“ wirklich löschen?');"
+                           style="color: #b94a48; text-decoration: none; font-weight: bold;">
+                            Löschen
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p style="margin-top: 2em; color: #999;">Bisher wurden noch keine OG‑Bilder hochgeladen.</p>
+    {% endif %}
+</div>
+{% endblock %}
