@@ -117,23 +117,27 @@ def result(request, wahl_slug, zustand):
     if not wahl.ist_aktiv:
         return render(request, "wahlrechner/inactive.html", {"wahl": wahl})
 
+    # lz_d_1: unterstützte Wahltypen für Punktegrafiken
+    WAHLTYPEN = ['Parlamentswahl', 'Personenwahl']  # bei Bedarf erweiterbar
+
+    # In result():
     points_parlament_url = None
     points_these_url = None
-
     points_dir = os.path.join(settings.MEDIA_ROOT, 'punkte_grafiken', wahl.slug)
     if os.path.isdir(points_dir):
-        base_parlament = f"{wahl.slug}__Gesamtpunkte_nach_Parlamentswahl__-1_1"
-        base_these = f"{wahl.slug}__Punkte_nach_These_und_Parlamentswahl__-1_1"
-        
-        if os.path.exists(os.path.join(points_dir, f"{base_parlament}.html")):
-            points_parlament_url = settings.MEDIA_URL + f"punkte_grafiken/{wahl.slug}/{base_parlament}.html"
-        elif os.path.exists(os.path.join(points_dir, f"{base_parlament}.png")):
-            points_parlament_url = settings.MEDIA_URL + f"punkte_grafiken/{wahl.slug}/{base_parlament}.png"
-        
-        if os.path.exists(os.path.join(points_dir, f"{base_these}.html")):
-            points_these_url = settings.MEDIA_URL + f"punkte_grafiken/{wahl.slug}/{base_these}.html"
-        elif os.path.exists(os.path.join(points_dir, f"{base_these}.png")):
-            points_these_url = settings.MEDIA_URL + f"punkte_grafiken/{wahl.slug}/{base_these}.png"
+        for wahltyp in WAHLTYPEN:
+            base_parlament = f"{wahl.slug}__Gesamtpunkte_nach_{wahltyp}__-1_1"
+            base_these    = f"{wahl.slug}__Punkte_nach_These_und_{wahltyp}__-1_1"
+            if not points_parlament_url:
+                if os.path.exists(os.path.join(points_dir, f"{base_parlament}.html")):
+                    points_parlament_url = settings.MEDIA_URL + f"punkte_grafiken/{wahl.slug}/{base_parlament}.html"
+                elif os.path.exists(os.path.join(points_dir, f"{base_parlament}.png")):
+                    points_parlament_url = settings.MEDIA_URL + f"punkte_grafiken/{wahl.slug}/{base_parlament}.png"
+            if not points_these_url:
+                if os.path.exists(os.path.join(points_dir, f"{base_these}.html")):
+                    points_these_url = settings.MEDIA_URL + f"punkte_grafiken/{wahl.slug}/{base_these}.html"
+                elif os.path.exists(os.path.join(points_dir, f"{base_these}.png")):
+                    points_these_url = settings.MEDIA_URL + f"punkte_grafiken/{wahl.slug}/{base_these}.png"
     
     opinions = decode_zustand(zustand, wahl)
     thesen = alle_thesen(wahl)
