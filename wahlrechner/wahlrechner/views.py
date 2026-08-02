@@ -430,3 +430,90 @@ def compare(request, wahl_slug, zustand):
         "og_image_url": request.build_absolute_uri(wahl.og_image.url) if wahl.og_image else None,
     }
     return render(request, "wahlrechner/compare.html", context)
+
+# lz_f_1: Bulk-Upload für OG-Bilder
+from django.contrib.admin.views.decorators import staff_member_required
+from .bulk_og_image_import import process_uploaded_og_images
+from .bulk_points_import import extract_slug_from_filename   # 1:1 übernommen
+
+@staff_member_required
+def og_bild_bulk_upload(request):
+    if request.method == 'POST' and request.FILES.getlist('images'):
+        uploaded_files = request.FILES.getlist('images')
+        results = process_uploaded_og_images(uploaded_files)
+
+        success_count = sum(1 for r in results if r['status'] == 'Erfolg')
+        error_count = len(results) - success_count
+
+        if success_count:
+            messages.success(request, f"{success_count} Bild(er) erfolgreich als OG‑Bild gesetzt.")
+        if error_count:
+            messages.warning(request, f"{error_count} Datei(en) konnten nicht verarbeitet werden. Details siehe unten.")
+
+        request.session['og_upload_results'] = results
+        return redirect('og_bild_bulk_upload')
+
+    # GET: Liste vorhandener OG‑Bilder anzeigen
+    og_ordner = os.path.join(settings.MEDIA_ROOT, 'og_images')
+    files_data = []
+    if os.path.isdir(og_ordner):
+        for filename in os.listdir(og_ordner):
+            if filename.lower().endswith(('.png', '.jpg', '.jpeg')):
+                filepath = os.path.join(og_ordner, filename)
+                slug = extract_slug_from_filename(filename)
+                if slug is None:
+                    slug = 'unbekannt'
+                files_data.append({
+                    'slug': slug,
+                    'filename': filename,
+                    'url': settings.MEDIA_URL + f'og_images/{filename}',
+                    'size': os.path.getsize(filepath),
+                    'modified': time.strftime('%Y-%m-%d %H:%M', time.localtime(os.path.getmtime(filepath))),
+                })
+    files_data.sort(key=lambda x: (x['slug'], x['filename']))
+
+    upload_results = request.session.pop('og_upload_results', None)
+    if upload_results:
+        upload_results.sort(key=lambda x: 0 if x['status'] == 'Fehler' else 1)
+        for result in upload_results:
+            if result['status'] == 'Erfolg':
+                messages.success(request, f"✅ {result['filename']} – zugeordnet zu {result.get('wahl_titel', result.get('wahl_slug'))}")
+            else:
+                messages.error(request, f"❌ {result['filename']}: {result.get('message', 'Unbekannter Fehler')}")
+
+    return render(request, 'admin/og_bild_bulk_upload.html', {'files': files_data})
+
+
+@staff_member_required
+def og_bild_delete_file(request, filename):
+    """
+    Löscht eine einzelne OG‑Bild‑Datei und entfernt die Zuordnung in der Wahl.
+    """
+    if not filename.lower().endswith(('.png', '.jpg', '.jpeg')):
+        return HttpResponseBadRequest("Ungültiger Dateiname – nur PNG, JPG und JPEG sind erlaubt.")
+
+    base_dir = os.path.abspath(os.path.join(settings.MEDIA_ROOT, 'og_images'))
+    filepath = os.path.join(base_dir, filename)
+    abs_path = os.path.abspath(filepath)
+
+    if not abs_path.startswith(base_dir):
+        return HttpResponseBadRequest("Ungültiger Pfad.")
+
+    if os.path.exists(abs_path):
+        os.remove(abs_path)
+        # Falls eine Wahl dieses Bild als og_image verwendet, das Feld leeren
+        slug = extract_slug_from_filename(filename)
+        if slug:
+            try:
+                wahl = Wahl.objects.get(slug=slug)
+                if wahl.og_image and wahl.og_image.name == f'og_images/{filename}':
+                    wahl.og_image.delete(save=False)   # Löscht die Datei aus dem Feld (nicht erneut, wir haben sie schon gelöscht)
+                    wahl.og_image = None
+                    wahl.save()
+            except Wahl.DoesNotExist:
+                pass
+        messages.success(request, f"Die Datei „{filename}“ wurde gelöscht.")
+    else:
+        messages.error(request, f"Die Datei „{filename}“ wurde nicht gefunden.")
+
+    return redirect('og_bild_bulk_upload')
