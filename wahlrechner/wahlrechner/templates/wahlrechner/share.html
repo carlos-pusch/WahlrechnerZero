@@ -295,7 +295,7 @@
     if (!inIframe && navigator.share) {
       navigator.share({
         title: title,
-        text: desc,
+        text: desc + "\n" + url,   // URL anhängen für Text‑teilen
         url: shareUrl
       }).catch((err) => {
         console.warn('Share API failed, fallback to dialog', err);
