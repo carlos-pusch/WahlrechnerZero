@@ -35,6 +35,9 @@ def start(request, wahl_slug):
         "share_url": request.build_absolute_uri(reverse('start', args=[wahl.slug])),
         "share_title": wahl.titel,
         "share_dialog_title": "Kennst du schon unseren Wahlcheck?\nErzähle anderen davon!",
+        "share_description": "Kennst du schon unseren Wahlcheck? Erzähle anderen davon!",
+        # Bild: zuerst das hochgeladene og_image, sonst statischen Fallback
+        "og_image_url": request.build_absolute_uri(wahl.og_image.url) if wahl.og_image else None,
     }
     return render(request, "wahlrechner/start.html", context)
 
@@ -151,6 +154,7 @@ def result(request, wahl_slug, zustand):
         "share_url": request.build_absolute_uri(reverse('start', args=[wahl.slug])),
         "share_title": wahl.titel,
         "share_dialog_title": "Ich habe unseren Wahlcheck ausgefüllt!\nDu auch?",
+        "og_image_url": request.build_absolute_uri(wahl.og_image.url) if wahl.og_image else None,
         "points_parlament_url": points_parlament_url,
         "points_these_url": points_these_url,
     }
@@ -423,5 +427,6 @@ def compare(request, wahl_slug, zustand):
         'share_url': request.build_absolute_uri(reverse('start', args=[wahl.slug])),
         'share_title': wahl.titel,
         'share_dialog_title': "Vergleiche die Positionen im Wahlcheck!",
+        "og_image_url": request.build_absolute_uri(wahl.og_image.url) if wahl.og_image else None,
     }
     return render(request, "wahlrechner/compare.html", context)
