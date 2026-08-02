@@ -31,6 +31,19 @@ class Wahl(models.Model):
         default=True,
         help_text="Nur aktive Wahlen sind über die URL erreichbar"
     )
+    og_image = models.ImageField(
+        upload_to='og_images/',
+        blank=True,
+        null=True,
+        verbose_name="Open‑Graph‑Bild"
+    )
+    wahltypus = models.CharField(
+        "Wahl Typus",
+        max_length=20,
+        blank=True,
+        null=True,
+        default=None
+    )
     erstellt_am = models.DateTimeField(auto_now_add=True)
     geaendert_am = models.DateTimeField(auto_now=True)
 
