@@ -294,3 +294,18 @@ class PointsBulkImport(models.Model):
 
     def __str__(self):
         return "Bulk-Import von Punktediagrammen"
+
+# lz_f_1: Dummy-Modell für den Admin-Eintrag "09. OG-Bilder-Bulkimport"
+class OGBildBulkImport(models.Model):
+    """
+    Dieses Modell existiert nur, um im Admin einen Menüpunkt
+    für den Bulk-Upload von OG-Bildern zu erzeugen.
+    Es wird keine Datenbanktabelle angelegt.
+    """
+    class Meta:
+        managed = False
+        verbose_name = "OG-Bild-Bulkimport"
+        verbose_name_plural = "09. OG-Bilder-Bulkimport"  # Sortierung
+
+    def __str__(self):
+        return "Bulk-Import von Open‑Graph‑Bildern"
