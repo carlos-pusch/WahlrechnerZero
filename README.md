@@ -15,7 +15,7 @@
       <li>CSS für eigene Bedürfnisse angepasst</li>
       <li>docker/wait-for-it lokal ergänzt</li>
       <li>Zentraler Wartungszustand per Admin Interface aktivierbar</li>
-      <li>Link teilen Funktion</li>
+      <li>Link teilen Funktion verbessert</li>
       <li>vor dem eigentlichen Start Kurzvorstellung des lokalen Teams</li>
       <li>Einbindung von Grafiken zur Bewertung der Kandidierenden / Parteien durch die Positionierung bei den klimapositiven Thesen</li>
       <li>Direkter Vergleich von 4 Kandidierenden / Parteien mit Übersicht, wo Unterschiede sind</li>
