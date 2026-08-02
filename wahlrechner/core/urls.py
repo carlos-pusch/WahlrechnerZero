@@ -11,6 +11,8 @@ from wahlrechner.views import bulk_upload, image_delete_file, points_bulk_upload
 urlpatterns = [
     path('admin/bulk-upload/', bulk_upload, name='bulk_upload'),
     path('admin/bulk-upload/delete/<path:filename>/', image_delete_file, name='image_delete_file'),
+    path('admin/og-bild-bulk-upload/', views.og_bild_bulk_upload, name='og_bild_bulk_upload'), # lz_f_1
+    path('admin/og-bild-delete/<str:filename>/', views.og_bild_delete_file, name='og_bild_delete_file'), # lz_f_1
     path('admin/points-bulk-upload/', points_bulk_upload, name='points_bulk_upload'),  # lz_d_1
     path('admin/points-bulk-upload/delete/<slug:slug>/<path:filename>/', points_delete_file, name='points_delete_file'),  # lz_d_1
     path('admin/', admin.site.urls),
