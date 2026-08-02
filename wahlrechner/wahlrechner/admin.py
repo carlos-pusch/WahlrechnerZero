@@ -15,8 +15,10 @@ class WahlAdmin(ImportExportModelAdmin):
     list_display = ['slug', 'titel', 'theme', 'ist_aktiv', 'erstellt_am', 'geaendert_am']
     list_editable = ['ist_aktiv', 'theme']
     list_display_links = ['slug'] # explizit, damit der Link erhalten bleibt
-    list_filter = ['ist_aktiv', 'theme']
+    list_filter = ['ist_aktiv', 'theme', 'titel']
+    ordering = ["titel"]
     search_fields = ['slug', 'titel']
+    autocomplete_fields = ["titel", "slug"]
     prepopulated_fields = {'slug': ('titel',)}
 
 class AntwortResource(resources.ModelResource):
@@ -25,7 +27,7 @@ class AntwortResource(resources.ModelResource):
 
 @admin.register(Antwort)
 class AntwortAdmin(ImportExportModelAdmin):
-    list_display = ["antwort_partei", "antwort_these", "antwort_position"]
+    list_display = ["wahl", "antwort_partei", "antwort_these", "antwort_position"]
     list_display_links = ["antwort_partei", "antwort_these"]
     search_fields = [
         "antwort_these__these_text",
@@ -33,8 +35,9 @@ class AntwortAdmin(ImportExportModelAdmin):
         "antwort_these__these_explainer",
         "antwort_partei__partei_name",
     ]
-    list_filter = ["antwort_partei", "wahl"]   # lz_b_1: Filter nach Wahl
-    autocomplete_fields = ["antwort_these", "antwort_partei"]
+    ordering = ["wahl", "antwort_partei", "antwort_these"]
+    list_filter = ["antwort_position"]
+    autocomplete_fields = ["wahl", "antwort_these", "antwort_partei"]
     resource_class = AntwortResource
 
 
@@ -50,9 +53,11 @@ class TheseResource(resources.ModelResource):
 class TheseAdmin(ImportExportModelAdmin):
     list_display = ["wahl", "these_nr", "these_keyword", "these_text", "these_explainer"]   # lz_b_1: wahl ergänzt
     list_display_links = ["these_keyword"]
-    ordering = ["wahl", "these_nr"]
-    search_fields = ["these_keyword", "these_text", "these_explainer"]
-    list_filter = ["wahl"]   # lz_b_1: Filter nach Wahl
+    ordering = ["wahl", "these_nr", "these_keyword"]
+    search_fields = ["these_keyword", "these_text", "these_explainer", "wahl__titel", "wahl__slug"]
+    list_filter = ["these_keyword"]
+    ordering = ["wahl", "these_keyword", "these_explainer"]
+    autocomplete_fields = ["wahl", "these_keyword", "these_explainer"]
     inlines = [AntwortInLine]
     resource_class = TheseResource
 
@@ -64,8 +69,10 @@ class ParteiResource(resources.ModelResource):
 class ParteiAdmin(ImportExportModelAdmin):
     list_display = ["wahl", "partei_name", "partei_farbe", "partei_bild"]   # lz_b_1: wahl ergänzt
     list_editable = ['partei_farbe', 'partei_bild']
-    search_fields = ["partei_name"]
+    search_fields = ["partei_name", "wahl__titel", "wahl__slug", "partei_farbe"]
     list_filter = ["wahl"]   # lz_b_1: Filter nach Wahl
+    ordering = ["wahl", "partei_name", "partei_farbe"]
+    autocomplete_fields = ["wahl", "partei_name", "partei_farbe"]
     resource_class = ParteiResource
 
 # lz_b_1: Admin für globale Einstellungen
@@ -106,7 +113,8 @@ class TeamInfoAdmin(ImportExportModelAdmin):
     list_filter = ['wahl']
     list_editable = ['text', 'aktiv']
     search_fields = ['wahl__titel', 'text']
-    autocomplete_fields = ['wahl']   # falls du Autocomplete für die Wahl haben möchtest
+    autocomplete_fields = ['wahl']
+    ordering = ["wahl"]
 
     def text_preview(self, obj):
         """Zeigt einen kurzen Ausschnitt des Textes in der Listenansicht an."""

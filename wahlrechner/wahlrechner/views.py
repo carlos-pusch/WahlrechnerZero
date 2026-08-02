@@ -117,23 +117,27 @@ def result(request, wahl_slug, zustand):
     if not wahl.ist_aktiv:
         return render(request, "wahlrechner/inactive.html", {"wahl": wahl})
 
+    # lz_d_1: unterstützte Wahltypen für Punktegrafiken
+    WAHLTYPEN = ['Parlamentswahl', 'Personenwahl']  # bei Bedarf erweiterbar
+
+    # In result():
     points_parlament_url = None
     points_these_url = None
-
     points_dir = os.path.join(settings.MEDIA_ROOT, 'punkte_grafiken', wahl.slug)
     if os.path.isdir(points_dir):
-        base_parlament = f"{wahl.slug}__Gesamtpunkte_nach_Parlamentswahl__-1_1"
-        base_these = f"{wahl.slug}__Punkte_nach_These_und_Parlamentswahl__-1_1"
-        
-        if os.path.exists(os.path.join(points_dir, f"{base_parlament}.html")):
-            points_parlament_url = settings.MEDIA_URL + f"punkte_grafiken/{wahl.slug}/{base_parlament}.html"
-        elif os.path.exists(os.path.join(points_dir, f"{base_parlament}.png")):
-            points_parlament_url = settings.MEDIA_URL + f"punkte_grafiken/{wahl.slug}/{base_parlament}.png"
-        
-        if os.path.exists(os.path.join(points_dir, f"{base_these}.html")):
-            points_these_url = settings.MEDIA_URL + f"punkte_grafiken/{wahl.slug}/{base_these}.html"
-        elif os.path.exists(os.path.join(points_dir, f"{base_these}.png")):
-            points_these_url = settings.MEDIA_URL + f"punkte_grafiken/{wahl.slug}/{base_these}.png"
+        for wahltyp in WAHLTYPEN:
+            base_parlament = f"{wahl.slug}__Gesamtpunkte_nach_{wahltyp}__-1_1"
+            base_these    = f"{wahl.slug}__Punkte_nach_These_und_{wahltyp}__-1_1"
+            if not points_parlament_url:
+                if os.path.exists(os.path.join(points_dir, f"{base_parlament}.html")):
+                    points_parlament_url = settings.MEDIA_URL + f"punkte_grafiken/{wahl.slug}/{base_parlament}.html"
+                elif os.path.exists(os.path.join(points_dir, f"{base_parlament}.png")):
+                    points_parlament_url = settings.MEDIA_URL + f"punkte_grafiken/{wahl.slug}/{base_parlament}.png"
+            if not points_these_url:
+                if os.path.exists(os.path.join(points_dir, f"{base_these}.html")):
+                    points_these_url = settings.MEDIA_URL + f"punkte_grafiken/{wahl.slug}/{base_these}.html"
+                elif os.path.exists(os.path.join(points_dir, f"{base_these}.png")):
+                    points_these_url = settings.MEDIA_URL + f"punkte_grafiken/{wahl.slug}/{base_these}.png"
     
     opinions = decode_zustand(zustand, wahl)
     thesen = alle_thesen(wahl)
@@ -357,3 +361,67 @@ def points_delete_file(request, slug, filename):
         messages.error(request, f"Die Datei „{filename}“ wurde nicht gefunden.")
 
     return redirect('points_bulk_upload')
+
+# lz_f_1: Neue Vergleichsansicht
+def compare(request, wahl_slug, zustand):
+    try:
+        wahl = Wahl.objects.get(slug=wahl_slug)
+    except Wahl.DoesNotExist:
+        dummy = _get_dummy_wahl()
+        return render(request, "wahlrechner/error_404.html", {"wahl": dummy}, status=404)
+
+    if not wahl.ist_aktiv:
+        return render(request, "wahlrechner/inactive.html", {"wahl": wahl})
+
+    # Lese die ausgewählten Partei-IDs aus GET-Parametern
+    partei_ids_str = request.GET.get('parteien', '')
+    partei_ids = []
+    if partei_ids_str:
+        try:
+            partei_ids = [int(id) for id in partei_ids_str.split(',') if id.strip()]
+        except ValueError:
+            pass
+
+    # Lade die Parteien und behalte die Reihenfolge aus der URL
+    parteien = Partei.objects.filter(wahl=wahl, pk__in=partei_ids)
+    parteien_dict = {p.pk: p for p in parteien}
+    parteien_geordnet = [parteien_dict[id] for id in partei_ids if id in parteien_dict]
+
+    opinions = decode_zustand(zustand, wahl)
+    thesen = alle_thesen(wahl)
+
+    # Sammle für jede These die User-Position und die Antworten der Parteien
+    thesen_daten = []
+    for these in thesen:
+        user_position = opinions[these][0]  # 'a', 'd', 'n', 's' oder None
+        partei_antworten = []
+        for partei in parteien_geordnet:
+            try:
+                antwort = Antwort.objects.get(antwort_these=these, antwort_partei=partei)
+                partei_antworten.append({
+                    'partei': partei,
+                    'position': antwort.antwort_position,
+                    'text': antwort.antwort_text,
+                })
+            except Antwort.DoesNotExist:
+                partei_antworten.append({
+                    'partei': partei,
+                    'position': None,
+                    'text': None,
+                })
+        thesen_daten.append({
+            'these': these,
+            'user_position': user_position,
+            'partei_antworten': partei_antworten,
+        })
+
+    context = {
+        'wahl': wahl,
+        'thesen_daten': thesen_daten,
+        'zustand': zustand,
+        'parteien': parteien_geordnet,
+        'share_url': request.build_absolute_uri(reverse('start', args=[wahl.slug])),
+        'share_title': wahl.titel,
+        'share_dialog_title': "Vergleiche die Positionen im Wahlcheck!",
+    }
+    return render(request, "wahlrechner/compare.html", context)

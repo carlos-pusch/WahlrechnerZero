@@ -20,7 +20,6 @@
   function animatePercentage(el, target, duration) {
     const start = performance.now();
 
-    // Thresholds und Farben (Light / Dark)
     const lightColors = {
       transparent: { bg: 'transparent', text: '#000000' },
       red:   { bg: 'rgba(226, 98, 101, 0.6)', text: '#000000' },
@@ -41,7 +40,6 @@
       const current = easeOut(progress) * target;
       el.textContent = current.toFixed(1).replace('.', ',') + '\u00A0%';
 
-      // Farbstufe bestimmen
       let key = 'transparent'; // 0 bis < 10 --> transparent
       if (current >= 10 && current < 60) key = 'red';
       else if (current >= 60 && current < 85) key = 'yellow';
@@ -61,14 +59,11 @@
     const spans = document.querySelectorAll('.percentage');
 
     if (ANIMATION_START === 'immediate') {
-      // Alle Animationen sofort starten
       spans.forEach(span => {
         const target = parseFloat(span.dataset.target);
         if (!isNaN(target)) animatePercentage(span, target, target * 100);
       });
     } else {
-      // Nur bei Sichtbarkeit starten (IntersectionObserver)
-
       const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
           if (entry.isIntersecting) {
@@ -91,7 +86,8 @@
 
 {% include 'wahlrechner/header.html' %}
 
-<div class="container flex-grow p-4 mx-auto xl:max-w-full sm:p-8 sm:px-16 md:p-8 lg:p-12 xl:p-16 2xl:p-28">
+<!-- <div class="container flex-grow p-4 mx-auto xl:max-w-full sm:p-8 sm:px-16 md:p-8 lg:p-12 xl:p-16 2xl:p-28"> -->
+<div class="container flex-grow p-4 mx-auto" style="padding: 0.5rem;">
 
     <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-7 md:space-x-5">
 
@@ -142,6 +138,9 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+
+<!-- lz_f_1: Block für seiten-spezifisches JavaScript -->
+{% block extra_js %}{% endblock %}
 
 </body>
 
