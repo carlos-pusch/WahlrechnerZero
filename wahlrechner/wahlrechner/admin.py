@@ -121,6 +121,21 @@ class TeamInfoAdmin(ImportExportModelAdmin):
         return obj.text[:100] + '…' if len(obj.text) > 100 else obj.text
     text_preview.short_description = 'Text (Auszug)'
 
+# lz_d_1: Admin für den Punkte-Bulkimport
+@admin.register(PointsBulkImport)
+class PointsBulkImportAdmin(admin.ModelAdmin):
+    def changelist_view(self, request, extra_context=None):
+        return redirect('points_bulk_upload')
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
 # lz_f_1: Admin für OG‑Bilder‑Bulkimport
 @admin.register(OGBildBulkImport)
 class OGBildBulkImportAdmin(admin.ModelAdmin):
