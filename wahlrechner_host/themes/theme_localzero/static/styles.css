@@ -1706,3 +1706,11 @@ footer img {
   flex-wrap: wrap;               /* für den Fall, dass es doch mal eng wird */
   padding: 1rem 0;               /* vertikaler Innenabstand nach Wunsch */
 }
+
+a.ext-link {
+    color: #0000EE;            /* klassisches Link-Blau */
+    text-decoration: underline;
+}
+a.ext-link:visited {
+    color: #551A8B;            /* besuchte Links */
+}
