@@ -27,7 +27,7 @@ def linkify_urls(text): # lz_g_1
             url_pattern = r'(https?://[^\s<>"]+)'
             part = re.sub(
                 url_pattern,
-                r'<a href="\1" target="_blank" rel="noopener noreferrer">Link</a>',
+                r'<a href="\1" target="_blank" rel="noopener noreferrer" class="ext-link">Link</a>',
                 part
             )
             result.append(part)
