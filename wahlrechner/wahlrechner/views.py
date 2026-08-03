@@ -120,10 +120,7 @@ def result(request, wahl_slug, zustand):
     if not wahl.ist_aktiv:
         return render(request, "wahlrechner/inactive.html", {"wahl": wahl})
 
-    # lz_d_1: unterstützte Wahltypen für Punktegrafiken
-    WAHLTYPEN = ['Parlamentswahl', 'Personenwahl']  # bei Bedarf erweiterbar
-
-    # In result():
+    WAHLTYPEN = ['Parlamentswahl', 'Personenwahl']
     points_parlament_url = None
     points_these_url = None
     points_dir = os.path.join(settings.MEDIA_ROOT, 'punkte_grafiken', wahl.slug)
@@ -131,17 +128,30 @@ def result(request, wahl_slug, zustand):
         for wahltyp in WAHLTYPEN:
             base_parlament = f"{wahl.slug}__Gesamtpunkte_nach_{wahltyp}__-1_1"
             base_these    = f"{wahl.slug}__Punkte_nach_These_und_{wahltyp}__-1_1"
+
+            # lz_g_1: Datei suchen und Cache-Buster anhängen
             if not points_parlament_url:
-                if os.path.exists(os.path.join(points_dir, f"{base_parlament}.html")):
-                    points_parlament_url = settings.MEDIA_URL + f"punkte_grafiken/{wahl.slug}/{base_parlament}.html"
-                elif os.path.exists(os.path.join(points_dir, f"{base_parlament}.png")):
-                    points_parlament_url = settings.MEDIA_URL + f"punkte_grafiken/{wahl.slug}/{base_parlament}.png"
+                for ext in ['.html', '.png']:
+                    candidate = os.path.join(points_dir, f"{base_parlament}{ext}")
+                    if os.path.exists(candidate):
+                        points_parlament_url = (
+                            settings.MEDIA_URL +
+                            f"punkte_grafiken/{wahl.slug}/{base_parlament}{ext}"
+                            f"?v={int(os.path.getmtime(candidate))}"
+                        )
+                        break
+
             if not points_these_url:
-                if os.path.exists(os.path.join(points_dir, f"{base_these}.html")):
-                    points_these_url = settings.MEDIA_URL + f"punkte_grafiken/{wahl.slug}/{base_these}.html"
-                elif os.path.exists(os.path.join(points_dir, f"{base_these}.png")):
-                    points_these_url = settings.MEDIA_URL + f"punkte_grafiken/{wahl.slug}/{base_these}.png"
-    
+                for ext in ['.html', '.png']:
+                    candidate = os.path.join(points_dir, f"{base_these}{ext}")
+                    if os.path.exists(candidate):
+                        points_these_url = (
+                            settings.MEDIA_URL +
+                            f"punkte_grafiken/{wahl.slug}/{base_these}{ext}"
+                            f"?v={int(os.path.getmtime(candidate))}"
+                        )
+                        break
+
     opinions = decode_zustand(zustand, wahl)
     thesen = alle_thesen(wahl)
     context = { # lz_d_1
@@ -159,9 +169,7 @@ def result(request, wahl_slug, zustand):
         "points_these_url": points_these_url,
     }
     increase_result_count()
-
     return render(request, "wahlrechner/result.html", context)
-
 # lz_b_1: Begründungs-Seite
 def reason(request, wahl_slug, these_pk, zustand):
     try:
