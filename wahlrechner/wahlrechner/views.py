@@ -498,6 +498,7 @@ def compare(request, wahl_slug, zustand):
         'parteien': parteien_geordnet,
         'share_url': request.build_absolute_uri(reverse('start', args=[wahl.slug])),
         'share_title': wahl.titel,
-        'share_dialog_title': "Vergleiche die Positionen im Wahlcheck!"
+        'share_dialog_title': "Vergleiche die Positionen im Wahlcheck!",
+        "og_image_url": request.build_absolute_uri(wahl.og_image.url) if wahl.og_image else None,
     }
     return render(request, "wahlrechner/compare.html", context)
