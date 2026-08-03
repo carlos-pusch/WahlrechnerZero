@@ -4,7 +4,7 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 
-from wahlrechner.views import bulk_upload, image_delete_file, points_bulk_upload, points_delete_file   # lz_c_1 # lz_d_1
+from wahlrechner.views import bulk_upload, image_delete_file, points_bulk_upload, points_delete_file, points_bulk_delete_files   # lz_c_1 # lz_d_1
 
 # lz_b_1: Die feste URL_PREFIX wird entfernt, stattdessen dynamischer Slug
 
@@ -15,6 +15,7 @@ urlpatterns = [
     path('admin/og-bild-delete/<str:filename>/', views.og_bild_delete_file, name='og_bild_delete_file'), # lz_f_1
     path('admin/points-bulk-upload/', points_bulk_upload, name='points_bulk_upload'),  # lz_d_1
     path('admin/points-bulk-upload/delete/<slug:slug>/<path:filename>/', points_delete_file, name='points_delete_file'),  # lz_d_1
+    path('admin/bulk-upload-points/delete-multiple/', points_bulk_delete_files, name='points_bulk_delete_files'),
     path('admin/', admin.site.urls),
     path('<slug:wahl_slug>/', include('wahlrechner.tenant_urls')),
 ]
