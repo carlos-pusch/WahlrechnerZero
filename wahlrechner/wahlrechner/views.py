@@ -301,7 +301,6 @@ def points_bulk_upload(request):
         uploaded_files = request.FILES.getlist('images')
         results = process_uploaded_points_files(uploaded_files)
 
-        # Erfolgs- und Fehlerzahlen für eine kurze Zusammenfassung
         success_count = sum(1 for r in results if r['status'] == 'Erfolg')
         error_count = len(results) - success_count
 
@@ -310,10 +309,7 @@ def points_bulk_upload(request):
         if error_count:
             messages.warning(request, f"{error_count} Datei(en) konnten nicht hochgeladen werden. Details siehe unten.")
 
-        # Detaillierte Ergebnisse in der Session speichern
         request.session['upload_results'] = results
-
-        # Redirect auf die gleiche Seite (GET), damit die Tabelle aktualisiert wird
         return redirect('points_bulk_upload')
 
     # --- GET: Liste vorhandener Dateien anzeigen ---
@@ -326,19 +322,21 @@ def points_bulk_upload(request):
                 for filename in os.listdir(dir_path):
                     if filename.lower().endswith(('.png', '.html')):
                         filepath = os.path.join(dir_path, filename)
+                        mtime = os.path.getmtime(filepath)
+                        # lz_g_1: Cache-Busting-Parameter anhängen
+                        url_base = settings.MEDIA_URL + f"punkte_grafiken/{slug}/{filename}"
+                        url_with_cache = f"{url_base}?v={int(mtime)}"
                         files_data.append({
                             'slug': slug,
                             'filename': filename,
-                            'url': settings.MEDIA_URL + f"punkte_grafiken/{slug}/{filename}",
+                            'url': url_with_cache,   # <-- geänderte URL
                             'size': os.path.getsize(filepath),
-                            'modified': time.strftime('%Y-%m-%d %H:%M', time.localtime(os.path.getmtime(filepath))),
+                            'modified': time.strftime('%Y-%m-%d %H:%M', time.localtime(mtime)),
                         })
     files_data.sort(key=lambda x: (x['slug'], x['filename']))
 
-    # Prüfen, ob es detaillierte Ergebnisse aus einem vorherigen Upload gibt
     upload_results = request.session.pop('upload_results', None)
     if upload_results:
-        # Sortiere: Fehler zuerst (status == 'Fehler'), dann Erfolg
         upload_results.sort(key=lambda x: 0 if x['status'] == 'Fehler' else 1)
         for result in upload_results:
             if result['status'] == 'Erfolg':
@@ -347,6 +345,65 @@ def points_bulk_upload(request):
                 messages.error(request, f"❌ {result['filename']}: {result.get('message', 'Unbekannter Fehler')}")
 
     return render(request, 'admin/bulk_upload_punkte.html', {'files': files_data})
+
+@staff_member_required
+def points_bulk_delete_files(request):
+    """
+    Erwartet POST mit einer Liste von Werten im Format 'slug/filename' (via Checkboxen).
+    Löscht die ausgewählten Dateien und leitet zurück zur Übersicht.
+    """
+    if request.method != 'POST':
+        return HttpResponseBadRequest("Nur POST-Anfragen erlaubt.")
+
+    filenames = request.POST.getlist('filenames')  # z.B. ['wahl-a-ort-1/Gesamtpunkte_nach_...png', ...]
+    if not filenames:
+        messages.warning(request, "Keine Dateien zum Löschen ausgewählt.")
+        return redirect('points_bulk_upload')
+
+    base_dir = os.path.abspath(os.path.join(settings.MEDIA_ROOT, 'punkte_grafiken'))
+    deleted = 0
+    errors = []
+
+    for combined in filenames:
+        # Format: slug/filename (der Slug kann selbst Schrägstriche enthalten? Normalerweise nicht.)
+        # Wir splitten beim ersten '/' vom Ende, um den Dateinamen zu erhalten.
+        if '/' not in combined:
+            errors.append(f"Ungültiges Format: {combined}")
+            continue
+        # Das letzte '/' trennt den Dateinamen
+        slug, filename = combined.rsplit('/', 1)
+        if not slug or not filename:
+            errors.append(f"Ungültiger Pfad: {combined}")
+            continue
+
+        # Sicherheitscheck: nur .png / .html
+        if not filename.lower().endswith(('.png', '.html')):
+            errors.append(f"Ungültige Dateiendung: {filename}")
+            continue
+
+        filepath = os.path.join(base_dir, slug, filename)
+        abs_path = os.path.abspath(filepath)
+
+        if not abs_path.startswith(base_dir):
+            errors.append(f"Ungültiger Pfad: {combined}")
+            continue
+
+        if os.path.exists(abs_path):
+            try:
+                os.remove(abs_path)
+                deleted += 1
+            except OSError as e:
+                errors.append(f"Fehler beim Löschen von {filename}: {e}")
+        else:
+            errors.append(f"Datei nicht gefunden: {filename}")
+
+    if deleted:
+        messages.success(request, f"{deleted} Datei(en) erfolgreich gelöscht.")
+    if errors:
+        for err in errors:
+            messages.error(request, f"❌ {err}")
+
+    return redirect('points_bulk_upload')
 
 @staff_member_required
 def points_delete_file(request, slug, filename):
