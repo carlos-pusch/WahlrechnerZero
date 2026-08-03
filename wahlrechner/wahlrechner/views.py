@@ -169,6 +169,7 @@ def result(request, wahl_slug, zustand):
         "share_url": request.build_absolute_uri(reverse('start', args=[wahl.slug])),
         "share_title": wahl.titel,
         "share_dialog_title": "Ich habe unseren Wahlcheck ausgefüllt!\nDu auch?",
+        "og_image_url": request.build_absolute_uri(wahl.og_image.url) if wahl.og_image else None, # Bild: zuerst das hochgeladene og_image, sonst statischen Fallback
         "points_parlament_url": points_parlament_url,
         "points_parlament_is_png": points_parlament_is_png,   # lz_g_1
         "points_these_url": points_these_url,
