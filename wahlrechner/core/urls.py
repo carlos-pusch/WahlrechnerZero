@@ -4,7 +4,7 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 
-from wahlrechner.views import bulk_upload, image_delete_file, points_bulk_upload, points_delete_file, points_bulk_delete_files   # lz_c_1 # lz_d_1
+from wahlrechner.views import bulk_upload, image_delete_file, points_bulk_upload, points_delete_file, points_bulk_delete_files, og_bild_bulk_upload, og_bild_delete_file   # lz_c_1 # lz_d_1
 
 # lz_b_1: Die feste URL_PREFIX wird entfernt, stattdessen dynamischer Slug
 
