@@ -1,4 +1,4 @@
-http://{$ROOT_DOMAIN} {
+http://{$ROOT_DOMAIN_1}, http://{$ROOT_DOMAIN_2} {
 	header Content-Security-Policy: frame-ancestors *
     header -X-Frame-Options	
     # header Strict-Transport-Security max-age=31536000;
