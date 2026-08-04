@@ -9,12 +9,14 @@ Parameter:
 5. "icon": Name des Icons
 6. "type": Button Typ (ggf. "submit")
 7. "sc": Keyboard Shortcut für Button
+8. "style": (optional) Inline‑CSS für den Button
 {% endcomment %}
 
 <button type="{{ type|default:"button" }}"
         {% if url %}onClick="location.href='{{ url }}'"
         {% elif onclick %}onClick="{{ onclick }}"{% endif %} class="btn"
-        {% if sc %}id="{{ sc }}"{% endif %}>
+        {% if sc %}id="{{ sc }}"{% endif %}
+		{% if style %}style="{{ style }}"{% endif %}>
     {% if pos == "l" or pos == "left" %}
         {% include "snippets/icon.html" with icon=icon %}
     {% endif %}
