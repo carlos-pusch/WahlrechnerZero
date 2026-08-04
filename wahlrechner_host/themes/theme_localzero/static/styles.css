@@ -783,7 +783,7 @@ p.text-gray-600 > span.text-gray-400 {
    --tw-shadow: 0 25px 50px -12px #00000040;
    /*! --tw-shadow-colored:0 25px 50px -12px var(--tw-shadow-color); */
    box-shadow:var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow2);
-   --tw-shadow2: 0 20px 20px -12px #00000040;
+   --tw-shadow2: 0 16px 16px -12px #00000040;
    /*! max-height: 650px;
                            min-height: 500px; */
    text-align: left;
