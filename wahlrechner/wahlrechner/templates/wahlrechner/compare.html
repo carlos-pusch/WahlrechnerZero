@@ -169,7 +169,7 @@
             grid-column: 1 / -1; /* nimmt die gesamte Breite ein */
             margin-top: 0.25rem;
             padding: 0.75rem 1rem;
-            background-color: #f3f4f6;
+            background-color: #f2f2f2;
             border-radius: 6px;
             font-size: 0.95rem;
             color: #1f2937;
@@ -215,7 +215,7 @@
             align-items: center;
             gap: 0.75rem 1.5rem;
             padding: 0.4rem 0;
-            border-bottom: 1px solid #e5e7eb;
+            border-bottom: 2px solid #e5e7eb;
             width: 100%;
         }
         .vergleichs-zeile-container:last-child {
@@ -303,7 +303,7 @@
     <div class="sticky-wrapper">
         <div class="header-gap-0"></div>
         <div class="content compare-header">
-            <div class="content" style="padding:0;">
+            <div class="content" style="padding:0;box-shadow:none;">
                 <div class="">
                     <h1>Direkter Vergleich</h1>
                 </div>
@@ -318,7 +318,7 @@
                 </p>
                 <div class="btn-row">
                     {% url "result" wahl.slug zustand as url %}
-                    {% include "snippets/btn.html" with text="Zurück zum Ergebnis" url=url icon="cleft" pos="l" %}
+                    {% include "snippets/btn.html" with text="Zurück zum Ergebnis" url=url icon="cleft" pos="l" style="box-shadow:none;" %}
                 </div>
             </div>
             <div class="header-gap"></div>
