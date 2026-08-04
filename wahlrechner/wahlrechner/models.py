@@ -317,6 +317,12 @@ class TeamInfo(models.Model):
 
     def __str__(self):
         return f"Team-Info für {self.wahl.titel}"
+        
+    def save(self, *args, **kwargs):
+        # Vor dem Speichern die Teaminfos automatisch verlinken
+        if self.text:
+            self.text = linkify_urls(self.text)
+        super().save(*args, **kwargs)
 
 # lz_d_1: Dummy-Modell für den Admin-Eintrag "08. Punkte-Bulkimport"
 class PointsBulkImport(models.Model):
