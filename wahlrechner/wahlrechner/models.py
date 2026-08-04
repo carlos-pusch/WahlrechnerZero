@@ -346,4 +346,4 @@ class OGBildBulkImport(models.Model):
         verbose_name_plural = "09. OG-Bilder-Bulkimport"  # Sortierung
 
     def __str__(self):
-        return "Bulk-Import von Open‑Graph‑Bildern"
+        return "Bulk-Import von Open-Graph-Bildern"
