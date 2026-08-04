@@ -2,7 +2,7 @@ from django.contrib import admin
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 
-from .models import Antwort, Partei, These, Wahl, Wartungszustand, BulkImageImport, TeamInfo, PointsBulkImport # lz_b_1 # lz_c_1 # lz_d_1
+from .models import Antwort, Partei, These, Wahl, Wartungszustand, BulkImageImport, TeamInfo, PointsBulkImport, OGBildBulkImport # lz_b_1 # lz_c_1 # lz_d_1 # lz_g_1
 from django.shortcuts import redirect # lz_c_1
 
 class WahlResource(resources.ModelResource):
@@ -18,7 +18,6 @@ class WahlAdmin(ImportExportModelAdmin):
     list_filter = ['ist_aktiv', 'theme', 'titel']
     ordering = ["titel"]
     search_fields = ['slug', 'titel', 'wahltypus']
-    autocomplete_fields = ["titel", "slug"]
     prepopulated_fields = {'slug': ('titel',)}
 
 class AntwortResource(resources.ModelResource):
@@ -57,7 +56,7 @@ class TheseAdmin(ImportExportModelAdmin):
     search_fields = ["these_keyword", "these_text", "these_explainer", "wahl__titel", "wahl__slug"]
     list_filter = ["these_keyword"]
     ordering = ["wahl", "these_keyword", "these_explainer"]
-    autocomplete_fields = ["wahl", "these_keyword", "these_explainer"]
+    autocomplete_fields = ["wahl"]
     inlines = [AntwortInLine]
     resource_class = TheseResource
 
@@ -72,7 +71,7 @@ class ParteiAdmin(ImportExportModelAdmin):
     search_fields = ["partei_name", "wahl__titel", "wahl__slug", "partei_farbe"]
     list_filter = ["wahl"]   # lz_b_1: Filter nach Wahl
     ordering = ["wahl", "partei_name", "partei_farbe"]
-    autocomplete_fields = ["wahl", "partei_name", "partei_farbe"]
+    autocomplete_fields = ["wahl"]
     resource_class = ParteiResource
 
 # lz_b_1: Admin für globale Einstellungen
