@@ -55,7 +55,11 @@
 
         {% if these_next %}
             {% url "reason" wahl.slug these_next.pk zustand_current as url %}
-            {% include "snippets/btn.html" with text="nächste These" url=url icon="right" pos="r" %}
+            {% if these_current.is_these %}
+                {% include "snippets/btn.html" with text="nächste These" url=url icon="right" pos="r" %}
+            {% else %}
+                {% include "snippets/btn.html" with text="nächste Frage" url=url icon="right" pos="r" %}
+            {% endif %}
         {% endif %}
     </div>
 
@@ -109,7 +113,11 @@
 
         {% if these_next %}
             {% url "reason" wahl.slug these_next.pk zustand_current as url %}
-            {% include "snippets/btn.html" with text="nächste These" url=url icon="right" pos="r" sc="39" %}
+            {% if these_current.is_these %}
+                {% include "snippets/btn.html" with text="nächste These" url=url icon="right" pos="r" %}
+            {% else %}
+                {% include "snippets/btn.html" with text="nächste Frage" url=url icon="right" pos="r" %}
+            {% endif %}
         {% endif %}
     </div>
 
