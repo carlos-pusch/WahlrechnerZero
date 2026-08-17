@@ -24,9 +24,16 @@ def get_key_from_value(d, val):
     return None
 
 # lz_b_1: alle_thesen benötigt jetzt eine Wahl
-def alle_thesen(wahl):
-    """Gibt alle Thesen der übergebenen Wahl sortiert in einer Liste zurück."""
-    return These.objects.filter(wahl=wahl).order_by("these_nr")
+# lz_h_1: alle_thesen nur für Thesen als Default sont nur offene Fragen
+def alle_thesen(wahl, nur_positionen=True):
+    """
+    Gibt alle Thesen einer Wahl zurück, optional nur die Positionierungsfragen.
+    Standardmäßig werden nur Thesen mit is_these=True geliefert.
+    """
+    qs = These.objects.filter(wahl=wahl)
+    if nur_positionen:
+        qs = qs.filter(is_these=True)
+    return qs.order_by('these_nr')
 
 # lz_b_1: decode_zustand bekommt wahl und arbeitet positionsbasiert
 def decode_zustand(zustand=0, wahl=None):
@@ -43,6 +50,7 @@ def decode_zustand(zustand=0, wahl=None):
 
     # Lade alle Thesen der Wahl, sortiert nach these_nr
     thesen = list(alle_thesen(wahl))
+    #thesen = These.objects.filter(wahl=wahl, is_these=True).order_by('these_nr')
 
     # Erstelle ein Dictionary mit allen Thesen, initial unbeantwortet
     opinions = {t: SCHLUESSEL.get("0").copy() for t in thesen}
@@ -69,6 +77,7 @@ def encode_zustand(opinions, wahl):
     Gibt einen Zustand in Base-36 zurück.
     """
     thesen = list(alle_thesen(wahl))
+    #thesen = These.objects.filter(wahl=wahl, is_these=True).order_by('these_nr')
     zustand = 0
     for pos, these in enumerate(thesen):
         status = get_key_from_value(SCHLUESSEL, opinions[these])
@@ -147,7 +156,14 @@ def calc_result(zustand, opinions, wahl):
         for partei in Partei.objects.filter(wahl=wahl):
             total_p = 0
             max_p = 0
-            for antwort in Antwort.objects.filter(antwort_partei=partei):
+            # for antwort in Antwort.objects.filter(antwort_partei=partei):
+            for antwort in Antwort.objects.filter( # lz_h_1
+                antwort_partei=partei,
+                antwort_these__is_these=True
+            ):
+                if antwort.antwort_these not in opinions:
+                    continue
+
                 # lz_b_1: Prüfe, ob die These zur aktuellen Wahl gehört
                 if antwort.antwort_these.wahl != wahl:
                     # logger.warning(
@@ -200,6 +216,7 @@ def calc_result(zustand, opinions, wahl):
 def check_result(opinions, wahl):
     """Überprüft, ob ein Ergebnis aussagekräftig ist."""
     thesen = alle_thesen(wahl)
+    #thesen = These.objects.filter(wahl=wahl, is_these=True).order_by('these_nr')
     skips = 0
     for these in thesen:
         if opinions[these][0] == "s":
