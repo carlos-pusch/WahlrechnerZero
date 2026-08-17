@@ -20,6 +20,7 @@
       <li>Einbindung von Grafiken zur Bewertung der Kandidierenden / Parteien durch die Positionierung bei den klimapositiven Thesen</li>
       <li>Direkter Vergleich von 4 Kandidierenden / Parteien mit Übersicht, wo Unterschiede sind</li>
       <li>"Mehr anzeigen" Button bei der Selbstbeschreibung ab 400 Zeichen hinzugefügt</li>
+      <li>Offene und optionale Fragen ermöglicht</li>
     </ul>
   </li>
   <li>Mögliche Änderungen
