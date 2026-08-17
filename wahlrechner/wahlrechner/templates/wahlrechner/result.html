@@ -61,11 +61,15 @@
             {% include "snippets/icon.html" with icon="compare" %} Vergleich
         </button>
         {% url "confirm" wahl.slug zustand_current as url %}
-        {% include "snippets/btn.html" with text="Gewichtung bearbeiten" url=url icon="edit" pos="l" %}
+        {% include "snippets/btn.html" with text="Gewichtung ändern" url=url icon="edit" pos="l" %}
         {% url "start" wahl.slug as url %}
         {% include "snippets/btn.html" with text="Neustart" url=url icon="restart" pos="l" %}
+        {% if offene_fragen_erste_id %}
+            {% url "reason" wahl.slug offene_fragen_erste_id zustand_current as url_offene %}
+            {% include "snippets/btn.html" with text="Offene Fragen ansehen" url=url_offene icon="cright" pos="r" %}
+        {% endif %}
         {% url "reason" wahl.slug thesen.first.pk zustand_current as url %}
-        {% include "snippets/btn.html" with text="Zu den Begründungen" url=url icon="cright" pos="r" %}
+        {% include "snippets/btn.html" with text="Begründungen lesen" url=url icon="cright" pos="r" %}
     </div>
 
     {% for partei, percentage in result %}
@@ -147,18 +151,22 @@
             {% include "snippets/icon.html" with icon="compare" %} Vergleich
         </button>
         {% url "confirm" wahl.slug zustand_current as url %}
-        {% include "snippets/btn.html" with text="Gewichtung bearbeiten" url=url icon="edit" pos="l" sc="37" %}
+        {% include "snippets/btn.html" with text="Gewichtung ändern" url=url icon="edit" pos="l" sc="37" %}
         {% url "start" wahl.slug as url %}
         {% include "snippets/btn.html" with text="Neustart" url=url icon="restart" pos="l" sc="78" %}
+        {% if offene_fragen_erste_id %}
+            {% url "reason" wahl.slug offene_fragen_erste_id zustand_current as url_offene %}
+            {% include "snippets/btn.html" with text="Offene Fragen ansehen" url=url_offene icon="cright" pos="r" %}
+        {% endif %}
         {% url "reason" wahl.slug thesen.first.pk zustand_current as url %}
-        {% include "snippets/btn.html" with text="Zu den Begründungen" url=url icon="cright" pos="r" sc="39" %}
+        {% include "snippets/btn.html" with text="Begründungen lesen" url=url icon="cright" pos="r" sc="39" %}
     </div>
 
 {% endblock %}
 
 {% block shortcuts %}
-    <li><span class="icon">&larr;</span> Gewichtung bearbeiten</li>
-    <li><span class="icon">&rarr;</span> Zu den Begründungen</li>
+    <li><span class="icon">&larr;</span> Gewichtung ändern</li>
+    <li><span class="icon">&rarr;</span> Begründungen lesen</li>
     <li><span class="icon">N</span> Neustart</li>
 {% endblock %}
 
