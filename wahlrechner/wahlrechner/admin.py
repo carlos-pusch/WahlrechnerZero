@@ -37,7 +37,7 @@ class AntwortAdmin(ImportExportModelAdmin):
     ]
     ordering = ["wahl", "antwort_partei", "antwort_these"]
     list_filter = ["antwort_position"]
-    autocomplete_fields = ["wahl__titel", "antwort_these", "antwort_partei"]
+    autocomplete_fields = ["wahl", "antwort_these", "antwort_partei"]
     resource_class = AntwortResource
 
 
@@ -57,7 +57,7 @@ class TheseAdmin(ImportExportModelAdmin):
     search_fields = ["these_keyword", "these_text", "these_explainer", "wahl__titel", "wahl__slug"]
     list_filter = ["is_these", "these_keyword"]
     ordering = ["wahl", "these_keyword", "these_explainer"]
-    autocomplete_fields = ["wahl__titel"]
+    autocomplete_fields = ["wahl"]
     inlines = [AntwortInLine]
     resource_class = TheseResource
 
