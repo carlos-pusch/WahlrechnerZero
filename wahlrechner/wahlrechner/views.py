@@ -27,6 +27,7 @@ def start(request, wahl_slug):
         return render(request, "wahlrechner/inactive.html", {"wahl": wahl})
 
     thesen = alle_thesen(wahl)
+    #thesen = These.objects.filter(wahl=wahl, is_these=True).order_by('these_nr')
     opinions = decode_zustand(0, wahl)
     context = { # lz_d_1
         "thesen": thesen,
@@ -55,6 +56,7 @@ def these(request, wahl_slug, these_pk, zustand):
     these_current = get_object_or_404(These, pk=these_pk, wahl=wahl)
     opinions = decode_zustand(zustand, wahl)
     thesen = alle_thesen(wahl)
+    #thesen = These.objects.filter(wahl=wahl, is_these=True).order_by('these_nr')
     index = thesen_index(thesen, these_current)
 
     context = {
@@ -86,6 +88,7 @@ def confirm(request, wahl_slug, zustand):
 
     opinions = decode_zustand(zustand, wahl)
     thesen = alle_thesen(wahl)
+    #thesen = These.objects.filter(wahl=wahl, is_these=True).order_by('these_nr')
     context = {
         "opinions": opinions,
         "thesen": thesen,
@@ -158,7 +161,18 @@ def result(request, wahl_slug, zustand):
                         break
 
     opinions = decode_zustand(zustand, wahl)
-    thesen = alle_thesen(wahl)
+    offene_fragen = These.objects.filter(wahl=wahl, is_these=False).order_by('these_nr')
+    offene_fragen_erste_id = None
+    if offene_fragen.exists():
+        # Prüfen, ob mindestens eine Antwort mit Text vorhanden ist
+        antwort_vorhanden = Antwort.objects.filter(
+            wahl=wahl,
+            antwort_these__is_these=False,
+            antwort_text__isnull=False
+        ).exclude(antwort_text='').exists()
+        if antwort_vorhanden:
+            offene_fragen_erste_id = offene_fragen.first().pk
+    thesen = These.objects.filter(wahl=wahl, is_these=True).order_by('these_nr')
     context = { # lz_d_1
         "opinions": opinions,
         "thesen": thesen,
@@ -174,6 +188,7 @@ def result(request, wahl_slug, zustand):
         "points_parlament_is_png": points_parlament_is_png,   # lz_g_1
         "points_these_url": points_these_url,
         "points_these_is_png": points_these_is_png,           # lz_g_1
+        "offene_fragen_erste_id": offene_fragen_erste_id,   # lz_h_1
     }
     increase_result_count()
     return render(request, "wahlrechner/result.html", context)
@@ -190,7 +205,11 @@ def reason(request, wahl_slug, these_pk, zustand):
 
     these_current = get_object_or_404(These, pk=these_pk, wahl=wahl)
     opinions = decode_zustand(zustand, wahl)
-    thesen = alle_thesen(wahl)
+    # lz_h_1: Je nach Typ der aktuellen These nur die passende Gruppe laden
+    if these_current.is_these:
+        thesen = These.objects.filter(wahl=wahl, is_these=True).order_by('these_nr')
+    else:
+        thesen = These.objects.filter(wahl=wahl, is_these=False).order_by('these_nr')
     index = thesen_index(thesen, these_current)
     context = {
         "opinions": opinions,
@@ -465,6 +484,7 @@ def compare(request, wahl_slug, zustand):
 
     opinions = decode_zustand(zustand, wahl)
     thesen = alle_thesen(wahl)
+    #thesen = These.objects.filter(wahl=wahl, is_these=True).order_by('these_nr')
 
     # Sammle für jede These die User-Position und die Antworten der Parteien
     thesen_daten = []
