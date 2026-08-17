@@ -113,6 +113,7 @@ class These(models.Model):
     # lz_a_1: Neues Feld für Erklärungssätze
     these_explainer_help = """<i>Optionale Hintergrundinformation</i><br>
     Erklärungssätze zur These, die als zusätzliche Information angezeigt werden."""
+
     these_explainer = models.TextField(
         "Hintergrundinformation",
         help_text=these_explainer_help,
@@ -129,7 +130,16 @@ class These(models.Model):
     Zahl sein.<br>
     <b>Beispiel:</b> Die These, die zuerst angezeigt werden soll, hat die Nummer 1. Die zweite These
     die Nummer 2, usw."""
+
     these_nr = models.FloatField("Thesen-Nummer", help_text=these_nr_help)
+
+    # lz_h_1
+    is_these = models.BooleanField(
+        "Positionierungsfrage?",
+        default=True,
+        help_text="Wenn aktiv, wird die These in der normalen Abfrage angezeigt und fließt in die "
+                "Ergebnisberechnung ein. Wenn deaktiviert, handelt es sich um eine optionale offene Frage."
+    )
 
     class Meta:
         verbose_name = "These"
