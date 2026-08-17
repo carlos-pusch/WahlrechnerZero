@@ -33,10 +33,11 @@ class AntwortAdmin(ImportExportModelAdmin):
         "antwort_these__these_keyword",
         "antwort_these__these_explainer",
         "antwort_partei__partei_name",
+        "wahl__titel", "wahl__slug"
     ]
     ordering = ["wahl", "antwort_partei", "antwort_these"]
     list_filter = ["antwort_position"]
-    autocomplete_fields = ["wahl", "antwort_these", "antwort_partei"]
+    autocomplete_fields = ["wahl__titel", "antwort_these", "antwort_partei"]
     resource_class = AntwortResource
 
 
@@ -50,13 +51,13 @@ class TheseResource(resources.ModelResource):
 
 @admin.register(These)
 class TheseAdmin(ImportExportModelAdmin):
-    list_display = ["wahl", "these_nr", "these_keyword", "these_text", "these_explainer"]   # lz_b_1: wahl ergänzt
+    list_display = ["wahl", "these_nr", "these_keyword", "these_text", "these_explainer", "is_these"]   # lz_b_1: wahl ergänzt # lz_h_1
     list_display_links = ["these_keyword"]
     ordering = ["wahl", "these_nr", "these_keyword"]
     search_fields = ["these_keyword", "these_text", "these_explainer", "wahl__titel", "wahl__slug"]
-    list_filter = ["these_keyword"]
+    list_filter = ["is_these", "these_keyword"]
     ordering = ["wahl", "these_keyword", "these_explainer"]
-    autocomplete_fields = ["wahl"]
+    autocomplete_fields = ["wahl__titel"]
     inlines = [AntwortInLine]
     resource_class = TheseResource
 
