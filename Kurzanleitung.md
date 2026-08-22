@@ -4,26 +4,28 @@ Im Terminal und kann dann in einem Rutsch ausgeführt werden.
 
 ```bash
 dir_name="Wahlrechner"
+git_branch=""
+
 sudo mkdir $dir_name
 
 sudo git clone https://github.com/carlos-pusch/WahlrechnerZero "$dir_name"
 # falls spezifischer Branch; stattdessen
-# sudo git clone -b NAME https://github.com/carlos-pusch/WahlrechnerZero.git "$dir_name"
+# sudo git clone -b "$git_branch" https://github.com/carlos-pusch/WahlrechnerZero.git "$dir_name"
 
 cd "$dir_name"
 cd wahlrechner_host
 
-docker stop $(docker ps -aq)
-docker rm $(docker ps -aq)
-docker compose down --volumes --remove-orphans
-docker network prune
+# docker stop $(docker ps -aq)
+# docker rm $(docker ps -aq)
+# docker compose down --volumes --remove-orphans
+# docker network prune
 
 cd .. ; cd wahlrechner
 
-docker stop $(docker ps -aq)
-docker rm $(docker ps -aq)
-docker compose down --volumes --remove-orphans
-docker network prune
+# docker stop $(docker ps -aq)
+# docker rm $(docker ps -aq)
+# docker compose down --volumes --remove-orphans
+# docker network prune
 
 cd .. ; cd ..
 sudo chmod -R u+rwx "$dir_name"
