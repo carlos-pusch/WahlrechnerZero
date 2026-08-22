@@ -165,9 +165,9 @@ class Partei(models.Model):
         related_name="parteien"
     )
 
-    partei_name_help = """<i>Maximal 80 Zeichen</i><br>
+    partei_name_help = """<i>Maximal 90 Zeichen</i><br>
     Gib den Namen der Partei an, der für den Benutzer angezeigt werden soll."""
-    partei_name = models.CharField("Name", help_text=partei_name_help, max_length=80)
+    partei_name = models.CharField("Name", help_text=partei_name_help, max_length=90)
 
     partei_beschreibung_help = """<i>Maximal 1500 Zeichen</i><br>
     Beschreibung für die Partei, wird auf der Ergebnis-Seite angezeigt."""
