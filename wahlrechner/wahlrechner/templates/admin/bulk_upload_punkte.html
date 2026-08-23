@@ -1,83 +1,98 @@
 {% extends "admin/base_site.html" %}
 {% load static %}
 
+{% block title %}Punkte-Bild-Bulkimport | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block branding %}
+<h1 id="site-name"><a href="{% url 'admin:index' %}">{{ site_header|default:_('Django administration') }}</a></h1>
+{% endblock %}
+
 {% block content %}
-<div class="module">
-    <h1>Punkte-Bulkimport für Wahlgrafiken</h1>
-    <p>
-        Hier können Sie mehrere PNG- oder HTML-Dateien hochladen, die Punktegrafiken für eine Wahl darstellen.
-        Die Dateinamen müssen dem Schema <code>&lt;slug&gt;__&lt;grafikkennung&gt;.png</code> oder <code>.html</code> entsprechen.
-    </p>
-    <ul>
-        <li><strong>Slug</strong>: der eindeutige URL-Identifikator der Wahl (z. B. <code>kommunalwahl_by_2026_augsburg_srw</code>).</li>
-        <li><strong>Grafikkennung</strong>: einer der folgenden Werte:
-            <ul>
-                <li><code>Gesamtpunkte_nach_Parlamentswahl__-1_1</code></li>
-                <li><code>Punkte_nach_These_und_Parlamentswahl__-1_1</code></li>
-            </ul>
-        </li>
-    </ul>
-    <p>Beispiel: <code>kommunalwahl_by_2026_augsburg_srw__Gesamtpunkte_nach_Parlamentswahl__-1_1.png</code></p>
-    <p><strong>Hinweis:</strong> HTML-Dateien werden bevorzugt dargestellt, falls vorhanden; andernfalls wird das PNG-Bild verwendet.</p>
-    <p>Bereits vorhandene Dateien werden überschrieben (gleicher Dateiname).</p>
+<div id="content-main">
 
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        <div>
-            <label for="id_images">Wählen Sie die Dateien aus:</label>
-            <input type="file" name="images" id="id_images" multiple accept=".png,.html">
-        </div>
-        <div style="margin-top: 1em;">
-            <input type="submit" value="Hochladen und Bericht erstellen">
-        </div>
+  <!-- Upload‑Bereich -->
+  <div class="module">
+    <h2>Neue Punktegrafiken hochladen</h2>
+    <form method="post" enctype="multipart/form-data" action="{% url 'points_bulk_upload' %}" style="margin-bottom: 20px;">
+      {% csrf_token %}
+      <p>
+        <label for="id_images">Dateien auswählen (PNG / HTML):</label>
+        <input type="file" name="images" id="id_images" multiple accept=".png,.html" required>
+      </p>
+      <p class="help">
+        Erwartetes Dateinamenschema: <strong>&lt;slug&gt;__&lt;typ&gt;.png/.html</strong><br>
+        Erlaubte Typ‑Präfixe: <em>Gesamtpunkte_nach_</em> oder <em>Punkte_nach_These_und_</em>
+      </p>
+      <input type="submit" value="Hochladen" class="default">
     </form>
+  </div>
 
-    <p style="margin-top: 2em;">
-        Nach dem Upload wird eine CSV-Datei mit allen verarbeiteten Dateien heruntergeladen. 
-        Sie können diese nutzen, um den Status jedes Uploads nachzuvollziehen.
-    </p>
-
-    <!-- Tabelle der bereits hochgeladenen Dateien -->
+  <!-- Vorhandene Dateien -->
+  <div class="module">
+    <h2>Vorhandene Punktegrafiken</h2>
     {% if files %}
-        <h2 style="margin-top: 2em;">Bereits hochgeladene Dateien</h2>
-        <table style="width:100%; border-collapse:collapse; margin-top:1em;">
+      <form method="post" action="{% url 'points_bulk_delete_files' %}">
+        {% csrf_token %}
+        <div class="results">
+          <table id="result_list">
             <thead>
-                <tr style="background:#f0f0f0; text-align:left;">
-                    <th style="padding:8px; border-bottom:1px solid #ddd;">Wahl (Slug)</th>
-                    <th style="padding:8px; border-bottom:1px solid #ddd;">Dateiname</th>
-                    <th style="padding:8px; border-bottom:1px solid #ddd;">Vorschau</th>
-                    <th style="padding:8px; border-bottom:1px solid #ddd;">Größe</th>
-                    <th style="padding:8px; border-bottom:1px solid #ddd;">Geändert</th>
-                    <th style="padding:8px; border-bottom:1px solid #ddd;">Aktion</th>
-                </tr>
+              <tr>
+                <th scope="col" class="action-checkbox-column">
+                  <input type="checkbox" id="select-all" onclick="toggleAll(this)">
+                </th>
+                <th scope="col">Wahl (Slug)</th>
+                <th scope="col">Dateiname</th>
+                <th scope="col">Größe</th>
+                <th scope="col">Geändert</th>
+                <th scope="col">Vorschau / Link</th>
+                <th scope="col">Aktion</th>
+              </tr>
             </thead>
             <tbody>
-                {% for file in files %}
-                <tr>
-                    <td style="padding:8px; border-bottom:1px solid #eee;">{{ file.slug }}</td>
-                    <td style="padding:8px; border-bottom:1px solid #eee;">{{ file.filename }}</td>
-                    <td style="padding:8px; border-bottom:1px solid #eee;">
-                        {% if file.filename|lower|slice:"-4:" == ".png" %}
-                            <img src="{{ file.url }}" alt="{{ file.filename }}" style="max-height:50px; max-width:100px;">
-                        {% else %}
-                            <a href="{{ file.url }}" target="_blank">HTML anzeigen</a>
-                        {% endif %}
-                    </td>
-                    <td style="padding:8px; border-bottom:1px solid #eee;">{{ file.size|filesizeformat }}</td>
-                    <td style="padding:8px; border-bottom:1px solid #eee;">{{ file.modified }}</td>
-                    <td style="padding:8px; border-bottom:1px solid #eee;">
-                        <a href="{% url 'points_delete_file' slug=file.slug filename=file.filename %}"
-                           onclick="return confirm('Möchten Sie die Datei „{{ file.filename }}“ wirklich löschen?');"
-                           style="color: #b94a48; text-decoration: none; font-weight: bold;">
-                            Löschen
-                        </a>
-                    </td>
+              {% for file in files %}
+                <tr class="{% cycle 'row1' 'row2' %}">
+                  <td class="action-checkbox">
+                    <input type="checkbox" name="filenames" value="{{ file.slug }}/{{ file.filename }}">
+                  </td>
+                  <td>{{ file.slug }}</td>
+                  <td>{{ file.filename }}</td>
+                  <td>{{ file.size|filesizeformat }}</td>
+                  <td>{{ file.modified }}</td>
+                  <td>
+                    {% if file.filename|slice:'-4:'|lower == '.png' %}
+                      <a href="{{ file.url }}" target="_blank">
+                        <img src="{{ file.url }}" alt="Vorschau" style="max-width: 80px; max-height: 60px; vertical-align: middle;">
+                      </a>
+                    {% else %}
+                      <a href="{{ file.url }}" target="_blank">HTML ansehen</a>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <a href="{% url 'points_delete_file' slug=file.slug filename=file.filename %}">Einzeln löschen</a>
+                  </td>
                 </tr>
-                {% endfor %}
+              {% endfor %}
             </tbody>
-        </table>
+          </table>
+        </div>
+        <div class="submit-row">
+          <input type="submit" value="Ausgewählte löschen" class="deletelink">
+        </div>
+      </form>
     {% else %}
-        <p style="margin-top: 2em; color: #999;">Bisher wurden noch keine Dateien hochgeladen.</p>
+      <p>Bisher wurden noch keine Dateien hochgeladen.</p>
     {% endif %}
+  </div>
+
 </div>
+
+<script>
+  function toggleAll(source) {
+    const checkboxes = document.getElementsByName('filenames');
+    for (let i = 0; i < checkboxes.length; i++) {
+      checkboxes[i].checked = source.checked;
+    }
+  }
+</script>
+
 {% endblock %}

@@ -10,29 +10,36 @@
 {% block content %}
 
     <div class="content lg:p-10 space-x-0">
+		
+        <h1 class="these h1 shift_for_icon">
+            {% if these_current.is_these %}
+                Original-Begründungen der Thesen
+            {% else %}
+                {% if index.1 == 1 %}
+                    Original-Antworten der offenen Frage
+                {% else %}
+                    Original-Antworten der offenen Fragen
+                {% endif %}
+            {% endif %}
+        </h1>
+        <div class="these counter">
+            {% if these_current.is_these %}These {{ index.0 }} von {{ index.1 }}{% else %}Offene Frage {{ index.0 }} von {{ index.1 }}{% endif %}
+        </div>
 
-        <div class="these counter shift_for_icon">These {{ index.0 }} von {{ index.1 }}</div>
         <div class="these title">{{ these_current.these_text }}</div>
 
         {# Erhalte Position des Nutzers zu der These #}
-        {% alias opinions|get_opinion:these_current as opinion %}
-
-        {% if opinion != "s" and opinion != None %}
-            {# Falls These nicht übersprungen... #}
-
-            {# Füge ein passendes Badge für die Position des Nutzers ein #}
-            <p class="these clue">Deine Position:</p>
-            {% include "snippets/badge.html" with type=opinion pers="1" %}
-
-            {# Falls These priorisiert, füge ein passendes Badge ein #}
-            {% if opinions|is_prio:these_current %}
-                {% include "snippets/badge.html" with type="fav" pers="1" %}
+        {% if these_current.is_these %}
+            {% alias opinions|get_opinion:these_current as opinion %}
+            {% if opinion != "s" and opinion != None %}
+                <p class="these clue">Deine Position:</p>
+                {% include "snippets/badge.html" with type=opinion pers="1" %}
+                {% if opinions|is_prio:these_current %}
+                    {% include "snippets/badge.html" with type="fav" pers="1" %}
+                {% endif %}
+            {% else %}
+                <p class="these clue">Du hast diese These übersprungen.</p>
             {% endif %}
-
-        {% else %}
-            {# Falls These übersprungen... #}
-            <p class="these clue">Du hast diese These übersprungen.</p>
-
         {% endif %}
 
     </div>
@@ -48,7 +55,11 @@
 
         {% if these_next %}
             {% url "reason" wahl.slug these_next.pk zustand_current as url %}
-            {% include "snippets/btn.html" with text="nächste These" url=url icon="right" pos="r" %}
+            {% if these_current.is_these %}
+                {% include "snippets/btn.html" with text="nächste These" url=url icon="right" pos="r" %}
+            {% else %}
+                {% include "snippets/btn.html" with text="nächste Frage" url=url icon="right" pos="r" %}
+            {% endif %}
         {% endif %}
     </div>
 
@@ -68,17 +79,21 @@
 						<div class="text-lg font-semibold text-gray-700 dark:text-gray-100 sm:inline-flex">
 							{{ antwort.antwort_partei.partei_name }}
 						</div>
-						{% include "snippets/badge.html" with type=antwort.antwort_position pers="3" %}
+                        {% if these_current.is_these %}{% include "snippets/badge.html" with type=antwort.antwort_position pers="3" %}{% endif %}						
 					</h2>
 					
-					{# Begründung der kandidierenden Person #}
+					{# Begründung der kandidierenden Person oder Antwort auf offene Frage#}
 					<p class="text-sm text-left text-gray-600 dark:text-gray-300">
-						{% if antwort.antwort_text %}
-							"{{ antwort.antwort_text.strip }}"
-						{% else %}
-							<i>Von der kandidierenden Person liegt zu dieser These keine Begründung vor.</i>
-						{% endif %}
-					</p>
+                        {% if antwort.antwort_text %}
+                            "{{ antwort.antwort_text.strip }}"
+                        {% else %}
+                            {% if these_current.is_these %}
+                                <i>Zu dieser These liegt keine Begründung vor.</i>
+                            {% else %}
+                                <i>Zu dieser offenen Frage liegt kein Text vor.</i>
+                            {% endif %}
+                        {% endif %}
+                    </p>
 				</div>
 
             </div>
@@ -98,7 +113,11 @@
 
         {% if these_next %}
             {% url "reason" wahl.slug these_next.pk zustand_current as url %}
-            {% include "snippets/btn.html" with text="nächste These" url=url icon="right" pos="r" sc="39" %}
+            {% if these_current.is_these %}
+                {% include "snippets/btn.html" with text="nächste These" url=url icon="right" pos="r" %}
+            {% else %}
+                {% include "snippets/btn.html" with text="nächste Frage" url=url icon="right" pos="r" %}
+            {% endif %}
         {% endif %}
     </div>
 

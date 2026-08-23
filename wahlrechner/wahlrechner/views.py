@@ -27,6 +27,7 @@ def start(request, wahl_slug):
         return render(request, "wahlrechner/inactive.html", {"wahl": wahl})
 
     thesen = alle_thesen(wahl)
+    #thesen = These.objects.filter(wahl=wahl, is_these=True).order_by('these_nr')
     opinions = decode_zustand(0, wahl)
     context = { # lz_d_1
         "thesen": thesen,
@@ -35,6 +36,9 @@ def start(request, wahl_slug):
         "share_url": request.build_absolute_uri(reverse('start', args=[wahl.slug])),
         "share_title": wahl.titel,
         "share_dialog_title": "Kennst du schon unseren Wahlcheck?\nErzähle anderen davon!",
+        "share_description": "Kennst du schon unseren Wahlcheck? Erzähle anderen davon!",
+        # Bild: zuerst das hochgeladene og_image, sonst statischen Fallback
+        "og_image_url": request.build_absolute_uri(wahl.og_image.url) if wahl.og_image else None,
     }
     return render(request, "wahlrechner/start.html", context)
 
@@ -52,6 +56,7 @@ def these(request, wahl_slug, these_pk, zustand):
     these_current = get_object_or_404(These, pk=these_pk, wahl=wahl)
     opinions = decode_zustand(zustand, wahl)
     thesen = alle_thesen(wahl)
+    #thesen = These.objects.filter(wahl=wahl, is_these=True).order_by('these_nr')
     index = thesen_index(thesen, these_current)
 
     context = {
@@ -83,6 +88,7 @@ def confirm(request, wahl_slug, zustand):
 
     opinions = decode_zustand(zustand, wahl)
     thesen = alle_thesen(wahl)
+    #thesen = These.objects.filter(wahl=wahl, is_these=True).order_by('these_nr')
     context = {
         "opinions": opinions,
         "thesen": thesen,
@@ -117,30 +123,56 @@ def result(request, wahl_slug, zustand):
     if not wahl.ist_aktiv:
         return render(request, "wahlrechner/inactive.html", {"wahl": wahl})
 
-    # lz_d_1: unterstützte Wahltypen für Punktegrafiken
-    WAHLTYPEN = ['Parlamentswahl', 'Personenwahl']  # bei Bedarf erweiterbar
-
-    # In result():
+    WAHLTYPEN = ['Parlamentswahl', 'Personenwahl']
+    
     points_parlament_url = None
+    points_parlament_is_png = False    # lz_g_1
     points_these_url = None
+    points_these_is_png = False        # lz_g_1
+    
     points_dir = os.path.join(settings.MEDIA_ROOT, 'punkte_grafiken', wahl.slug)
     if os.path.isdir(points_dir):
         for wahltyp in WAHLTYPEN:
             base_parlament = f"{wahl.slug}__Gesamtpunkte_nach_{wahltyp}__-1_1"
             base_these    = f"{wahl.slug}__Punkte_nach_These_und_{wahltyp}__-1_1"
+
             if not points_parlament_url:
-                if os.path.exists(os.path.join(points_dir, f"{base_parlament}.html")):
-                    points_parlament_url = settings.MEDIA_URL + f"punkte_grafiken/{wahl.slug}/{base_parlament}.html"
-                elif os.path.exists(os.path.join(points_dir, f"{base_parlament}.png")):
-                    points_parlament_url = settings.MEDIA_URL + f"punkte_grafiken/{wahl.slug}/{base_parlament}.png"
+                for ext in ['.html', '.png']:
+                    candidate = os.path.join(points_dir, f"{base_parlament}{ext}")
+                    if os.path.exists(candidate):
+                        points_parlament_url = (
+                            settings.MEDIA_URL +
+                            f"punkte_grafiken/{wahl.slug}/{base_parlament}{ext}"
+                            f"?v={int(os.path.getmtime(candidate))}"
+                        )
+                        points_parlament_is_png = (ext == '.png')   # lz_g_1
+                        break
+
             if not points_these_url:
-                if os.path.exists(os.path.join(points_dir, f"{base_these}.html")):
-                    points_these_url = settings.MEDIA_URL + f"punkte_grafiken/{wahl.slug}/{base_these}.html"
-                elif os.path.exists(os.path.join(points_dir, f"{base_these}.png")):
-                    points_these_url = settings.MEDIA_URL + f"punkte_grafiken/{wahl.slug}/{base_these}.png"
-    
+                for ext in ['.html', '.png']:
+                    candidate = os.path.join(points_dir, f"{base_these}{ext}")
+                    if os.path.exists(candidate):
+                        points_these_url = (
+                            settings.MEDIA_URL +
+                            f"punkte_grafiken/{wahl.slug}/{base_these}{ext}"
+                            f"?v={int(os.path.getmtime(candidate))}"
+                        )
+                        points_these_is_png = (ext == '.png')       # lz_g_1
+                        break
+
     opinions = decode_zustand(zustand, wahl)
-    thesen = alle_thesen(wahl)
+    offene_fragen = These.objects.filter(wahl=wahl, is_these=False).order_by('these_nr')
+    offene_fragen_erste_id = None
+    if offene_fragen.exists():
+        # Prüfen, ob mindestens eine Antwort mit Text vorhanden ist
+        antwort_vorhanden = Antwort.objects.filter(
+            wahl=wahl,
+            antwort_these__is_these=False,
+            antwort_text__isnull=False
+        ).exclude(antwort_text='').exists()
+        if antwort_vorhanden:
+            offene_fragen_erste_id = offene_fragen.first().pk
+    thesen = These.objects.filter(wahl=wahl, is_these=True).order_by('these_nr')
     context = { # lz_d_1
         "opinions": opinions,
         "thesen": thesen,
@@ -151,13 +183,15 @@ def result(request, wahl_slug, zustand):
         "share_url": request.build_absolute_uri(reverse('start', args=[wahl.slug])),
         "share_title": wahl.titel,
         "share_dialog_title": "Ich habe unseren Wahlcheck ausgefüllt!\nDu auch?",
+        "og_image_url": request.build_absolute_uri(wahl.og_image.url) if wahl.og_image else None, # Bild: zuerst das hochgeladene og_image, sonst statischen Fallback
         "points_parlament_url": points_parlament_url,
+        "points_parlament_is_png": points_parlament_is_png,   # lz_g_1
         "points_these_url": points_these_url,
+        "points_these_is_png": points_these_is_png,           # lz_g_1
+        "offene_fragen_erste_id": offene_fragen_erste_id,   # lz_h_1
     }
     increase_result_count()
-
     return render(request, "wahlrechner/result.html", context)
-
 # lz_b_1: Begründungs-Seite
 def reason(request, wahl_slug, these_pk, zustand):
     try:
@@ -171,7 +205,11 @@ def reason(request, wahl_slug, these_pk, zustand):
 
     these_current = get_object_or_404(These, pk=these_pk, wahl=wahl)
     opinions = decode_zustand(zustand, wahl)
-    thesen = alle_thesen(wahl)
+    # lz_h_1: Je nach Typ der aktuellen These nur die passende Gruppe laden
+    if these_current.is_these:
+        thesen = These.objects.filter(wahl=wahl, is_these=True).order_by('these_nr')
+    else:
+        thesen = These.objects.filter(wahl=wahl, is_these=False).order_by('these_nr')
     index = thesen_index(thesen, these_current)
     context = {
         "opinions": opinions,
@@ -289,7 +327,6 @@ def points_bulk_upload(request):
         uploaded_files = request.FILES.getlist('images')
         results = process_uploaded_points_files(uploaded_files)
 
-        # Erfolgs- und Fehlerzahlen für eine kurze Zusammenfassung
         success_count = sum(1 for r in results if r['status'] == 'Erfolg')
         error_count = len(results) - success_count
 
@@ -298,10 +335,7 @@ def points_bulk_upload(request):
         if error_count:
             messages.warning(request, f"{error_count} Datei(en) konnten nicht hochgeladen werden. Details siehe unten.")
 
-        # Detaillierte Ergebnisse in der Session speichern
         request.session['upload_results'] = results
-
-        # Redirect auf die gleiche Seite (GET), damit die Tabelle aktualisiert wird
         return redirect('points_bulk_upload')
 
     # --- GET: Liste vorhandener Dateien anzeigen ---
@@ -314,19 +348,21 @@ def points_bulk_upload(request):
                 for filename in os.listdir(dir_path):
                     if filename.lower().endswith(('.png', '.html')):
                         filepath = os.path.join(dir_path, filename)
+                        mtime = os.path.getmtime(filepath)
+                        # lz_g_1: Cache-Busting-Parameter anhängen
+                        url_base = settings.MEDIA_URL + f"punkte_grafiken/{slug}/{filename}"
+                        url_with_cache = f"{url_base}?v={int(mtime)}"
                         files_data.append({
                             'slug': slug,
                             'filename': filename,
-                            'url': settings.MEDIA_URL + f"punkte_grafiken/{slug}/{filename}",
+                            'url': url_with_cache,   # <-- geänderte URL
                             'size': os.path.getsize(filepath),
-                            'modified': time.strftime('%Y-%m-%d %H:%M', time.localtime(os.path.getmtime(filepath))),
+                            'modified': time.strftime('%Y-%m-%d %H:%M', time.localtime(mtime)),
                         })
     files_data.sort(key=lambda x: (x['slug'], x['filename']))
 
-    # Prüfen, ob es detaillierte Ergebnisse aus einem vorherigen Upload gibt
     upload_results = request.session.pop('upload_results', None)
     if upload_results:
-        # Sortiere: Fehler zuerst (status == 'Fehler'), dann Erfolg
         upload_results.sort(key=lambda x: 0 if x['status'] == 'Fehler' else 1)
         for result in upload_results:
             if result['status'] == 'Erfolg':
@@ -335,6 +371,65 @@ def points_bulk_upload(request):
                 messages.error(request, f"❌ {result['filename']}: {result.get('message', 'Unbekannter Fehler')}")
 
     return render(request, 'admin/bulk_upload_punkte.html', {'files': files_data})
+    
+@staff_member_required
+def points_bulk_delete_files(request):
+    """
+    Erwartet POST mit einer Liste von Werten im Format 'slug/filename' (via Checkboxen).
+    Löscht die ausgewählten Dateien und leitet zurück zur Übersicht.
+    """
+    if request.method != 'POST':
+        return HttpResponseBadRequest("Nur POST-Anfragen erlaubt.")
+
+    filenames = request.POST.getlist('filenames')  # z.B. ['wahl-a-ort-1/Gesamtpunkte_nach_...png', ...]
+    if not filenames:
+        messages.warning(request, "Keine Dateien zum Löschen ausgewählt.")
+        return redirect('points_bulk_upload')
+
+    base_dir = os.path.abspath(os.path.join(settings.MEDIA_ROOT, 'punkte_grafiken'))
+    deleted = 0
+    errors = []
+
+    for combined in filenames:
+        # Format: slug/filename (der Slug kann selbst Schrägstriche enthalten? Normalerweise nicht.)
+        # Wir splitten beim ersten '/' vom Ende, um den Dateinamen zu erhalten.
+        if '/' not in combined:
+            errors.append(f"Ungültiges Format: {combined}")
+            continue
+        # Das letzte '/' trennt den Dateinamen
+        slug, filename = combined.rsplit('/', 1)
+        if not slug or not filename:
+            errors.append(f"Ungültiger Pfad: {combined}")
+            continue
+
+        # Sicherheitscheck: nur .png / .html
+        if not filename.lower().endswith(('.png', '.html')):
+            errors.append(f"Ungültige Dateiendung: {filename}")
+            continue
+
+        filepath = os.path.join(base_dir, slug, filename)
+        abs_path = os.path.abspath(filepath)
+
+        if not abs_path.startswith(base_dir):
+            errors.append(f"Ungültiger Pfad: {combined}")
+            continue
+
+        if os.path.exists(abs_path):
+            try:
+                os.remove(abs_path)
+                deleted += 1
+            except OSError as e:
+                errors.append(f"Fehler beim Löschen von {filename}: {e}")
+        else:
+            errors.append(f"Datei nicht gefunden: {filename}")
+
+    if deleted:
+        messages.success(request, f"{deleted} Datei(en) erfolgreich gelöscht.")
+    if errors:
+        for err in errors:
+            messages.error(request, f"❌ {err}")
+
+    return redirect('points_bulk_upload')
 
 @staff_member_required
 def points_delete_file(request, slug, filename):
@@ -389,6 +484,7 @@ def compare(request, wahl_slug, zustand):
 
     opinions = decode_zustand(zustand, wahl)
     thesen = alle_thesen(wahl)
+    #thesen = These.objects.filter(wahl=wahl, is_these=True).order_by('these_nr')
 
     # Sammle für jede These die User-Position und die Antworten der Parteien
     thesen_daten = []
@@ -423,5 +519,100 @@ def compare(request, wahl_slug, zustand):
         'share_url': request.build_absolute_uri(reverse('start', args=[wahl.slug])),
         'share_title': wahl.titel,
         'share_dialog_title': "Vergleiche die Positionen im Wahlcheck!",
+        "og_image_url": request.build_absolute_uri(wahl.og_image.url) if wahl.og_image else None,
     }
     return render(request, "wahlrechner/compare.html", context)
+
+# lz_f_1: Bulk-Upload für OG-Bilder
+from django.contrib.admin.views.decorators import staff_member_required
+from .bulk_og_image_import import process_uploaded_og_images
+from .bulk_points_import import extract_slug_from_filename   # 1:1 übernommen
+
+@staff_member_required
+def og_bild_bulk_upload(request):
+    if request.method == 'POST' and request.FILES.getlist('images'):
+        uploaded_files = request.FILES.getlist('images')
+        results = process_uploaded_og_images(uploaded_files)
+
+        success_count = sum(1 for r in results if r['status'] == 'Erfolg')
+        error_count = len(results) - success_count
+		
+        if success_count:
+            messages.success(request, f"{success_count} Bild(er) erfolgreich als OG‑Bild gesetzt.")
+        if error_count:
+            messages.warning(request, f"{error_count} Datei(en) konnten nicht verarbeitet werden. Details siehe unten.")
+
+        request.session['og_upload_results'] = results
+        return redirect('og_bild_bulk_upload')
+
+    # GET: Liste vorhandener OG‑Bilder anzeigen
+    og_ordner = os.path.join(settings.MEDIA_ROOT, 'og_images')
+    files_data = []
+
+    if os.path.isdir(og_ordner):
+        for filename in os.listdir(og_ordner):
+            if filename.lower().endswith(('.png', '.jpg', '.jpeg')):
+                filepath = os.path.join(og_ordner, filename)
+                slug = extract_slug_from_filename(filename)
+                if slug is None:
+                    slug = 'unbekannt'
+                files_data.append({
+                    'slug': slug,
+                    'filename': filename,
+                    'url': settings.MEDIA_URL + f'og_images/{filename}',
+                    'size': os.path.getsize(filepath),
+                    'modified': time.strftime('%Y-%m-%d %H:%M', time.localtime(os.path.getmtime(filepath))),
+                })
+
+    files_data.sort(key=lambda x: (x['slug'], x['filename']))
+    upload_results = request.session.pop('og_upload_results', None)
+
+    if upload_results:
+        upload_results.sort(key=lambda x: 0 if x['status'] == 'Fehler' else 1)
+        for result in upload_results:
+            if result['status'] == 'Erfolg':
+                messages.success(request, f"✅ {result['filename']} – zugeordnet zu {result.get('wahl_titel', result.get('wahl_slug'))}")
+            else:
+                messages.error(request, f"❌ {result['filename']}: {result.get('message', 'Unbekannter Fehler')}")
+
+    return render(request, 'admin/og_bild_bulk_upload.html', {'files': files_data})
+
+@staff_member_required
+def og_bild_delete_file(request, filename):
+    """
+    Löscht eine einzelne OG‑Bild‑Datei und entfernt die Zuordnung in der Wahl.
+    """
+	
+    if not filename.lower().endswith(('.png', '.jpg', '.jpeg')):
+        return HttpResponseBadRequest("Ungültiger Dateiname – nur PNG, JPG und JPEG sind erlaubt.")
+
+    base_dir = os.path.abspath(os.path.join(settings.MEDIA_ROOT, 'og_images'))
+    filepath = os.path.join(base_dir, filename)
+    abs_path = os.path.abspath(filepath)
+
+    if not abs_path.startswith(base_dir):
+        return HttpResponseBadRequest("Ungültiger Pfad.")
+		
+    if os.path.exists(abs_path):
+
+        os.remove(abs_path)
+		
+        # Falls eine Wahl dieses Bild als og_image verwendet, das Feld leeren
+        slug = extract_slug_from_filename(filename)
+
+        if slug:
+            try:
+                wahl = Wahl.objects.get(slug=slug)
+                if wahl.og_image and wahl.og_image.name == f'og_images/{filename}':
+                    wahl.og_image.delete(save=False)   # Löscht die Datei aus dem Feld (nicht erneut, wir haben sie schon gelöscht)
+                    wahl.og_image = None
+                    wahl.save()
+
+            except Wahl.DoesNotExist:
+                pass
+
+        messages.success(request, f"Die Datei „{filename}“ wurde gelöscht.")
+    else:
+        messages.error(request, f"Die Datei „{filename}“ wurde nicht gefunden.")
+
+    return redirect('og_bild_bulk_upload')

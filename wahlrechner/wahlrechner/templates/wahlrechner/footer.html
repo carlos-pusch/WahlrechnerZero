@@ -10,7 +10,7 @@
             {# EXAKT die gleichen Klassen wie der Content-Container in base.html #}
             <div class="row-span-1 row-start-1 md:row-start-auto md:col-span-2 lg:col-span-5">
                 {# lz_d_1: Team-Info nur auf der Startseite anzeigen #}
-                {% if request.resolver_match.url_name == 'start' %}
+                {% if request.resolver_match.url_name == 'start' and wahl.pk %}
                     {% with team_info=wahl.team_infos.first %}
                         {% if team_info and team_info.text and team_info.aktiv %}
                             <div class="team-info mb-4">

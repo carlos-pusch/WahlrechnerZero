@@ -65,7 +65,9 @@
             <div class="font-semibold">Hintergrundinformation:</div>
             <div class="text-gray-700 hintergrundinfo">
                 {% if these_current.these_explainer %}
-                    {{ these_current.these_explainer|linebreaks }}
+					{% autoescape off %}
+						{{ these_current.these_explainer|linebreaks|safe }}
+					{% endautoescape %}
                 {% else %}
                     Es liegen leider keine extra Hintergrundinformation vor.
                 {% endif %}

@@ -1,6 +1,38 @@
 from colorfield.fields import ColorField
 from django.db import models
 from django.core.exceptions import ValidationError
+import re # lz_g_1
+
+def linkify_urls(text): # lz_g_1
+    """
+    Ersetzt reine URLs (http://... oder https://...) durch
+    <a href="URL" target="_blank" rel="noopener noreferrer">Link</a>,
+    jedoch nur, wenn sie nicht bereits innerhalb eines <a>-Tags stehen.
+    """
+    if not text:
+        return text
+
+    # Zerlege den Text in Teile außerhalb und innerhalb von <a>-Tags
+    # Der Split erhält die <a>…</a>-Blöcke als eigene Teile
+    parts = re.split(r'(<a\b[^>]*>.*?</a>)', text, flags=re.DOTALL | re.IGNORECASE)
+    result = []
+
+    for i, part in enumerate(parts):
+        # Ungerade Indizes sind die <a>…</a>-Blöcke – diese bleiben unverändert
+        if i % 2 == 1:
+            result.append(part)
+        else:
+            # In allen anderen Teilen URLs ersetzen
+            # Regex für URLs, die mit http/https beginnen und keine Leerzeichen, <, >, " enthalten
+            url_pattern = r'(https?://[^\s<>"]+)'
+            part = re.sub(
+                url_pattern,
+                r'<a href="\1" target="_blank" rel="noopener noreferrer" class="ext-link">Link</a>',
+                part
+            )
+            result.append(part)
+
+    return ''.join(result)
 
 # lz_b_1: Neues Modell für Mandanten (Wahlen)
 class Wahl(models.Model):
@@ -30,6 +62,19 @@ class Wahl(models.Model):
         "Aktiv?",
         default=True,
         help_text="Nur aktive Wahlen sind über die URL erreichbar"
+    )
+    og_image = models.ImageField(
+        upload_to='og_images/',
+        blank=True,
+        null=True,
+        verbose_name="Open‑Graph‑Bild"
+    )
+    wahltypus = models.CharField(
+        "Wahl Typus",
+        max_length=20,
+        blank=True,
+        null=True,
+        default=None
     )
     erstellt_am = models.DateTimeField(auto_now_add=True)
     geaendert_am = models.DateTimeField(auto_now=True)
@@ -68,6 +113,7 @@ class These(models.Model):
     # lz_a_1: Neues Feld für Erklärungssätze
     these_explainer_help = """<i>Optionale Hintergrundinformation</i><br>
     Erklärungssätze zur These, die als zusätzliche Information angezeigt werden."""
+
     these_explainer = models.TextField(
         "Hintergrundinformation",
         help_text=these_explainer_help,
@@ -84,7 +130,16 @@ class These(models.Model):
     Zahl sein.<br>
     <b>Beispiel:</b> Die These, die zuerst angezeigt werden soll, hat die Nummer 1. Die zweite These
     die Nummer 2, usw."""
+
     these_nr = models.FloatField("Thesen-Nummer", help_text=these_nr_help)
+
+    # lz_h_1
+    is_these = models.BooleanField(
+        "Positionierungsfrage?",
+        default=True,
+        help_text="Wenn aktiv, wird die These in der normalen Abfrage angezeigt und fließt in die "
+                "Ergebnisberechnung ein. Wenn deaktiviert, handelt es sich um eine optionale offene Frage."
+    )
 
     class Meta:
         verbose_name = "These"
@@ -95,6 +150,12 @@ class These(models.Model):
     def __str__(self):
         return f"{self.wahl.slug} - {self.these_keyword}"
 
+    def save(self, *args, **kwargs):
+        # Vor dem Speichern die Hintergrundinfo automatisch verlinken
+        if self.these_explainer:
+            self.these_explainer = linkify_urls(self.these_explainer)
+        super().save(*args, **kwargs)
+
 class Partei(models.Model):
     # lz_b_1: Fremdschlüssel zur Wahl hinzugefügt
     wahl = models.ForeignKey(
@@ -104,9 +165,9 @@ class Partei(models.Model):
         related_name="parteien"
     )
 
-    partei_name_help = """<i>Maximal 60 Zeichen</i><br>
+    partei_name_help = """<i>Maximal 90 Zeichen</i><br>
     Gib den Namen der Partei an, der für den Benutzer angezeigt werden soll."""
-    partei_name = models.CharField("Name", help_text=partei_name_help, max_length=60)
+    partei_name = models.CharField("Name", help_text=partei_name_help, max_length=90)
 
     partei_beschreibung_help = """<i>Maximal 1500 Zeichen</i><br>
     Beschreibung für die Partei, wird auf der Ergebnis-Seite angezeigt."""
@@ -133,6 +194,14 @@ class Partei(models.Model):
         blank=True,
         help_text=partei_farbe_beschreibung,
         default=None,
+    )
+
+    partei_gradient_css = models.CharField(
+        "CSS-Farbverlauf",
+        max_length=300,
+        blank=True,
+        null=True,
+        help_text="z.B. 'linear-gradient(135deg, #9b74fa 0%, #3cc783 100%)' – überschreibt die Einzelfarbe"
     )
 
     class Meta:
@@ -266,6 +335,12 @@ class TeamInfo(models.Model):
 
     def __str__(self):
         return f"Team-Info für {self.wahl.titel}"
+        
+    def save(self, *args, **kwargs):
+        # Vor dem Speichern die Teaminfos automatisch verlinken
+        if self.text:
+            self.text = linkify_urls(self.text)
+        super().save(*args, **kwargs)
 
 # lz_d_1: Dummy-Modell für den Admin-Eintrag "08. Punkte-Bulkimport"
 class PointsBulkImport(models.Model):
@@ -281,3 +356,18 @@ class PointsBulkImport(models.Model):
 
     def __str__(self):
         return "Bulk-Import von Punktediagrammen"
+
+# lz_f_1: Dummy-Modell für den Admin-Eintrag "09. OG-Bilder-Bulkimport"
+class OGBildBulkImport(models.Model):
+    """
+    Dieses Modell existiert nur, um im Admin einen Menüpunkt
+    für den Bulk-Upload von OG-Bildern zu erzeugen.
+    Es wird keine Datenbanktabelle angelegt.
+    """
+    class Meta:
+        managed = False
+        verbose_name = "OG-Bild-Bulkimport"
+        verbose_name_plural = "09. OG-Bilder-Bulkimport"  # Sortierung
+
+    def __str__(self):
+        return "Bulk-Import von Open-Graph-Bildern"

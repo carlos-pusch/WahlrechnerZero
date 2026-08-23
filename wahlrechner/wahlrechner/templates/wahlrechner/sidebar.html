@@ -18,7 +18,9 @@ Template für die Seitenleiste mit der Übersicht aller Thesen.
 </div>
 
 <div id="thesenMenu" class="thesen-container">
-    <p class="mb-2 text-lg font-semibold dark:text-gray-200">Alle Thesen</p>
+    <p class="mb-2 text-lg font-semibold dark:text-gray-200">
+        {% if these_current.is_these %}Alle Thesen{% else %}Offene Fragen{% endif %}
+    </p>
 
     <ul class="space-y-1 sidebar">
 
@@ -35,7 +37,11 @@ Template für die Seitenleiste mit der Übersicht aller Thesen.
             {% for these in thesen %}
 
                 {# Erhalte Position des Nutzers zu der These #}
-                {% alias opinions|get_opinion:these as opinion %}
+                {% if these.is_these %}
+                    {% alias opinions|get_opinion:these as opinion %}
+                {% else %}
+                    {% alias 'skip' as opinion %}
+                {% endif %}
 
                 <li>
 
@@ -52,8 +58,8 @@ Template für die Seitenleiste mit der Übersicht aller Thesen.
                         </a>
                     {% endif %}
 
-                    {# Falls These priorisiert, füge Icon hinzu #}
-                    {% if opinions|is_prio:these %}
+                    {# lz_h_1: Priorisierung nur für Positionierungsfragen anzeigen #}
+                    {% if these.is_these and opinions|is_prio:these %}
                         {% include "snippets/icon.html" with icon="fav" %}
                     {% endif %}
 
