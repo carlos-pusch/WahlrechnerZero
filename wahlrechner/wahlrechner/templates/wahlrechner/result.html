@@ -74,8 +74,16 @@
 
     {% for partei, percentage in result %}
         <div class="card">
-            <div class="w-full h-full p-4 {% if partei.partei_farbe %}border-l-8{% endif %}"
-                 {% if partei.partei_farbe %}style="border-color: {{ partei.partei_farbe }}"{% endif %}>
+            <div class="w-full h-full p-4 
+                {% if partei.partei_farbe or partei.partei_gradient_css %}border-l-8{% endif %}"
+                style="
+                    {% if partei.partei_gradient_css %}
+                        border-image: {{ partei.partei_gradient_css }} 1;
+                        border-style: solid;
+                    {% elif partei.partei_farbe %}
+                        border-color: {{ partei.partei_farbe }};
+                    {% endif %}
+                ">
                 {% if forloop.first %}
                     <div class="mb-3 mb3-pl text-sm text-gray-500 dark:text-gray-400">
                         {% include "snippets/icon.html" with icon="winner" %} Höchste Übereinstimmung
