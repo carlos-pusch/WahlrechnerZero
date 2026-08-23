@@ -3,6 +3,41 @@ from django.db import models
 from django.core.exceptions import ValidationError
 import re # lz_g_1
 
+# Hilfsfunktionen für Namensbereinigung (identisch zu R)
+def replace_umlaute(s):
+    umlaut_map = {
+        'ä': 'ae', 'ö': 'oe', 'ü': 'ue',
+        'Ä': 'Ae', 'Ö': 'Oe', 'Ü': 'Ue',
+        'ß': 'ss'
+    }
+    for k, v in umlaut_map.items():
+        s = s.replace(k, v)
+    return s
+
+def clean_partei_name(name):
+    """
+    Bereinigt den Parteiennamen analog zur R-Funktion clear_image_name.
+    """
+    import re
+    s = name.replace(' ', '_')
+    s = s.lower()
+    s = s.replace(',', '')
+    s = s.replace("'", '_')
+    s = s.replace('-', '_')
+    s = s.replace('/', '')
+    s = re.sub(r'dr\._', '', s)
+    s = re.sub(r'med\._', '', s)
+    s = s.replace('grünen', '')
+    s = s.replace('grüne', '')
+    s = s.replace('bündnis', 'b')
+    s = s.replace('die_', '')
+    s = re.sub(r'\._', '_', s)
+    while '__' in s:
+        s = s.replace('__', '_')
+    s = replace_umlaute(s)
+    s = s.strip('_')
+    return s
+
 def linkify_urls(text): # lz_g_1
     """
     Ersetzt reine URLs (http://... oder https://...) durch
@@ -204,6 +239,15 @@ class Partei(models.Model):
         help_text="z.B. 'linear-gradient(135deg, #9b74fa 0%, #3cc783 100%)' – überschreibt die Einzelfarbe"
     )
 
+    bild_clean_name = models.CharField(
+        "Import-Bildname",
+        max_length=300,
+        blank=True,
+        editable=False,
+        help_text="Wird automatisch aus dem Parteiennamen generiert. "
+                  "Dieser Name muss mit dem Teil nach dem '__' im Dateinamen übereinstimmen."
+    )
+
     class Meta:
         verbose_name = "Partei"
         verbose_name_plural = "03. Parteien" # Sortieren
@@ -212,6 +256,11 @@ class Partei(models.Model):
 
     def __str__(self):
         return f"{self.wahl.slug} - {self.partei_name}"
+
+    def save(self, *args, **kwargs):
+        # Bereinigten Namen vor dem Speichern aktualisieren
+        self.bild_clean_name = clean_partei_name(self.partei_name)
+        super().save(*args, **kwargs)
 
 class Antwort(models.Model):
     # lz_b_1: Fremdschlüssel zur Wahl hinzugefügt (kann über These oder Partei abgeleitet werden, aber für einfachere Abfragen direkt)
