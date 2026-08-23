@@ -4,53 +4,6 @@ import re
 from django.conf import settings
 from .models import Partei, Wahl
 
-# -------------------------------------------------------------
-# Hilfsfunktionen für Namensbereinigung (analog zu R)
-# -------------------------------------------------------------
-
-def replace_umlaute(s):
-    """Ersetzt Umlaute und ß durch ae, oe, ue, ss."""
-    umlaut_map = {
-        'ä': 'ae', 'ö': 'oe', 'ü': 'ue',
-        'Ä': 'Ae', 'Ö': 'Oe', 'Ü': 'Ue',
-        'ß': 'ss'
-    }
-    for k, v in umlaut_map.items():
-        s = s.replace(k, v)
-    return s
-
-def clean_partei_name(name):
-    """
-    Bereinigt den Parteiennamen analog zur R-Funktion clear_image_name.
-    - Leerzeichen → _
-    - Kleinbuchstaben
-    - Entfernt Kommas, /, Punkte vor Unterstrichen
-    - Ersetzt ' und - durch _
-    - Entfernt dr._, med._, grünen, grüne
-    - Ersetzt bündnis → b
-    - Entfernt die_
-    - Entfernt doppelte Unterstriche
-    - Ersetzt Umlaute
-    """
-    s = name.replace(' ', '_')
-    s = s.lower()
-    s = s.replace(',', '')
-    s = s.replace("'", '_')
-    s = s.replace('-', '_')
-    s = s.replace('/', '')
-    s = re.sub(r'dr\._', '', s)
-    s = re.sub(r'med\._', '', s)
-    s = s.replace('grünen', '')
-    s = s.replace('grüne', '')
-    s = s.replace('bündnis', 'b')
-    s = s.replace('die_', '')
-    s = re.sub(r'\._', '_', s)
-    while '__' in s:
-        s = s.replace('__', '_')
-    s = replace_umlaute(s)
-    s = s.strip('_')
-    return s
-
 def extract_slug_and_name_from_filename(filename):
     """
     Extrahiert aus dem Dateinamen den Slug und den rohen Parteiennamen.
@@ -86,7 +39,6 @@ def process_uploaded_images(uploaded_files):
     Gibt eine Liste von Dictionaries mit den Ergebnissen zurück.
     """
     results = []
-
     for uploaded in uploaded_files:
         filename = uploaded.name
         slug, raw_name = extract_slug_and_name_from_filename(filename)
@@ -101,15 +53,25 @@ def process_uploaded_images(uploaded_files):
             })
             continue
 
-        # Wahl anhand Slug finden
         try:
             wahl = Wahl.objects.get(slug=slug)
         except Wahl.DoesNotExist:
+            results.append({...})
+            continue
+
+        # Direkter Vergleich mit dem gespeicherten bereinigten Namen
+        gefundene_partei = None
+        for partei in Partei.objects.filter(wahl=wahl):
+            if partei.bild_clean_name == raw_name:
+                gefundene_partei = partei
+                break
+
+        if not gefundene_partei:
             results.append({
                 'filename': filename,
-                'partei_name': '–',
+                'partei_name': raw_name,
                 'status': 'Fehler',
-                'message': f'Keine Wahl mit Slug "{slug}" gefunden',
+                'message': f'Keine Partei in Wahl "{slug}" mit bereinigtem Namen "{raw_name}" gefunden',
                 'target_path': ''
             })
             continue
