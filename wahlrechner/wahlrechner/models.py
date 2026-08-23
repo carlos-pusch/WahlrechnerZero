@@ -196,6 +196,14 @@ class Partei(models.Model):
         default=None,
     )
 
+    partei_gradient_css = models.CharField(
+        "CSS-Farbverlauf",
+        max_length=300,
+        blank=True,
+        null=True,
+        help_text="z.B. 'linear-gradient(135deg, #9b74fa 0%, #3cc783 100%)' – überschreibt die Einzelfarbe"
+    )
+
     class Meta:
         verbose_name = "Partei"
         verbose_name_plural = "03. Parteien" # Sortieren
