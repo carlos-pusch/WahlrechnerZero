@@ -1,14 +1,10 @@
 {% load static %}
 
-<footer class="w-full bg-gray-100 mt-auto">
+<footer class="w-full">
     {# Kein eigenes Padding – das kommt vom umgebenden .container in base.html #}
     <div class="footer-content" id="footer-content">
-        <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-7 md:space-x-5">
-            {# Unsichtbare Sidebar-Spalte #}
-            <div class="hidden md:block lg:col-span-2"></div>
-
-            {# EXAKT die gleichen Klassen wie der Content-Container in base.html #}
-            <div class="row-span-1 row-start-1 md:row-start-auto md:col-span-2 lg:col-span-5">
+        <div class="">
+            <div class=""></div>
                 {# lz_d_1: Team-Info nur auf der Startseite anzeigen #}
                 {% if request.resolver_match.url_name == 'start' and wahl.pk %}
                     {% with team_info=wahl.team_infos.first %}
@@ -24,7 +20,7 @@
                 {% endif %}
 
                 {# Credit-Bereich (weiterhin überall sichtbar) #}
-                <footer class="w-full bg-gray-100 mt-auto">
+                <footer class="w-full">
                     <div class="footer-flex-container">
                         <div class="footer-left">
                         <p>Ein Angebot von GermanZero<br>und LocalZero</p>
