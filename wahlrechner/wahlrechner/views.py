@@ -334,6 +334,42 @@ def image_delete_file(request, filename):
     return redirect('bulk_upload')
 
 @staff_member_required
+def image_delete_selected(request):
+    """
+    Löscht mehrere Bilder anhand einer Liste von Dateinamen (POST-Parameter 'filenames').
+    """
+    if request.method != 'POST':
+        return redirect('bulk_upload')
+    
+    filenames = request.POST.getlist('filenames')
+    if not filenames:
+        messages.warning(request, "Es wurden keine Dateien zum Löschen ausgewählt.")
+        return redirect('bulk_upload')
+    
+    bilder_ordner = os.path.join(settings.MEDIA_ROOT, 'partei_bild')
+    geloescht = 0
+    fehler = 0
+    for filename in filenames:
+        # Sicherheitsprüfung: nur erlaubte Endungen
+        if not filename.lower().endswith(('.png', '.jpg', '.jpeg')):
+            continue
+        filepath = os.path.join(bilder_ordner, filename)
+        if os.path.exists(filepath):
+            try:
+                os.remove(filepath)
+                geloescht += 1
+            except Exception:
+                fehler += 1
+        else:
+            fehler += 1
+    
+    if geloescht:
+        messages.success(request, f"{geloescht} ausgewählte(s) Bild(er) gelöscht.")
+    if fehler:
+        messages.warning(request, f"{fehler} Datei(en) konnten nicht gelöscht werden (nicht vorhanden oder Fehler).")
+    return redirect('bulk_upload')
+
+@staff_member_required
 def image_delete_all(request):
     """
     Löscht ALLE Bilddateien im Ordner media/partei_bild/ (nur PNG, JPG, JPEG).
