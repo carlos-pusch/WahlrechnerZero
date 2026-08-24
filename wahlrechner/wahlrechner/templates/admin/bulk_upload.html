@@ -9,8 +9,8 @@
 
     <div style="margin: 20px 0; padding: 15px; background: #f8f8f8; border-left: 4px solid #79aec8;">
         <p><strong>Hinweis:</strong> Die hochgeladenen Bilddateien müssen <strong>exakt</strong> dem Dateinamen entsprechen,
-        der im <code>partei_bild</code>-Feld der jeweiligen Partei eingetragen ist (z. B. <code>slug__vorname_nachname_partei.png</code>).</p>
-        <p>Bereits vorhandene Bilder werden <strong>nicht überschrieben</strong> und erscheinen im späteren CSV-Bericht als „übersprungen“.</p>
+        der im <code>partei_bild</code>-Feld der jeweiligen Partei eingetragen ist (z. B. <code>slug__vorname_nachname_partei.png</code>) oder durch den Slug und einer 100% Überschneidung mit dem Namen bestimmt wird.</p>
+        <p>Bereits vorhandene Bilder werden <strong>überschrieben</strong> (gleicher Dateiname).</p>
     </div>
 
     <form method="post" enctype="multipart/form-data">
@@ -25,12 +25,87 @@
     </form>
 
     <div style="margin-top: 40px;">
-        <p>Nach dem Upload wird ein CSV‑Bericht heruntergeladen. Die Ergebnisse erscheinen zusätzlich als Meldungen auf dieser Seite.</p>
+        <p>Nach dem Upload erscheinen die Ergebnisse als Meldungen auf dieser Seite.</p>
     </div>
 
-    <!-- Tabelle der bereits hochgeladenen Bilder -->
+    {% if parteien %}
+        <h2 style="margin-top: 2em;">Erwartete Dateinamen für Parteien</h2>
+        <p>
+            <strong>Filter:</strong>
+            <input type="text" id="parteiSearch" placeholder="Suche nach Wahl-Slug oder -Titel (z. B. weinheim)" style="width: 300px; padding: 5px;">
+            <span style="margin-left: 15px; font-size: 0.9em; color: #666;">Die Tabelle wird während der Eingabe gefiltert.</span>
+        </p>
+        <!-- Button zum Download der CSV -->
+        <p style="margin-top: 10px;">
+            <a href="{% url 'download_parteien_csv' %}" class="button" style="background: #79aec8; color: white; padding: 6px 12px; text-decoration: none; border-radius: 4px;">
+                📥 CSV der erwarteten Dateinamen (;) herunterladen
+            </a>
+        </p>
+        <!-- Container mit Scroll -->
+        <div style="max-height: 15rem; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px;">
+            <table id="parteiTable" style="width:100%; border-collapse:collapse; margin-top:1em;">
+                <thead>
+                    <tr style="background:#f0f0f0; text-align:left; position: sticky; top: 0; z-index: 10;">
+                        <th style="padding:8px; border-bottom:1px solid #ddd;">Wahl (Slug)</th>
+                        <th style="padding:8px; border-bottom:1px solid #ddd;">Wahl-Titel</th>
+                        <th style="padding:8px; border-bottom:1px solid #ddd;">Partei-Name</th>
+                        <th style="padding:8px; border-bottom:1px solid #ddd;">Erwarteter Dateiname (ohne Endung)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in parteien %}
+                    <tr>
+                        <td style="padding:8px; border-bottom:1px solid #eee;">{{ p.slug }}</td>
+                        <td style="padding:8px; border-bottom:1px solid #eee;">{{ p.wahl_titel }}</td>
+                        <td style="padding:8px; border-bottom:1px solid #eee;">{{ p.partei_name }}</td>
+                        <td style="padding:8px; border-bottom:1px solid #eee;">
+                            <code style="background:#f5f5f5; padding:2px 6px; border-radius:3px;">
+                                {{ p.slug }}__{{ p.bild_clean_name }}
+                            </code>
+                            <span style="font-size:0.8em; color:#888;"> (Endung: .png, .jpg oder .jpeg)</span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <script>
+        (function() {
+            const searchInput = document.getElementById('parteiSearch');
+            const table = document.getElementById('parteiTable');
+            const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+
+            searchInput.addEventListener('input', function() {
+                const filter = this.value.toLowerCase().trim();
+                for (let i = 0; i < rows.length; i++) {
+                    const row = rows[i];
+                    const slugCell = row.cells[0];
+                    const titleCell = row.cells[1];
+                    const slugText = slugCell ? slugCell.textContent.toLowerCase() : '';
+                    const titleText = titleCell ? titleCell.textContent.toLowerCase() : '';
+                    if (slugText.includes(filter) || titleText.includes(filter)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                }
+            });
+        })();
+        </script>
+    {% else %}
+        <p style="margin-top: 2em; color: #999;">Es sind noch keine Parteien in der Datenbank vorhanden.</p>
+    {% endif %}
+
     {% if files %}
         <h2 style="margin-top: 2em;">Bereits hochgeladene Bilder</h2>
+        <p>
+            <a href="{% url 'image_delete_all' %}"
+               onclick="return confirm('Möchten Sie wirklich ALLE Bilder im Ordner „partei_bild“ löschen? Diese Aktion kann nicht rückgängig gemacht werden.');"
+               style="color: #b94a48; text-decoration: none; font-weight: bold; background: #f2dede; padding: 6px 12px; border-radius: 4px; border: 1px solid #ebccd1;">
+                🗑 Alle Bilder löschen
+            </a>
+        </p>
         <table style="width:100%; border-collapse:collapse; margin-top:1em;">
             <thead>
                 <tr style="background:#f0f0f0; text-align:left;">
