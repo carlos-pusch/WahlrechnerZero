@@ -69,6 +69,37 @@ def linkify_urls(text): # lz_g_1
 
     return ''.join(result)
 
+def linkify_urls_team(text): # lz_g_1
+    """
+    Ersetzt reine URLs (http://... oder https://...) durch
+    <a href="URL" target="_blank" rel="noopener noreferrer">Link</a>,
+    jedoch nur, wenn sie nicht bereits innerhalb eines <a>-Tags stehen.
+    """
+    if not text:
+        return text
+
+    # Zerlege den Text in Teile außerhalb und innerhalb von <a>-Tags
+    # Der Split erhält die <a>…</a>-Blöcke als eigene Teile
+    parts = re.split(r'(<a\b[^>]*>.*?</a>)', text, flags=re.DOTALL | re.IGNORECASE)
+    result = []
+
+    for i, part in enumerate(parts):
+        # Ungerade Indizes sind die <a>…</a>-Blöcke – diese bleiben unverändert
+        if i % 2 == 1:
+            result.append(part)
+        else:
+            # In allen anderen Teilen URLs ersetzen
+            # Regex für URLs, die mit http/https beginnen und keine Leerzeichen, <, >, " enthalten
+            url_pattern = r'(https?://[^\s<>"]+)'
+            part = re.sub(
+                url_pattern,
+                r'<a href="\1" target="_blank" rel="noopener noreferrer" class="ext-link-team">Link</a>',
+                part
+            )
+            result.append(part)
+
+    return ''.join(result)
+
 # lz_b_1: Neues Modell für Mandanten (Wahlen)
 class Wahl(models.Model):
     """
@@ -388,7 +419,7 @@ class TeamInfo(models.Model):
     def save(self, *args, **kwargs):
         # Vor dem Speichern die Teaminfos automatisch verlinken
         if self.text:
-            self.text = linkify_urls(self.text)
+            self.text = linkify_urls_team(self.text)
         super().save(*args, **kwargs)
 
 # lz_d_1: Dummy-Modell für den Admin-Eintrag "08. Punkte-Bulkimport"
