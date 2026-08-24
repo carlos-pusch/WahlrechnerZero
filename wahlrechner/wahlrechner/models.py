@@ -249,6 +249,7 @@ class Partei(models.Model):
         upload_to="partei_bild",
         help_text=partei_bild_beschreibung,
         blank=True,
+        max_length=500,
         null=True,
         default=None,
     )
@@ -272,7 +273,7 @@ class Partei(models.Model):
 
     bild_clean_name = models.CharField(
         "Import-Bildname",
-        max_length=300,
+        max_length=500,
         blank=True,
         editable=False,
         help_text="Wird automatisch aus dem Parteiennamen generiert. "
