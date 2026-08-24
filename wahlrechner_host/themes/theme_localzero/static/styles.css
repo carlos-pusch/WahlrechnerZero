@@ -1722,6 +1722,9 @@ a.ext-link {
 a.ext-link:visited {
     color: #551A8B;
 }
+a.ext-link:hover {
+    color: white;
+}
 
 a.ext-link-team {
     color: #ffc232;
@@ -1733,3 +1736,4 @@ a.ext-link-team:visited {
 a.ext-link-team:hover {
     color: white;
 }
+
