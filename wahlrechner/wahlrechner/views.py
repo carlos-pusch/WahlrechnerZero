@@ -1,4 +1,5 @@
 from django.http.response import HttpResponseNotFound, HttpResponseServerError, HttpResponseBadRequest
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.template.loader import render_to_string
 from .models import Wahl # lz_b_1
@@ -284,6 +285,17 @@ def bulk_upload(request):
     # Sortierung nach Slug, dann Dateiname
     files_data.sort(key=lambda x: (x['slug'], x['filename']))
 
+    # --- Alle Parteien für die Tabelle der erwarteten Dateinamen ---
+    alle_parteien = Partei.objects.select_related('wahl').order_by('wahl__slug', 'partei_name')
+    parteien_data = []
+    for p in alle_parteien:
+        parteien_data.append({
+            'slug': p.wahl.slug,
+            'wahl_titel': p.wahl.titel,
+            'partei_name': p.partei_name,
+            'bild_clean_name': p.bild_clean_name,
+        })
+
     # Detaillierte Ergebnisse aus Session holen
     upload_results = request.session.pop('upload_results', None)
     if upload_results:
@@ -294,7 +306,7 @@ def bulk_upload(request):
             else:
                 messages.error(request, f"❌ {result['filename']}: {result.get('message', 'Unbekannter Fehler')}")
 
-    return render(request, 'admin/bulk_upload.html', {'files': files_data})
+    return render(request, 'admin/bulk_upload.html', {'files': files_data,'parteien': parteien_data,})
 
 @staff_member_required
 def image_delete_file(request, filename):
@@ -320,6 +332,68 @@ def image_delete_file(request, filename):
         messages.error(request, f"Die Datei „{filename}“ wurde nicht gefunden.")
 
     return redirect('bulk_upload')
+
+@staff_member_required
+def image_delete_all(request):
+    """
+    Löscht ALLE Bilddateien im Ordner media/partei_bild/ (nur PNG, JPG, JPEG).
+    """
+    bilder_ordner = os.path.join(settings.MEDIA_ROOT, 'partei_bild')
+    if not os.path.isdir(bilder_ordner):
+        messages.warning(request, "Der Ordner für Parteienbilder existiert nicht.")
+        return redirect('bulk_upload')
+
+    geloescht = 0
+    fehler = 0
+    for filename in os.listdir(bilder_ordner):
+        if filename.lower().endswith(('.png', '.jpg', '.jpeg')):
+            filepath = os.path.join(bilder_ordner, filename)
+            try:
+                os.remove(filepath)
+                geloescht += 1
+            except Exception as e:
+                fehler += 1
+                messages.error(request, f"Fehler beim Löschen von {filename}: {e}")
+
+    if geloescht:
+        messages.success(request, f"{geloescht} Bild(er) erfolgreich gelöscht.")
+    if fehler:
+        messages.warning(request, f"{fehler} Bild(er) konnten nicht gelöscht werden.")
+    return redirect('bulk_upload')
+
+@staff_member_required
+def download_parteien_csv(request):
+    """
+    Lädt eine CSV‑Datei mit allen erwarteten Dateinamen für alle Parteien herunter.
+    Trennzeichen: ;  (Semikolon)
+    Kodierung: UTF‑8 (mit BOM für Excel-Kompatibilität)
+    """
+    import csv
+    import io
+    from .models import Partei
+
+    # Daten aus der Datenbank holen (wie in der bulk_upload‑View)
+    parteien = Partei.objects.select_related('wahl').order_by('wahl__slug', 'partei_name')
+
+    output = io.StringIO()
+    # UTF‑8 mit BOM für Excel
+    output.write('\ufeff')
+    writer = csv.writer(output, delimiter=';', quoting=csv.QUOTE_MINIMAL)
+
+    # Kopfzeile
+    writer.writerow(['Wahl-Slug', 'Wahl-Titel', 'Partei-Name', 'Erwarteter Dateiname (ohne Endung)'])
+
+    for p in parteien:
+        writer.writerow([
+            p.wahl.slug,
+            p.wahl.titel,
+            p.partei_name,
+            f"{p.wahl.slug}__{p.bild_clean_name}"
+        ])
+
+    response = HttpResponse(output.getvalue(), content_type='text/csv; charset=utf-8')
+    response['Content-Disposition'] = 'attachment; filename="erwartete_dateinamen.csv"'
+    return response
 
 @staff_member_required
 def points_bulk_upload(request):
