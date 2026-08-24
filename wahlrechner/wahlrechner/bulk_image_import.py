@@ -2,7 +2,7 @@
 import os
 import re
 from django.conf import settings
-from .models import Partei, Wahl
+from .models import Partei, Wahl, clean_partei_name
 
 def extract_slug_and_name_from_filename(filename):
     """
