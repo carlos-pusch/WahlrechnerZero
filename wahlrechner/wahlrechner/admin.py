@@ -68,6 +68,7 @@ class ParteiResource(resources.ModelResource):
 @admin.register(Partei)
 class ParteiAdmin(ImportExportModelAdmin):
     list_display = ["wahl", "partei_name", "partei_farbe", "bild_clean_name", "partei_bild"]   # lz_b_1: wahl ergänzt
+    list_display_links = ["partei_name"]
     list_editable = ['partei_farbe', 'partei_bild']
     search_fields = ["partei_name", "wahl__titel", "wahl__slug", "partei_farbe"]
     list_filter = ["wahl"]   # lz_b_1: Filter nach Wahl
