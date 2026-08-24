@@ -38,9 +38,40 @@ def process_uploaded_images(uploaded_files):
     setzt das partei_bild-Feld und speichert die Datei.
     Gibt eine Liste von Dictionaries mit den Ergebnissen zurück.
     """
+
+    ALLOWED_EXCEPTIONS = ['leer.png', 'default.png']  # Groß-/Kleinschreibung wird ignoriert
+
     results = []
     for uploaded in uploaded_files:
         filename = uploaded.name
+
+        base = os.path.basename(filename).lower()
+        if base in [e.lower() for e in ALLOWED_EXCEPTIONS]:
+            # Direkt speichern ohne Prüfung
+            target_relative = f"partei_bild/{filename}"
+            target_absolute = os.path.join(settings.MEDIA_ROOT, target_relative)
+            os.makedirs(os.path.dirname(target_absolute), exist_ok=True)
+            try:
+                with open(target_absolute, 'wb') as dest:
+                    for chunk in uploaded.chunks():
+                        dest.write(chunk)
+                results.append({
+                    'filename': filename,
+                    'partei_name': '– Ausnahme –',
+                    'status': 'Erfolg',
+                    'message': 'Ausnahmedatei direkt gespeichert',
+                    'target_path': target_relative
+                })
+            except Exception as e:
+                results.append({
+                    'filename': filename,
+                    'partei_name': '– Ausnahme –',
+                    'status': 'Fehler',
+                    'message': str(e),
+                    'target_path': ''
+                })
+            continue
+
         slug, raw_name = extract_slug_and_name_from_filename(filename)
 
         if not slug or not raw_name:
