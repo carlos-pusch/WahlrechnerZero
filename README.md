@@ -18,14 +18,14 @@
       <li>Link teilen Funktion verbessert</li>
       <li>vor dem eigentlichen Start Kurzvorstellung des lokalen Teams</li>
       <li>Einbindung von Grafiken zur Bewertung der Kandidierenden / Parteien durch die Positionierung bei den klimapositiven Thesen</li>
-      <li>Direkter Vergleich von 4 Kandidierenden / Parteien mit Übersicht, wo Unterschiede sind</li>
+      <li>Direkter Vergleich von 2 bis max. 4 Kandidierenden / Parteien mit Übersicht, wo Unterschiede sind</li>
       <li>"Mehr anzeigen" Button bei der Selbstbeschreibung ab 400 Zeichen hinzugefügt</li>
-      <li>Offene und optionale Fragen ermöglicht</li>
+      <li>Offene, aber optionale Freitext-Fragen nach dem / außerhalb des quantifizierbaren Wahlchecks ermöglicht</li>
+      <li>Bulk-Upload für Fotos auf der Ergebnisseite (automatisch zugeordnet)</li> 
     </ul>
   </li>
   <li>Mögliche Änderungen
     <ul>
-      <li>in Einarbeitung: Freitext Antworten nach dem / außerhalb des quantifizierbaren Wahlchecks darstellen</li>
       <li>in Planung: Möglichkeit des Exports der eigenen Abstimmungen als PDF oder SharePics</li>
       <li>zu prüfen: vor dem eigentlichen Start die Darstellung der Übersicht der nicht geantworteten Kandidierenden</li>
       <li>zu prüfen: Feedback-Mechanismus - Nutzer:innen können melden, wenn eine These oder Antwort unklar oder irreführend ist</li>
