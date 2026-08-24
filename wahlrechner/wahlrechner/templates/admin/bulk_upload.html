@@ -13,14 +13,14 @@
         <p>Bereits vorhandene Bilder werden <strong>überschrieben</strong> (gleicher Dateiname).</p>
     </div>
 
-    <form method="post" enctype="multipart/form-data">
+      <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
         <div>
             <label for="id_images"><strong>Bilder auswählen:</strong></label>
             <input type="file" name="images" id="id_images" multiple accept="image/png,image/jpeg,image/jpg" required>
         </div>
-        <div style="margin-top: 20px;">
-            <input type="submit" value="Hochladen und Bericht erzeugen" class="default" style="background: #79aec8;">
+        <div style="margin-top: 10px;">
+            <input type="submit" value="Hochladen und Bericht erzeugen" class="default" style="background: #79aec8; padding: 10px 20px; font-size: 1rem;">
         </div>
     </form>
 
@@ -29,11 +29,11 @@
     </div>
 
     {% if parteien %}
-        <h2 style="margin-top: 2em;">Erwartete Dateinamen für Parteien</h2>
+        <h2 style="margin-top: 2rem;">Erwartete Dateinamen für Parteien</h2>
         <p>
             <strong>Filter:</strong>
             <input type="text" id="parteiSearch" placeholder="Suche nach Wahl-Slug oder -Titel (z. B. weinheim)" style="width: 300px; padding: 5px;">
-            <span style="margin-left: 15px; font-size: 0.9em; color: #666;">Die Tabelle wird während der Eingabe gefiltert.</span>
+            <span style="margin-left: 15px; font-size: 0.9rem; color: #666;">Die Tabelle wird während der Eingabe gefiltert.</span>
         </p>
         <!-- Button zum Download der CSV -->
         <p style="margin-top: 10px;">
@@ -43,7 +43,7 @@
         </p>
         <!-- Container mit Scroll -->
         <div style="max-height: 15rem; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px;">
-            <table id="parteiTable" style="width:100%; border-collapse:collapse; margin-top:1em;">
+            <table id="parteiTable" style="width:100%; border-collapse:collapse; margin-top:1rem;">
                 <thead>
                     <tr style="background:#f0f0f0; text-align:left; position: sticky; top: 0; z-index: 10;">
                         <th style="padding:8px; border-bottom:1px solid #ddd;">Wahl (Slug)</th>
@@ -62,7 +62,7 @@
                             <code style="background:#f5f5f5; padding:2px 6px; border-radius:3px;">
                                 {{ p.slug }}__{{ p.bild_clean_name }}
                             </code>
-                            <span style="font-size:0.8em; color:#888;"> (Endung: .png, .jpg oder .jpeg)</span>
+                            <span style="font-size:0.8rem; color:#888;"> (Endung: .png, .jpg oder .jpeg)</span>
                         </td>
                     </tr>
                     {% endfor %}
@@ -94,52 +94,91 @@
         })();
         </script>
     {% else %}
-        <p style="margin-top: 2em; color: #999;">Es sind noch keine Parteien in der Datenbank vorhanden.</p>
+        <p style="margin-top: 2rem; color: #999;">Es sind noch keine Parteien in der Datenbank vorhanden.</p>
     {% endif %}
 
     {% if files %}
-        <h2 style="margin-top: 2em;">Bereits hochgeladene Bilder</h2>
-        <p>
-            <a href="{% url 'image_delete_all' %}"
-               onclick="return confirm('Möchten Sie wirklich ALLE Bilder im Ordner „partei_bild“ löschen? Diese Aktion kann nicht rückgängig gemacht werden.');"
-               style="color: #b94a48; text-decoration: none; font-weight: bold; background: #f2dede; padding: 6px 12px; border-radius: 4px; border: 1px solid #ebccd1;">
+        <h2 style="margin-top: 2rem;">Bereits hochgeladene Bilder</h2>
+        <div style="display: flex; gap: 15px; align-items: center; margin-bottom: 10px;">
+            <a href="{% url 'image_delete_all' %}" class="btn-bulk-danger"
+               onclick="return confirm('Möchten Sie wirklich ALLE Bilder im Ordner „partei_bild“ löschen? Diese Aktion kann nicht rückgängig gemacht werden.');">
                 🗑 Alle Bilder löschen
             </a>
-        </p>
-        <table style="width:100%; border-collapse:collapse; margin-top:1em;">
-            <thead>
-                <tr style="background:#f0f0f0; text-align:left;">
-                    <th style="padding:8px; border-bottom:1px solid #ddd;">Wahl (Slug)</th>
-                    <th style="padding:8px; border-bottom:1px solid #ddd;">Dateiname</th>
-                    <th style="padding:8px; border-bottom:1px solid #ddd;">Vorschau</th>
-                    <th style="padding:8px; border-bottom:1px solid #ddd;">Größe</th>
-                    <th style="padding:8px; border-bottom:1px solid #ddd;">Geändert</th>
-                    <th style="padding:8px; border-bottom:1px solid #ddd;">Aktion</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for file in files %}
-                <tr>
-                    <td style="padding:8px; border-bottom:1px solid #eee;">{{ file.slug }}</td>
-                    <td style="padding:8px; border-bottom:1px solid #eee;">{{ file.filename }}</td>
-                    <td style="padding:8px; border-bottom:1px solid #eee;">
-                        <img src="{{ file.url }}" alt="{{ file.filename }}" style="max-height:50px; max-width:100px;">
-                    </td>
-                    <td style="padding:8px; border-bottom:1px solid #eee;">{{ file.size|filesizeformat }}</td>
-                    <td style="padding:8px; border-bottom:1px solid #eee;">{{ file.modified }}</td>
-                    <td style="padding:8px; border-bottom:1px solid #eee;">
-                        <a href="{% url 'image_delete_file' filename=file.filename %}"
-                           onclick="return confirm('Möchten Sie die Datei „{{ file.filename }}“ wirklich löschen?');"
-                           style="color: #b94a48; text-decoration: none; font-weight: bold;">
-                            Löschen
-                        </a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+            <form method="post" action="{% url 'image_delete_selected' %}" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn-bulk-danger
+                        onclick="return confirm('Die ausgewählten Bilder werden gelöscht. Fortfahren?');">                        
+                    🗑 Ausgewählte löschen
+                </button>
+        </div>
+        <div style="max-height: 15rem; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px; margin-top:1rem; margin-bottom:2rem">
+            <table style="width:100%; border-collapse:collapse;">
+                <thead>
+                    <tr style="background:#f0f0f0; text-align:left; position: sticky; top:0; z-index:10;">
+                        <th style="padding:8px; border-bottom:1px solid #ddd; width: 40px;">
+                            <input type="checkbox" id="selectAll" onclick="toggleAll(this);">
+                        </th>
+                        <th style="padding:8px; border-bottom:1px solid #ddd;">Wahl (Slug)</th>
+                        <th style="padding:8px; border-bottom:1px solid #ddd;">Dateiname</th>
+                        <th style="padding:8px; border-bottom:1px solid #ddd;">Vorschau</th>
+                        <th style="padding:8px; border-bottom:1px solid #ddd;">Größe</th>
+                        <th style="padding:8px; border-bottom:1px solid #ddd;">Geändert</th>
+                        <th style="padding:8px; border-bottom:1px solid #ddd;">Einzel löschen</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for file in files %}
+                    <tr>
+                        <td style="padding:8px; border-bottom:1px solid #eee; text-align:center;">
+                            <input type="checkbox" name="filenames" value="{{ file.filename }}" class="file-checkbox">
+                        </td>
+                        <td style="padding:8px; border-bottom:1px solid #eee;">{{ file.slug }}</td>
+                        <td style="padding:8px; border-bottom:1px solid #eee;">{{ file.filename }}</td>
+                        <td style="padding:8px; border-bottom:1px solid #eee;">
+                            <img src="{{ file.url }}" alt="{{ file.filename }}" style="max-height:50px; max-width:100px;">
+                        </td>
+                        <td style="padding:8px; border-bottom:1px solid #eee;">{{ file.size|filesizeformat }}</td>
+                        <td style="padding:8px; border-bottom:1px solid #eee;">{{ file.modified }}</td>
+                        <td style="padding:8px; border-bottom:1px solid #eee;">
+                            <a href="{% url 'image_delete_file' filename=file.filename %}"
+                               onclick="return confirm('Möchten Sie die Datei „{{ file.filename }}“ wirklich löschen?');"
+                               style="color: #b94a48; text-decoration: none; font-weight: bold;">
+                                Löschen
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <!-- Das Formular muss noch geschlossen werden – hier nach der Tabelle -->
+        </form>
     {% else %}
-        <p style="margin-top: 2em; color: #999;">Bisher wurden noch keine Bilder hochgeladen.</p>
+        <p style="margin-top: 2rem; color: #999;">Bisher wurden noch keine Bilder hochgeladen.</p>
     {% endif %}
 </div>
+<script>
+function toggleAll(source) {
+    const checkboxes = document.getElementsByClassName('file-checkbox');
+    for (let i = 0; i < checkboxes.length; i++) {
+        checkboxes[i].checked = source.checked;
+    }
+}
+</script>
+<style>
+    .btn-bulk-danger {
+        color: #b94a48;
+        background: #f2dede;
+        padding: 6px 12px;
+        border-radius: 4px;
+        border: 1px solid #ebccd1;
+        font-weight: bold;
+        height: 2.5rem;
+        box-sizing: border-box;
+        text-decoration: none;      /* für <a> relevant, für <button> ignoriert */
+        display: inline-flex;       /* oder inline-block, je nach Wunsch */
+        align-items: center;        /* Inhalt vertikal zentrieren */
+        cursor: pointer;
+    }
+</style>
 {% endblock %}
